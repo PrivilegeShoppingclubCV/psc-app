@@ -53,15 +53,15 @@ tools/readypro/               Script per il server di ReadyPro e istruzioni di i
 
 Finché le variabili sono vuote, `createClient()` restituisce `null` e l'app resta sui dati finti.
 
-### Accesso con codice via email
+### Accesso con link via email
 
-I soci entrano con un codice che ricevono via email e digitano nell'app. Si usa il codice e non il link perché sul telefono il link si aprirebbe nel browser, fuori dall'app installata. Su Supabase:
+I soci entrano con un link che ricevono via email (magic link), niente password. Il link vale nel browser in cui è stato chiesto: sull'iPhone l'app installata sulla schermata Home ha cookie suoi, quindi il link aperto dalla mail fa entrare in Safari, non nell'app. Per questo l'email contiene anche il codice (`{{ .Token }}`), che nell'app si può digitare sotto «Nell'email c'è anche un codice?». Su Supabase:
 
-- **Authentication → Emails → Templates**: in **Magic Link** e in **Confirm signup** (la riceve chi entra per la prima volta) incolla `supabase/templates/codice-accesso.html`, con oggetto `Il tuo codice: {{ .Token }}`. Il logo arriva da `public/brand/psc-lockup-bianco-email.png` tramite `{{ .SiteURL }}`, quindi la Site URL deve essere l'indirizzo di produzione.
-- **Authentication → URL Configuration**: Site URL = indirizzo di produzione; Redirect URLs = `https://*-privilegeshoppingclubcv-1245.vercel.app/**` e `http://localhost:3000/**`.
-- **Authentication → SMTP Settings**: il servizio email incluso in Supabase scrive solo agli indirizzi del team e pochi messaggi l'ora. Prima di aprire l'app ai clienti serve un servizio email vero (Resend, Brevo, Postmark, …).
+- **Authentication → URL Configuration**: Site URL = indirizzo di produzione; Redirect URLs = l'indirizzo di produzione con `/**` in fondo, `https://*-privilegeshoppingclubcv-1245.vercel.app/**` (anteprime) e `http://localhost:3000/**`. Se un indirizzo manca, il link riporta alla Site URL: l'app se ne accorge e completa comunque l'accesso.
+- **Authentication → Emails → Templates**: funziona anche con i modelli standard. Per l'email con il brand, in **Magic Link** e in **Confirm signup** (la riceve chi entra per la prima volta) incolla `supabase/templates/accesso.html`, con oggetto `Entra nel Privilege Shopping Club`. Il logo arriva da `public/brand/psc-lockup-bianco-email.png` tramite `{{ .SiteURL }}`.
+- **Authentication → SMTP Settings**: il servizio email incluso in Supabase scrive solo agli indirizzi del team e pochi messaggi l'ora. Per le prove va bene Gmail con una password per le app; prima di aprire l'app ai clienti serve un servizio email vero (Resend, Brevo, Postmark, …).
 
-Flussi (`src/app/accesso/`): «Ho già la tessera» chiede numero ed email, manda il codice e dopo la conferma chiama `collega_tessera`; «Voglio iscrivermi» fa lo stesso con `iscriviti`; «Accedi» manda il codice e porta alla Home, o a collegare la tessera se l'account non ne ha una.
+Flussi (`src/app/accesso/`): «Ho già la tessera» chiede numero ed email, manda il link e all'arrivo su `/auth/callback` chiama `collega_tessera`; «Voglio iscrivermi» fa lo stesso con `iscriviti`; «Accedi» manda il link e porta alla Home, o a collegare la tessera se l'account non ne ha una. I dati del modulo aspettano in un cookie per 30 minuti: se il link si apre in un altro browser, il socio entra ma deve ricompilare il modulo.
 
 ## Da decidere prima del lancio
 

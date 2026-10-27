@@ -1,10 +1,11 @@
-// Accesso con codice via email (OTP), collegamento della tessera, iscrizione, uscita.
+// Accesso con link via email (magic link), collegamento della tessera, iscrizione, uscita.
 //
 // L'email si verifica sempre prima di toccare la tessera: chi compila "Ho già la
-// tessera" o "Voglio iscrivermi" senza aver fatto l'accesso riceve un codice, e i
-// dati del modulo aspettano in un cookie finché il codice non è confermato.
-// Il codice si digita nell'app: un link aperto dalla mail finirebbe nel browser,
-// fuori dall'app installata sulla schermata Home.
+// tessera" o "Voglio iscrivermi" senza aver fatto l'accesso riceve un link, e i
+// dati del modulo aspettano in un cookie finché il link non viene aperto
+// (/auth/callback). Il link funziona nel browser in cui è stato chiesto: l'app
+// installata sulla schermata Home di iPhone ha cookie suoi, quindi lì resta
+// possibile digitare il codice, se il modello dell'email lo contiene ({{ .Token }}).
 
 import { cookies, headers } from "next/headers";
 import { redirect } from "next/navigation";
@@ -30,7 +31,7 @@ export function messaggioAuth(e: { message: string; code?: string; status?: numb
   if (e.status === 429 || e.code === "over_email_send_rate_limit" || e.code === "over_request_rate_limit")
     return "Hai chiesto troppi codici: riprova tra qualche minuto.";
   if (e.code === "otp_expired" || e.code === "invalid_credentials" || /expired|invalid/i.test(e.message))
-    return "Codice scaduto o non valido: controlla l'ultima email ricevuta o chiedine uno nuovo.";
+    return "Link o codice scaduto: chiedi una nuova email e usa l'ultima che ricevi.";
   if (e.code === "email_address_invalid" || /email/i.test(e.message)) return "Controlla l'indirizzo email.";
   return "Qualcosa non ha funzionato. Riprova tra poco.";
 }
@@ -62,12 +63,11 @@ export async function utenteCorrente(supabase: Supabase) {
   return user;
 }
 
-export async function mandaCodice(supabase: Supabase, email: string, dopo: Dopo, pagina: string): Promise<never> {
+export async function mandaLink(supabase: Supabase, email: string, dopo: Dopo, pagina: string): Promise<never> {
   const h = await headers();
   const origine = h.get("origin") ?? `https://${h.get("host")}`;
   const { error } = await supabase.auth.signInWithOtp({
     email,
-    // Se il modello dell'email contiene anche il link, riporta qui.
     options: { emailRedirectTo: `${origine}/auth/callback?dopo=${dopo}` },
   });
   if (error) redirect(conErrore(pagina, messaggioAuth(error), { email }));

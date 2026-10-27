@@ -12,7 +12,7 @@ export default async function Accedi({ searchParams }: { searchParams: Promise<R
   if (configurato && socio) redirect("/home");
 
   return (
-    <AuthPage eyebrow="Accedi" titolo="Accedi al club" intro="Ti mandiamo un codice via email: niente password da ricordare." errore={param(q.errore)}>
+    <AuthPage eyebrow="Accedi" titolo="Accedi al club" intro="Ti mandiamo un link via email: niente password da ricordare." errore={param(q.errore)}>
       <form action={accedi}>
         <Campo id="email" label="Email" type="email" autoComplete="email" required={configurato} defaultValue={param(q.email)} />
         <button type="submit" className="psc-btn psc-btn--primary psc-btn--block">Continua</button>
