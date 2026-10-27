@@ -39,7 +39,7 @@ export const getSessione = cache(async (): Promise<Sessione> => {
 
   const { data, error } = await supabase
     .from("soci")
-    .select("id, numero_tessera, nome, cognome, email, iscritto_il, codice_invito, livelli(nome)")
+    .select("id, numero_tessera, nome, cognome, email, iscritto_il, codice_invito, stato_cassa, livelli(nome)")
     .eq("user_id", user.id)
     .eq("stato", "attivo")
     .maybeSingle();
@@ -56,6 +56,7 @@ export const getSessione = cache(async (): Promise<Sessione> => {
       email: data.email ?? user.email ?? "",
       iscrittoDal: data.iscritto_il,
       codiceInvito: data.codice_invito,
+      inAttivazione: data.stato_cassa === "in_attivazione",
       livello: (data.livelli as unknown as { nome: string } | null)?.nome ?? "Classic",
     },
   };

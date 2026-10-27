@@ -11,6 +11,7 @@ export const socio: Socio = {
   livello: "Gold",
   iscrittoDal: "2024-03-12",
   codiceInvito: "GIULIA-7K2",
+  inAttivazione: false,
 };
 
 export const movimenti: MovimentoPunti[] = [

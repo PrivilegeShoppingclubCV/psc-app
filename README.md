@@ -40,6 +40,8 @@ public/sw.js                  Service worker
 supabase/migrations/          Schema del database (tabelle, regole di accesso, bucket immagini)
 supabase/seed.sql             Dati di esempio per il database locale
 docs/database.md              Come è fatto il database e come si applica
+src/app/api/gestionale/        Endpoint per il server dei negozi (CSV clienti in, nuovi iscritti out)
+tools/readypro/               Script per il server di ReadyPro e istruzioni di installazione
 ```
 
 ## Supabase

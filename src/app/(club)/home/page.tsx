@@ -18,6 +18,9 @@ export default async function Home() {
 
       <section className="section" aria-label="Saldo punti e tessera">
         <SaldoPunti saldo={saldo} premi={premi} />
+        {socio.inAttivazione && (
+          <p className="psc-hint">Tessera in attivazione nei negozi: il codice a barre arriva entro un&apos;ora.</p>
+        )}
         <ApriTessera socio={socio} />
       </section>
 

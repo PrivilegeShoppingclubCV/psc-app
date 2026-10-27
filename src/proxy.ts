@@ -26,6 +26,6 @@ export async function proxy(request: NextRequest) {
 }
 
 export const config = {
-  // Tutto tranne file statici, logo, icone, font e service worker.
-  matcher: ["/((?!_next/static|_next/image|brand/|icons/|sw\\.js|manifest\\.webmanifest|.*\\.(?:svg|png|jpg|jpeg|webp|ico|woff2)$).*)"],
+  // Tutto tranne gli endpoint del gestionale (niente sessione), file statici, logo, icone, font e service worker.
+  matcher: ["/((?!api/gestionale/|_next/static|_next/image|brand/|icons/|sw\\.js|manifest\\.webmanifest|.*\\.(?:svg|png|jpg|jpeg|webp|ico|woff2)$).*)"],
 };
