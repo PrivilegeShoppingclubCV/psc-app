@@ -1,0 +1,8 @@
+{
+  "UrlApp": "https://indirizzo-dell-app.vercel.app",
+  "FileClienti": "C:\\PSC\\export\\clienti.csv",
+  "FileNuoviIscritti": "C:\\PSC\\import\\nuovi-iscritti.csv",
+  "CodificaNuoviIscritti": "windows-1252",
+  "CartellaLog": "C:\\PSC\\log",
+  "MinutiTraInvii": 15
+}
