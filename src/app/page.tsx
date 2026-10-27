@@ -1,6 +1,11 @@
 import Link from "next/link";
+import { redirect } from "next/navigation";
+import { getSessione } from "@/lib/dati";
 
-export default function Benvenuto() {
+export default async function Benvenuto() {
+  const { configurato, socio } = await getSessione();
+  if (configurato && socio) redirect("/home");
+
   return (
     <main className="welcome">
       <div className="welcome__brand">

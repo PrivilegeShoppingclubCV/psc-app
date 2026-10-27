@@ -1,18 +1,29 @@
 import Link from "next/link";
+import { isSupabaseConfigured } from "@/lib/supabase/config";
 import { IconIndietro } from "./Icons";
 
-/** Guscio comune delle pagine di accesso: torna al benvenuto, titolo, contenuto. */
-export function AuthPage({ eyebrow, titolo, intro, children }: { eyebrow: string; titolo: string; intro: string; children: React.ReactNode }) {
+/** Guscio comune delle pagine di accesso: torna al benvenuto, titolo, eventuale errore, contenuto. */
+export function AuthPage({ eyebrow, titolo, intro, errore, indietro = "/", children }: {
+  eyebrow: string;
+  titolo: string;
+  intro: React.ReactNode;
+  errore?: string;
+  indietro?: string;
+  children: React.ReactNode;
+}) {
   return (
     <main className="auth">
-      <Link href="/" className="back-link"><IconIndietro /> Indietro</Link>
+      <Link href={indietro} className="back-link"><IconIndietro /> Indietro</Link>
       <div className="page-head">
         <p className="t-eyebrow">{eyebrow}</p>
         <h1 className="t-display-l">{titolo}</h1>
         <p className="t-body-l">{intro}</p>
       </div>
+      {errore && <p className="notice notice--errore" role="alert">{errore}</p>}
       {children}
-      <p className="notice">Anteprima: l&apos;accesso non è ancora collegato. Con «Continua» entri con un socio di prova.</p>
+      {!isSupabaseConfigured && (
+        <p className="notice">Anteprima: il database non è collegato. Con «Continua» entri con un socio di prova.</p>
+      )}
     </main>
   );
 }
@@ -26,3 +37,15 @@ export function Campo({ id, label, help, ...input }: { id: string; label: string
     </div>
   );
 }
+
+export function Spunta({ id, children, ...input }: { id: string; children: React.ReactNode } & React.InputHTMLAttributes<HTMLInputElement>) {
+  return (
+    <label className="spunta" htmlFor={id}>
+      <input id={id} name={id} type="checkbox" {...input} />
+      <span>{children}</span>
+    </label>
+  );
+}
+
+/** Legge un parametro della query string come testo (Next li passa come string | string[]). */
+export const param = (v: string | string[] | undefined) => (Array.isArray(v) ? v[0] : v) ?? "";

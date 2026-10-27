@@ -1,17 +1,18 @@
 // Service worker della PWA Privilege Shopping Club.
 // - Pagine: prima la rete, poi la copia salvata (così la tessera si apre anche offline).
 // - File statici (/_next/static, font, logo, icone): prima la cache.
+// - Le pagine del club dipendono da chi ha fatto l'accesso: si salvano solo dopo
+//   averle visitate, e il bottone Esci svuota le cache.
 // Cambia VERSIONE per svuotare le cache vecchie a ogni rilascio che lo richiede.
 
-const VERSIONE = "v1";
+const VERSIONE = "v2";
 const CACHE_PAGINE = `psc-pagine-${VERSIONE}`;
 const CACHE_STATICI = `psc-statici-${VERSIONE}`;
-const PAGINE = ["/", "/home", "/punti", "/offerte", "/negozi", "/profilo"];
+const NON_SALVARE = ["/auth/", "/verifica", "/accedi", "/collega-tessera", "/iscriviti"];
 
 self.addEventListener("install", (event) => {
-  event.waitUntil(
-    caches.open(CACHE_PAGINE).then((cache) => cache.addAll(PAGINE)).then(() => self.skipWaiting())
-  );
+  // Nessuna pagina salvata in anticipo: "/" e "/home" cambiano a seconda di chi ha fatto l'accesso.
+  event.waitUntil(self.skipWaiting());
 });
 
 self.addEventListener("activate", (event) => {
@@ -36,10 +37,12 @@ self.addEventListener("fetch", (event) => {
   if (url.origin !== self.location.origin) return;
 
   if (request.mode === "navigate") {
+    const daSalvare = !NON_SALVARE.some((p) => url.pathname.startsWith(p));
     event.respondWith(
       fetch(request)
         .then((res) => {
-          if (res.ok) {
+          // Una pagina arrivata dopo un redirect (es. /home → /accedi) non va salvata sotto il nome di partenza.
+          if (daSalvare && res.ok && !res.redirected) {
             const copia = res.clone();
             caches.open(CACHE_PAGINE).then((cache) => cache.put(request, copia));
           }

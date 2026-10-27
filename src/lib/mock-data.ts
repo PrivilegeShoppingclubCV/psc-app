@@ -1,49 +1,7 @@
-// Dati finti per lo scheletro. Verranno sostituiti dalle query a Supabase
-// (vedi src/lib/supabase) quando il database sarà pronto.
+// Dati finti: li usa src/lib/dati.ts finché Supabase non è configurato
+// (anteprime senza chiavi, sviluppo in locale).
 
-export type Livello = "Classic" | "Gold";
-
-export interface Socio {
-  nome: string;
-  cognome: string;
-  email: string;
-  /** Numero tessera: chiave importata dal gestionale, sempre testo e mai rigenerata. */
-  numeroTessera: string;
-  livello: Livello;
-  iscrittoDal: string;
-  codiceInvito: string;
-}
-
-export interface MovimentoPunti {
-  id: string;
-  data: string;
-  descrizione: string;
-  negozio?: string;
-  punti: number;
-}
-
-export interface Premio {
-  id: string;
-  nome: string;
-  soglia: number;
-}
-
-export interface Negozio {
-  id: string;
-  nome: string;
-  indirizzo: string;
-  orari: string;
-}
-
-export interface Offerta {
-  id: string;
-  marca: string;
-  nome: string;
-  prezzoSoci: number;
-  prezzoListino: number;
-  scadenza: string;
-  soloTesserati: boolean;
-}
+import type { MovimentoPunti, Negozio, Offerta, Premio, Socio } from "./tipi";
 
 export const socio: Socio = {
   nome: "Giulia",
@@ -82,8 +40,3 @@ export const offerte: Offerta[] = [
   { id: "o2", marca: "Esempio", nome: "Sciarpa in cashmere", prezzoSoci: 39.9, prezzoListino: 55, scadenza: "2026-11-16", soloTesserati: true },
   { id: "o3", marca: "Esempio", nome: "Borsa a mano in pelle", prezzoSoci: 119, prezzoListino: 160, scadenza: "2026-11-30", soloTesserati: false },
 ];
-
-/** Il primo premio non ancora raggiunto, o l'ultimo se li ha superati tutti. */
-export function prossimoPremio(saldo: number): Premio {
-  return premi.find((p) => p.soglia > saldo) ?? premi[premi.length - 1];
-}

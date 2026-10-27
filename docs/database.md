@@ -14,12 +14,14 @@ npx supabase db push                                  # applica i file non ancor
 
 In alternativa, senza riga di comando: SQL Editor di Supabase, incolla ed esegui i file di `supabase/migrations/` uno alla volta, in ordine di nome.
 
-Poi crea il primo admin: accedi una volta all'app con la tua email e dal SQL Editor esegui
+Poi crea il primo admin. L'utente deve esistere in Supabase: accedi una volta all'app con la tua email, oppure crealo da Authentication → Users → Add user → Create new user (spunta "Auto Confirm User"). Poi dal SQL Editor esegui
 
 ```sql
 insert into public.staff (user_id, ruolo)
-select id, 'admin' from auth.users where email = 'tua@email.it';
+select id, 'admin' from auth.users where lower(email) = lower('tua@email.it');
 ```
+
+Deve rispondere `INSERT 0 1`; `INSERT 0 0` vuol dire che l'utente con quell'email non esiste ancora.
 
 ## Tabelle
 

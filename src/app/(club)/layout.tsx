@@ -1,8 +1,10 @@
 import Link from "next/link";
 import { TabBar } from "@/components/TabBar";
-import { socio } from "@/lib/mock-data";
+import { getSocio } from "@/lib/socio";
 
-export default function ClubLayout({ children }: { children: React.ReactNode }) {
+export default async function ClubLayout({ children }: { children: React.ReactNode }) {
+  const socio = await getSocio();
+
   return (
     <>
       <div className="app">
