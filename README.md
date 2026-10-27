@@ -57,7 +57,7 @@ Finché le variabili sono vuote, `createClient()` restituisce `null` e l'app res
 
 I soci entrano con un codice che ricevono via email e digitano nell'app. Si usa il codice e non il link perché sul telefono il link si aprirebbe nel browser, fuori dall'app installata. Su Supabase:
 
-- **Authentication → Email Templates → Magic Link**: il testo deve contenere il codice, `{{ .Token }}`. Esempio: «Il tuo codice per entrare nel Privilege Shopping Club è {{ .Token }}». Il link `{{ .ConfirmationURL }}` può restare: funziona se aperto nello stesso browser.
+- **Authentication → Emails → Templates**: in **Magic Link** e in **Confirm signup** (la riceve chi entra per la prima volta) incolla `supabase/templates/codice-accesso.html`, con oggetto `Il tuo codice: {{ .Token }}`. Il logo arriva da `public/brand/psc-lockup-bianco-email.png` tramite `{{ .SiteURL }}`, quindi la Site URL deve essere l'indirizzo di produzione.
 - **Authentication → URL Configuration**: Site URL = indirizzo di produzione; Redirect URLs = `https://*-privilegeshoppingclubcv-1245.vercel.app/**` e `http://localhost:3000/**`.
 - **Authentication → SMTP Settings**: il servizio email incluso in Supabase scrive solo agli indirizzi del team e pochi messaggi l'ora. Prima di aprire l'app ai clienti serve un servizio email vero (Resend, Brevo, Postmark, …).
 
