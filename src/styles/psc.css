@@ -1,0 +1,136 @@
+
+/* Privilege Shopping Club — componenti. Ogni valore viene dai token. */
+
+body { background: var(--surface); color: var(--ink); font-family: var(--font-text); }
+
+.psc-row { display: flex; flex-wrap: wrap; gap: var(--space-3); align-items: center; }
+.psc-stack { display: flex; flex-direction: column; gap: var(--space-4); }
+.psc-pad { padding: var(--space-4); }
+
+/* ---------- Bottoni ---------- */
+.psc-btn {
+  display: inline-flex; align-items: center; justify-content: center; gap: var(--space-2);
+  min-height: var(--space-12); padding: 0 var(--space-6);
+  border: 1px solid transparent; border-radius: var(--radius-sm);
+  font-family: var(--font-label); font-size: 12px; line-height: 16px; font-weight: 600;
+  letter-spacing: 0.12em; text-transform: uppercase; text-decoration: none;
+  cursor: pointer; transition: background-color .15s ease, border-color .15s ease, color .15s ease;
+}
+.psc-btn:focus-visible { outline: 2px solid var(--focus); outline-offset: 2px; }
+.psc-btn--primary { background: var(--action); color: var(--on-action); }
+.psc-btn--primary:hover, .psc-btn--primary.is-hover { background: var(--action-hover); }
+.psc-btn--primary:active, .psc-btn--primary.is-pressed { background: var(--action-pressed); }
+.psc-btn--secondary { background: transparent; color: var(--ink); border-color: var(--line-strong); }
+.psc-btn--secondary:hover, .psc-btn--secondary.is-hover { background: var(--surface-tint); border-color: var(--ink); }
+.psc-btn--ghost { background: transparent; color: var(--ink); padding: 0 var(--space-3); text-decoration: underline; text-underline-offset: 4px; }
+.psc-btn--block { width: 100%; }
+.psc-btn[disabled], .psc-btn.is-disabled { background: var(--disabled-bg); color: var(--disabled-ink); border-color: transparent; cursor: not-allowed; }
+.psc-btn.is-focus { outline: 2px solid var(--focus); outline-offset: 2px; }
+.psc-btn svg { width: 18px; height: 18px; }
+
+/* ---------- Badge e chip di stato ---------- */
+.psc-badge {
+  display: inline-flex; align-items: center; gap: var(--space-1);
+  padding: 2px var(--space-2); border-radius: var(--radius-xs);
+  font-family: var(--font-label); font-size: 10px; line-height: 16px; font-weight: 600;
+  letter-spacing: 0.14em; text-transform: uppercase; white-space: nowrap;
+}
+.psc-badge svg { width: 12px; height: 12px; }
+.psc-badge--member { background: var(--surface-brand); color: var(--ink-on-brand); }
+.psc-badge--discount { background: var(--surface); color: var(--ink); border: 1px solid var(--ink); }
+.psc-badge--gold { background: var(--accent-surface); color: var(--accent); }
+.psc-badge--success { background: var(--success-surface); color: var(--success); }
+.psc-badge--warning { background: var(--warning-surface); color: var(--warning); }
+.psc-badge--danger { background: var(--danger-surface); color: var(--danger); }
+.psc-badge--info { background: var(--info-surface); color: var(--info); }
+
+/* ---------- Tessera digitale ---------- */
+.psc-tessera {
+  position: relative; width: 100%; max-width: 360px; aspect-ratio: 85.6 / 53.98;
+  border-radius: var(--radius-md); overflow: hidden; color: var(--ink-on-brand);
+  background: radial-gradient(120% 95% at 50% 42%, var(--verde-600) 0%, var(--verde-700) 38%, var(--verde-800) 72%, var(--verde-900) 100%);
+  box-shadow: var(--shadow-tessera);
+  display: flex; flex-direction: column; align-items: center; justify-content: center; gap: var(--space-2);
+  padding: var(--space-6); box-sizing: border-box;
+}
+.psc-tessera__logo { width: 62%; height: auto; }
+.psc-tessera__meta {
+  position: absolute; left: var(--space-4); right: var(--space-4); bottom: var(--space-3);
+  display: flex; justify-content: space-between; align-items: baseline;
+  font-family: var(--font-text); font-size: 12px; line-height: 16px;
+}
+.psc-tessera__name { font-family: var(--font-label); font-size: 10px; letter-spacing: .18em; text-transform: uppercase; font-weight: 400; }
+.psc-tessera__level { color: var(--oro-300); font-family: var(--font-label); font-size: 10px; letter-spacing: .18em; text-transform: uppercase; font-weight: 600; }
+
+.psc-tessera-back {
+  width: 100%; max-width: 360px; box-sizing: border-box;
+  border-radius: var(--radius-md); background: var(--surface); border: 1px solid var(--line);
+  padding: var(--space-4); display: flex; flex-direction: column; align-items: center; gap: var(--space-2);
+}
+.psc-barcode-box { background: #ffffff; border-radius: var(--radius-sm); padding: var(--space-3) var(--space-4); width: 100%; box-sizing: border-box; }
+.psc-barcode { display: block; width: 100%; height: 72px; fill: #000000; }
+.psc-code { font-family: var(--font-text); font-size: 15px; line-height: 20px; font-weight: 500; letter-spacing: .08em; font-variant-numeric: tabular-nums; color: var(--ink); }
+.psc-hint { font-size: 13px; line-height: 18px; color: var(--ink-muted); text-align: center; margin: 0; }
+
+/* ---------- Card prodotto ---------- */
+.psc-product { display: flex; flex-direction: column; gap: var(--space-2); width: 100%; max-width: 220px; color: var(--ink); }
+.psc-product__media {
+  position: relative; aspect-ratio: 4 / 5; border-radius: var(--radius-sm); overflow: hidden;
+  background: var(--surface-alt);
+}
+.psc-product__media img { width: 100%; height: 100%; object-fit: cover; display: block; }
+.psc-product__badges { position: absolute; top: var(--space-2); left: var(--space-2); display: flex; flex-direction: column; align-items: flex-start; gap: var(--space-1); }
+.psc-product__brand { font-family: var(--font-label); font-size: 10px; line-height: 14px; font-weight: 600; letter-spacing: .16em; text-transform: uppercase; color: var(--ink-muted); }
+.psc-product__name { font-size: 15px; line-height: 20px; font-weight: 500; margin: 0; }
+.psc-price { display: flex; flex-wrap: wrap; align-items: baseline; gap: var(--space-1) var(--space-2); }
+.psc-price__member { font-family: var(--font-display); font-weight: 700; font-size: 20px; line-height: 24px; color: var(--price-member); font-variant-numeric: lining-nums tabular-nums; }
+.psc-price__list { font-size: 13px; line-height: 18px; color: var(--price-list); text-decoration: line-through; }
+.psc-price__label { flex-basis: 100%; font-size: 12px; line-height: 16px; color: var(--ink-muted); }
+.psc-product__stock { font-size: 13px; line-height: 18px; color: var(--ink-muted); display: flex; align-items: center; gap: var(--space-1); }
+.psc-product__stock svg { width: 14px; height: 14px; }
+
+/* ---------- Saldo punti ---------- */
+.psc-points { background: var(--surface-tint); border-radius: var(--radius-md); padding: var(--space-4); display: flex; flex-direction: column; gap: var(--space-3); color: var(--ink); max-width: 360px; }
+.psc-points__top { display: flex; justify-content: space-between; align-items: flex-end; gap: var(--space-3); }
+.psc-points__value { font-family: var(--font-display); font-weight: 300; font-size: 48px; line-height: 48px; font-variant-numeric: lining-nums; }
+.psc-points__unit { font-family: var(--font-label); font-size: 11px; letter-spacing: .16em; text-transform: uppercase; font-weight: 600; color: var(--ink-muted); }
+.psc-progress { height: 6px; border-radius: var(--radius-pill); background: var(--surface); overflow: hidden; }
+.psc-progress > span { display: block; height: 100%; background: var(--action); border-radius: var(--radius-pill); }
+.psc-points__next { font-size: 13px; line-height: 18px; color: var(--ink-muted); margin: 0; }
+.psc-points__next strong { color: var(--ink); font-weight: 600; }
+
+/* ---------- Campi ---------- */
+.psc-field { display: flex; flex-direction: column; gap: var(--space-1); max-width: 360px; }
+.psc-field__label { font-size: 15px; line-height: 22px; font-weight: 600; color: var(--ink); }
+.psc-field__input {
+  min-height: var(--space-12); padding: 0 var(--space-3); box-sizing: border-box;
+  border: 1px solid var(--line-strong); border-radius: var(--radius-sm);
+  background: var(--surface); color: var(--ink); font: 400 16px/22px var(--font-text);
+}
+.psc-field__input::placeholder { color: var(--ink-muted); }
+.psc-field__input:focus-visible, .psc-field__input.is-focus { outline: 2px solid var(--focus); outline-offset: 2px; border-color: var(--ink); }
+.psc-field__help { font-size: 13px; line-height: 18px; color: var(--ink-muted); }
+.psc-field.is-error .psc-field__input { border-color: var(--danger); border-width: 2px; }
+.psc-field.is-error .psc-field__help { color: var(--danger); display: flex; gap: var(--space-1); align-items: center; }
+.psc-field__help svg { width: 14px; height: 14px; flex: none; }
+
+/* ---------- Invito amici ---------- */
+.psc-referral { background: var(--surface-brand); color: var(--ink-on-brand); border-radius: var(--radius-md); padding: var(--space-6) var(--space-4); display: flex; flex-direction: column; gap: var(--space-3); max-width: 360px; box-sizing: border-box; }
+.psc-referral__eyebrow { font-family: var(--font-label); font-size: 11px; line-height: 16px; letter-spacing: .16em; text-transform: uppercase; font-weight: 600; color: var(--oro-300); }
+.psc-referral__title { font-family: var(--font-display); font-size: 22px; line-height: 28px; font-weight: 400; margin: 0; }
+.psc-referral__text { font-size: 15px; line-height: 22px; margin: 0; }
+.psc-referral__code { display: flex; align-items: center; justify-content: space-between; gap: var(--space-2); border: 1px dashed var(--oro-300); border-radius: var(--radius-sm); padding: var(--space-2) var(--space-2) var(--space-2) var(--space-3); }
+.psc-referral__code .psc-code { color: var(--ink-on-brand); }
+.psc-referral .psc-btn--copy { min-height: 40px; padding: 0 var(--space-3); background: var(--bianco); color: var(--verde-700); }
+
+/* ---------- Barra di navigazione ---------- */
+.psc-tabbar { display: grid; grid-template-columns: repeat(5, 1fr); background: var(--surface); border-top: 1px solid var(--line); box-shadow: var(--shadow-sheet); max-width: 420px; }
+.psc-tab { display: flex; flex-direction: column; align-items: center; gap: 2px; padding: var(--space-2) 0 var(--space-3); min-height: 56px; box-sizing: border-box; color: var(--ink-muted); font-size: 11px; line-height: 14px; text-decoration: none; }
+.psc-tab svg { width: 22px; height: 22px; stroke-width: 1.5; }
+.psc-tab.is-active { color: var(--ink); font-weight: 600; }
+.psc-tab.is-active svg { stroke-width: 2; }
+.psc-tab--card { color: var(--ink); }
+.psc-tab--card .psc-tab__fab { width: 44px; height: 44px; margin-top: -18px; border-radius: 50%; background: var(--surface-brand); color: var(--ink-on-brand); display: grid; place-items: center; box-shadow: var(--shadow-tessera); }
+.psc-tab--card .psc-tab__fab svg { width: 22px; height: 22px; }
+
+@media (prefers-reduced-motion: reduce) { .psc-btn { transition: none; } }
