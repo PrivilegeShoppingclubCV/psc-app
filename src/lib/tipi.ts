@@ -11,6 +11,8 @@ export interface Socio {
   livello: string;
   iscrittoDal: string;
   codiceInvito: string;
+  /** Tessera creata in app che la cassa non conosce ancora: il codice a barre resta nascosto. */
+  inAttivazione: boolean;
 }
 
 export interface MovimentoPunti {

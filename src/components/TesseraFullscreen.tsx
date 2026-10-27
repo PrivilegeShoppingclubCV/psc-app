@@ -53,11 +53,24 @@ export function ApriTessera({ socio }: { socio: Socio }) {
         </div>
         <Tessera socio={socio} />
         <div className="psc-tessera-back">
-          <div className="psc-barcode-box">
-            <Barcode value={socio.numeroTessera} label={`Codice a barre della tessera ${numero}`} />
-          </div>
-          <span className="psc-code">{numero}</span>
-          <p className="psc-hint">Mostra questo codice in cassa per accumulare punti e avere i prezzi soci.</p>
+          {socio.inAttivazione ? (
+            <>
+              <span className="psc-badge psc-badge--warning">In attivazione</span>
+              <span className="psc-code">{numero}</span>
+              <p className="psc-hint">
+                Stiamo registrando la tessera nelle casse dei negozi: di solito basta meno di un&apos;ora.
+                Il codice a barre comparirà qui appena è attiva.
+              </p>
+            </>
+          ) : (
+            <>
+              <div className="psc-barcode-box">
+                <Barcode value={socio.numeroTessera} label={`Codice a barre della tessera ${numero}`} />
+              </div>
+              <span className="psc-code">{numero}</span>
+              <p className="psc-hint">Mostra questo codice in cassa per accumulare punti e avere i prezzi soci.</p>
+            </>
+          )}
         </div>
       </dialog>
     </>

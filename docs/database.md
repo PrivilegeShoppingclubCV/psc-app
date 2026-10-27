@@ -75,6 +75,20 @@ Regole:
 
 `importa_movimenti_punti` serve se il gestionale esporta scontrini o accrediti: il campo `riferimento` (id scontrino) impedisce di contare due volte lo stesso movimento.
 
+## Sincronizzazione con ReadyPro
+
+Il gestionale dei negozi è ReadyPro. Il server dei negozi invia il CSV dei clienti e scarica le tessere create in app con lo script di `tools/readypro/` (istruzioni complete nel suo README). Nel database:
+
+| Oggetto | A cosa serve |
+|---|---|
+| `gestionale_chiavi` | Chiavi del server dei negozi: solo l'impronta SHA-256. Si creano con `gestionale_crea_chiave(nome)` e si revocano con `gestionale_revoca_chiave(id)`. |
+| `gestionale_ricevi_soci(chiave, …)` | Riceve il CSV dei clienti e lo passa a `importa_soci` con la mappatura salvata in `impostazioni.gestionale_mappatura_soci`. Lo stesso file mandato due volte non si rielabora. |
+| `soci.stato_cassa` | `attiva` per i soci importati, `in_attivazione` per quelli nati in app. Diventa `attiva` quando la tessera ricompare in un import del gestionale: finché non succede l'app nasconde il codice a barre. |
+| `gestionale_lotti`, `gestionale_nuovi_iscritti(chiave)`, `gestionale_conferma_lotto(chiave, lotto)` | Le tessere in attivazione vanno al server a lotti. Un lotto non confermato si rimanda al giro dopo. |
+| vista `soci_in_attesa_cassa` | Tessere create in app che la cassa non conosce ancora, con le ore di attesa. |
+
+Le funzioni con la chiave sono aperte ad `anon`: senza una chiave valida non fanno nulla. Le righe degli invii automatici riusciti si cancellano dopo `gestionale_giorni_righe` giorni (30); quelle in errore restano.
+
 ## Immagini
 
 Vanno su **Supabase Storage**, nello stesso progetto del database:
@@ -92,4 +106,3 @@ I bucket pubblici accettano JPEG, PNG, WebP e AVIF fino a 5 MB; solo gli admin c
 
 - Chi calcola i punti degli acquisti: il gestionale (e noi importiamo i movimenti) o l'app in cassa.
 - Regola dei livelli e degli inviti (quando si premia, quanti punti).
-- Se le tessere create in app devono poi essere registrate anche nel gestionale.
