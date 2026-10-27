@@ -2,7 +2,7 @@
 
 PWA per i soci del Privilege Shopping Club: tessera digitale con codice a barre, saldo punti, offerte riservate e negozi.
 
-Questo è lo **scheletro**: tutte le schermate usano dati finti (`src/lib/mock-data.ts`). Supabase è predisposto ma non ancora collegato.
+Le schermate leggono i dati da Supabase (`src/lib/dati.ts`). Finché le chiavi di Supabase non sono impostate, l'app usa i dati finti di `src/lib/mock-data.ts`.
 
 ## Stack
 
@@ -47,9 +47,19 @@ docs/database.md              Come è fatto il database e come si applica
 1. Crea il progetto su supabase.com.
 2. Applica lo schema del database (`supabase/migrations/`) e crea il primo admin: istruzioni in [docs/database.md](docs/database.md).
 3. Copia `.env.example` in `.env.local` e incolla URL e anon key (Project Settings → API).
-4. Su Vercel aggiungi le stesse due variabili in Project Settings → Environment Variables.
+4. Su Vercel aggiungi le stesse due variabili in Project Settings → Environment Variables (Production, Preview e Development), poi rifai il deploy.
 
 Finché le variabili sono vuote, `createClient()` restituisce `null` e l'app resta sui dati finti.
+
+### Accesso con codice via email
+
+I soci entrano con un codice che ricevono via email e digitano nell'app. Si usa il codice e non il link perché sul telefono il link si aprirebbe nel browser, fuori dall'app installata. Su Supabase:
+
+- **Authentication → Email Templates → Magic Link**: il testo deve contenere il codice, `{{ .Token }}`. Esempio: «Il tuo codice per entrare nel Privilege Shopping Club è {{ .Token }}». Il link `{{ .ConfirmationURL }}` può restare: funziona se aperto nello stesso browser.
+- **Authentication → URL Configuration**: Site URL = indirizzo di produzione; Redirect URLs = `https://*-privilegeshoppingclubcv-1245.vercel.app/**` e `http://localhost:3000/**`.
+- **Authentication → SMTP Settings**: il servizio email incluso in Supabase scrive solo agli indirizzi del team e pochi messaggi l'ora. Prima di aprire l'app ai clienti serve un servizio email vero (Resend, Brevo, Postmark, …).
+
+Flussi (`src/app/accesso/`): «Ho già la tessera» chiede numero ed email, manda il codice e dopo la conferma chiama `collega_tessera`; «Voglio iscrivermi» fa lo stesso con `iscriviti`; «Accedi» manda il codice e porta alla Home, o a collegare la tessera se l'account non ne ha una.
 
 ## Da decidere prima del lancio
 

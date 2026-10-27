@@ -3,17 +3,21 @@ import Link from "next/link";
 import { PageHead } from "@/components/PageHead";
 import { SaldoPunti } from "@/components/SaldoPunti";
 import { ApriTessera } from "@/components/TesseraFullscreen";
-import { saldoPunti, socio } from "@/lib/mock-data";
+import { getPremi, getSaldo } from "@/lib/dati";
+import { getSocio } from "@/lib/socio";
 
 export const metadata: Metadata = { title: "Home" };
 
-export default function Home() {
+export default async function Home() {
+  const socio = await getSocio();
+  const [saldo, premi] = await Promise.all([getSaldo(socio.id), getPremi()]);
+
   return (
     <>
-      <PageHead eyebrow="Socio dal 2024" titolo={`Ciao ${socio.nome}`} />
+      <PageHead eyebrow={`Socio dal ${new Date(socio.iscrittoDal).getFullYear()}`} titolo={socio.nome ? `Ciao ${socio.nome}` : "Ciao"} />
 
       <section className="section" aria-label="Saldo punti e tessera">
-        <SaldoPunti saldo={saldoPunti} />
+        <SaldoPunti saldo={saldo} premi={premi} />
         <ApriTessera socio={socio} />
       </section>
 

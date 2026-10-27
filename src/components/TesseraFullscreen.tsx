@@ -1,7 +1,7 @@
 "use client";
 
 import { useCallback, useEffect, useRef } from "react";
-import type { Socio } from "@/lib/mock-data";
+import type { Socio } from "@/lib/tipi";
 import { formatTessera } from "@/lib/format";
 import { Barcode } from "./Barcode";
 import { IconChiudi, IconTessera } from "./Icons";

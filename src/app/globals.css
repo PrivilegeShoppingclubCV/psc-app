@@ -69,6 +69,7 @@ button { font: inherit; }
 .media-placeholder .logo--crown { width: 40%; }
 
 .notice { background: var(--info-surface); color: var(--info); border-radius: var(--radius-sm); padding: var(--space-3) var(--space-4); font-size: 13px; line-height: 18px; margin: 0; }
+.notice--errore { background: var(--danger-surface); color: var(--danger); font-size: 15px; line-height: 22px; }
 
 /* ---------- Benvenuto ---------- */
 .welcome {
@@ -91,6 +92,9 @@ button { font: inherit; }
 .auth { max-width: 480px; margin: 0 auto; min-height: 100dvh; padding: calc(var(--safe-top) + var(--space-4)) var(--space-4) calc(var(--safe-bottom) + var(--space-8)); display: flex; flex-direction: column; gap: var(--space-8); }
 .auth form { display: flex; flex-direction: column; gap: var(--space-4); }
 .auth .psc-field { max-width: none; }
+.auth .link-btn { align-self: center; background: none; border: 0; padding: var(--space-2); color: var(--ink-muted); font: inherit; text-decoration: underline; cursor: pointer; }
+.spunta { display: flex; gap: var(--space-3); align-items: flex-start; font-size: 15px; line-height: 22px; color: var(--ink); cursor: pointer; }
+.spunta input { flex: none; width: 20px; height: 20px; margin: 1px 0 0; accent-color: var(--verde-700); }
 .back-link { display: inline-flex; align-items: center; gap: var(--space-1); min-height: var(--space-12); text-decoration: none; color: var(--ink-muted); }
 .back-link svg { width: 20px; height: 20px; }
 

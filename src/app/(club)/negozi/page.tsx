@@ -1,14 +1,16 @@
 import type { Metadata } from "next";
 import { PageHead } from "@/components/PageHead";
-import { negozi } from "@/lib/mock-data";
+import { getNegozi } from "@/lib/dati";
 
 export const metadata: Metadata = { title: "Negozi" };
 
-export default function Negozi() {
+export default async function Negozi() {
+  const negozi = await getNegozi();
+
   return (
     <>
       <PageHead eyebrow="I nostri negozi" titolo="Negozi">
-        <p className="t-caption">Indirizzi e orari di prova. Mappa e indicazioni arriveranno più avanti.</p>
+        <p className="t-caption">Mappa e indicazioni arriveranno più avanti.</p>
       </PageHead>
       <ul className="list">
         {negozi.map((n) => (

@@ -1,4 +1,4 @@
-import type { Socio } from "@/lib/mock-data";
+import type { Socio } from "@/lib/tipi";
 
 /** Fronte della tessera digitale, in proporzione ISO come la carta fisica. */
 export function Tessera({ socio }: { socio: Socio }) {
