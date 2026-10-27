@@ -37,13 +37,17 @@ src/fonts/                    Butler e Sansumi (woff2). Jost arriva da Google Fo
 public/brand/                 Logo SVG
 public/icons/                 Icone dell'app (generate dalla corona)
 public/sw.js                  Service worker
+supabase/migrations/          Schema del database (tabelle, regole di accesso, bucket immagini)
+supabase/seed.sql             Dati di esempio per il database locale
+docs/database.md              Come è fatto il database e come si applica
 ```
 
 ## Supabase
 
 1. Crea il progetto su supabase.com.
-2. Copia `.env.example` in `.env.local` e incolla URL e anon key (Project Settings → API).
-3. Su Vercel aggiungi le stesse due variabili in Project Settings → Environment Variables.
+2. Applica lo schema del database (`supabase/migrations/`) e crea il primo admin: istruzioni in [docs/database.md](docs/database.md).
+3. Copia `.env.example` in `.env.local` e incolla URL e anon key (Project Settings → API).
+4. Su Vercel aggiungi le stesse due variabili in Project Settings → Environment Variables.
 
 Finché le variabili sono vuote, `createClient()` restituisce `null` e l'app resta sui dati finti.
 
