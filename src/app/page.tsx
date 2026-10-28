@@ -2,7 +2,15 @@ import Link from "next/link";
 import { redirect } from "next/navigation";
 import { getSessione } from "@/lib/dati";
 
-export default async function Benvenuto() {
+export default async function Benvenuto({ searchParams }: { searchParams: Promise<Record<string, string | string[] | undefined>> }) {
+  // Se l'indirizzo dell'app non è tra i Redirect URLs di Supabase, il link
+  // dell'email riporta qui invece che su /auth/callback: lo si inoltra.
+  const q = await searchParams;
+  if (q.code || q.token_hash) {
+    const inoltro = new URLSearchParams(Object.entries(q).flatMap(([k, v]) => (typeof v === "string" ? [[k, v]] : [])));
+    redirect(`/auth/callback?${inoltro}`);
+  }
+
   const { configurato, socio } = await getSessione();
   if (configurato && socio) redirect("/home");
 

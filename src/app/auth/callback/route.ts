@@ -5,8 +5,10 @@ import { completaAccesso, leggiDopo } from "@/app/accesso/flusso";
 import { getSupabase } from "@/lib/dati";
 
 /**
- * Arrivo dal link dell'email, se il modello dell'email lo contiene.
- * Funziona nel browser in cui si apre il link; nell'app installata si usa il codice.
+ * Arrivo dal link dell'email (magic link).
+ * Con il modello standard di Supabase arriva "code": vale solo nel browser in cui
+ * è stato chiesto il link, perché la verifica usa un cookie salvato lì.
+ * Con un modello che usa {{ .TokenHash }} arriva "token_hash", che vale ovunque.
  */
 export async function GET(request: NextRequest) {
   const supabase = await getSupabase();
@@ -23,6 +25,14 @@ export async function GET(request: NextRequest) {
       ? await supabase.auth.verifyOtp({ token_hash: tokenHash, type: (params.get("type") ?? "email") as EmailOtpType })
       : { error: new Error("Link incompleto") };
 
-  if (error) redirect(`/accedi?${new URLSearchParams({ errore: "Il link è scaduto o è già stato usato: chiedi un nuovo codice." })}`);
+  if (error) {
+    // Link aperto in un browser diverso da quello in cui è stato chiesto (es. Gmail
+    // che apre il suo browser interno): manca il cookie della verifica.
+    const altroBrowser = code && /code verifier/i.test(error.message);
+    const errore = altroBrowser
+      ? "Apri il link nello stesso browser in cui l'hai chiesto, oppure chiedine uno nuovo da qui."
+      : "Il link è scaduto o è già stato usato: chiedine uno nuovo.";
+    redirect(`/accedi?${new URLSearchParams({ errore })}`);
+  }
   redirect(await completaAccesso(supabase, dopo));
 }

@@ -10,7 +10,7 @@ import {
   eseguiCollega,
   eseguiIscrizione,
   leggiDopo,
-  mandaCodice,
+  mandaLink,
   messaggioAuth,
   salvaAttesa,
   testo,
@@ -23,7 +23,7 @@ export async function accedi(form: FormData) {
   if (!supabase) redirect("/home");
   const email = testo(form, "email").toLowerCase();
   if (!email) redirect(conErrore("/accedi", "Inserisci la tua email."));
-  await mandaCodice(supabase, email, leggiDopo(form.get("dopo")), "/accedi");
+  await mandaLink(supabase, email, leggiDopo(form.get("dopo")), "/accedi");
 }
 
 export async function verifica(form: FormData) {
@@ -50,7 +50,7 @@ export async function collegaTessera(form: FormData) {
   const email = testo(form, "email").toLowerCase();
   if (!email) redirect(conErrore("/collega-tessera", "Inserisci l'email che hai lasciato in negozio.", { tessera: numero }));
   await salvaAttesa({ tipo: "collega", numero });
-  await mandaCodice(supabase, email, "collega", "/collega-tessera");
+  await mandaLink(supabase, email, "collega", "/collega-tessera");
 }
 
 export async function iscriviti(form: FormData) {
@@ -72,7 +72,7 @@ export async function iscriviti(form: FormData) {
   const email = testo(form, "email").toLowerCase();
   if (!email) redirect(conErrore("/iscriviti", "Inserisci la tua email.", campi));
   await salvaAttesa(attesa);
-  await mandaCodice(supabase, email, "iscriviti", "/iscriviti");
+  await mandaLink(supabase, email, "iscriviti", "/iscriviti");
 }
 
 export async function esci() {

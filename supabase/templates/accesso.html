@@ -1,0 +1,114 @@
+<!doctype html>
+<html lang="it">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="color-scheme" content="light">
+<meta name="supported-color-schemes" content="light">
+<title>Entra nel Privilege Shopping Club</title>
+</head>
+<!--
+  Email di accesso dell'app Privilege Shopping Club: bottone con il link
+  ({{ .ConfirmationURL }}) e, sotto, il codice ({{ .Token }}) per chi usa l'app
+  installata sulla schermata Home, dove il link si aprirebbe nel browser.
+  Da incollare su Supabase in Authentication → Emails → Templates, sia in
+  "Magic Link" sia in "Confirm signup". Oggetto consigliato:
+    Entra nel Privilege Shopping Club
+  Solo tabelle e stili in linea: è quello che le app di posta leggono tutte.
+  Il logo è un PNG servito dall'app (gli SVG in Gmail non si vedono).
+-->
+<body style="margin:0;padding:0;background-color:#f3f6f4;">
+  <!-- Anteprima nella lista delle email -->
+  <div style="display:none;max-height:0;overflow:hidden;mso-hide:all;font-size:1px;line-height:1px;color:#f3f6f4;">
+    Tocca il bottone per entrare nel club. Il link vale per poco tempo.
+  </div>
+
+  <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="background-color:#f3f6f4;">
+    <tr>
+      <td align="center" style="padding:32px 16px;">
+
+        <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="max-width:480px;background-color:#ffffff;border-radius:12px;overflow:hidden;">
+          <!-- Testata verde con il logo -->
+          <tr>
+            <td align="center" style="background-color:#113f2d;padding:32px 24px 28px;">
+              <img src="{{ .SiteURL }}/brand/psc-lockup-bianco-email.png" width="150" height="72" alt="Privilege Shopping Club"
+                   style="display:block;border:0;outline:none;text-decoration:none;width:150px;height:auto;color:#ffffff;font-family:Georgia,'Times New Roman',serif;font-size:18px;">
+            </td>
+          </tr>
+
+          <!-- Corpo -->
+          <tr>
+            <td style="padding:36px 32px 8px;font-family:'Helvetica Neue',Helvetica,Arial,sans-serif;color:#0f1e17;">
+              <p style="margin:0 0 8px;font-size:11px;line-height:16px;letter-spacing:2.5px;text-transform:uppercase;color:#7a5f1f;font-weight:600;">
+                Accesso al club
+              </p>
+              <h1 style="margin:0 0 16px;font-family:Georgia,'Times New Roman',serif;font-size:28px;line-height:34px;font-weight:normal;color:#113f2d;">
+                Entra con un tocco
+              </h1>
+              <p style="margin:0 0 24px;font-size:15px;line-height:22px;color:#4a5b53;">
+                Tocca il bottone da questo telefono, nello stesso browser in cui hai chiesto l'accesso. Il link vale per poco tempo e si usa una volta sola.
+              </p>
+            </td>
+          </tr>
+
+          <!-- Bottone -->
+          <tr>
+            <td align="center" style="padding:0 32px 28px;">
+              <table role="presentation" cellpadding="0" cellspacing="0" border="0">
+                <tr>
+                  <td align="center" bgcolor="#113f2d" style="border-radius:999px;">
+                    <a href="{{ .ConfirmationURL }}" target="_blank"
+                       style="display:inline-block;padding:16px 40px;font-family:'Helvetica Neue',Helvetica,Arial,sans-serif;font-size:16px;line-height:20px;font-weight:600;color:#ffffff;text-decoration:none;border-radius:999px;">
+                      Entra nel club
+                    </a>
+                  </td>
+                </tr>
+              </table>
+            </td>
+          </tr>
+
+          <!-- Codice, per l'app installata -->
+          <tr>
+            <td style="padding:0 32px 28px;font-family:'Helvetica Neue',Helvetica,Arial,sans-serif;">
+              <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0">
+                <tr>
+                  <td style="background-color:#f3f6f4;border-radius:8px;padding:14px 16px;font-size:13px;line-height:19px;color:#4a5b53;">
+                    Usi l'app installata sulla schermata Home? Tocca «Nell'email c'è anche un codice?» e inserisci
+                    <span style="font-family:'SFMono-Regular',Menlo,Consolas,'Courier New',monospace;font-size:15px;letter-spacing:3px;font-weight:bold;color:#113f2d;white-space:nowrap;">{{ .Token }}</span>
+                  </td>
+                </tr>
+              </table>
+            </td>
+          </tr>
+
+          <tr>
+            <td style="padding:0 32px 36px;font-family:'Helvetica Neue',Helvetica,Arial,sans-serif;">
+              <p style="margin:0;font-size:13px;line-height:19px;color:#4a5b53;">
+                Non hai chiesto tu di entrare? Puoi ignorare questa email: senza questo link nessuno può entrare nel tuo account.
+              </p>
+            </td>
+          </tr>
+
+          <!-- Filetto oro -->
+          <tr>
+            <td style="padding:0 32px;"><div style="height:1px;line-height:1px;font-size:1px;background-color:#d9c590;">&nbsp;</div></td>
+          </tr>
+
+          <tr>
+            <td align="center" style="padding:20px 32px 28px;font-family:'Helvetica Neue',Helvetica,Arial,sans-serif;">
+              <p style="margin:0;font-size:11px;line-height:16px;letter-spacing:2px;text-transform:uppercase;color:#7a8c84;">
+                Privilege Shopping Club
+              </p>
+            </td>
+          </tr>
+        </table>
+
+        <p style="margin:16px 0 0;font-family:'Helvetica Neue',Helvetica,Arial,sans-serif;font-size:11px;line-height:16px;color:#7a8c84;">
+          Email automatica inviata a {{ .Email }}: non rispondere a questo messaggio.
+        </p>
+
+      </td>
+    </tr>
+  </table>
+</body>
+</html>
