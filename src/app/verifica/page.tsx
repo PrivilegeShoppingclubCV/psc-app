@@ -5,7 +5,7 @@ import { accedi, verifica } from "../accesso/azioni";
 
 export const metadata: Metadata = { title: "Controlla la posta" };
 
-const INDIETRO = { collega: "/collega-tessera", iscriviti: "/iscriviti", home: "/accedi" } as const;
+const INDIETRO = { collega: "/collega-tessera", iscriviti: "/iscriviti", home: "/accedi", admin: "/accedi?dopo=admin" } as const;
 
 export default async function Verifica({ searchParams }: { searchParams: Promise<Record<string, string | string[] | undefined>> }) {
   const q = await searchParams;

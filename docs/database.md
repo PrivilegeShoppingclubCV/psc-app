@@ -23,6 +23,8 @@ select id, 'admin' from auth.users where lower(email) = lower('tua@email.it');
 
 Deve rispondere `INSERT 0 1`; `INSERT 0 0` vuol dire che l'utente con quell'email non esiste ancora.
 
+Da lì in poi il pannello `/admin` è aperto a quell'account, e gli altri admin e operatori si aggiungono dalla sezione Staff. Resta sempre almeno un admin: il database rifiuta di togliere o declassare l'ultimo.
+
 ## Tabelle
 
 | Tabella | Cosa contiene |
@@ -55,6 +57,7 @@ Nessuno, admin compresi, può modificare o cancellare un movimento punti o un co
 - `iscriviti(nome, cognome, accetta_privacy, consenso_marketing, telefono, codice_invito, user_agent)` — "Voglio iscrivermi": crea la tessera (APP000001, APP000002, …), registra i consensi e l'invito.
 - `aggiorna_profilo(...)` — recapiti del socio.
 - `importa_soci(batch)`, `importa_movimenti_punti(batch)` — solo admin.
+- `admin_elenco_staff()`, `admin_aggiungi_staff(email, ruolo, negozio, nome)` — per la sezione Staff del pannello: mostrano le email degli account e aggiungono allo staff chi ha già fatto almeno un accesso all'app. Solo admin.
 
 ## Import dal gestionale
 

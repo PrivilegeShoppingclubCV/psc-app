@@ -14,8 +14,8 @@ import type { getSupabase } from "@/lib/dati";
 export type Supabase = NonNullable<Awaited<ReturnType<typeof getSupabase>>>;
 
 /** Cosa fare dopo l'accesso. Solo valori noti: mai un indirizzo arbitrario. */
-export type Dopo = "home" | "collega" | "iscriviti";
-export const leggiDopo = (v: unknown): Dopo => (v === "collega" || v === "iscriviti" ? v : "home");
+export type Dopo = "home" | "collega" | "iscriviti" | "admin";
+export const leggiDopo = (v: unknown): Dopo => (v === "collega" || v === "iscriviti" || v === "admin" ? v : "home");
 
 export const COOKIE_ATTESA = "psc_attesa";
 
@@ -97,9 +97,13 @@ export async function completaAccesso(supabase: Supabase, dopo: Dopo): Promise<s
   const attesa = await prendiAttesa();
   if (dopo === "collega" && attesa?.tipo === "collega") return eseguiCollega(supabase, attesa.numero);
   if (dopo === "iscriviti" && attesa?.tipo === "iscriviti") return eseguiIscrizione(supabase, attesa);
+  if (dopo === "admin") return "/admin";
 
   // Accesso semplice: chi non ha ancora una tessera collegata va a collegarla.
   const user = await utenteCorrente(supabase);
   const { data } = await supabase.from("soci").select("id").eq("user_id", user?.id ?? "").maybeSingle();
-  return data ? "/home" : "/collega-tessera";
+  if (data) return "/home";
+  // Lo staff senza tessera va al pannello (che spiega se l'account non è admin).
+  const { data: staff } = await supabase.from("staff").select("ruolo").eq("user_id", user?.id ?? "").maybeSingle();
+  return staff ? "/admin" : "/collega-tessera";
 }

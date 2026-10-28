@@ -28,6 +28,7 @@ src/app/page.tsx              Benvenuto (Ho già la tessera · Voglio iscrivermi
 src/app/collega-tessera|iscriviti|accedi
 src/app/(club)/layout.tsx     Guscio con barra in basso: Negozi · Punti · Home · Offerte · Profilo
 src/app/(club)/home           Saldo punti + "Apri tessera" a schermo intero con codice a barre
+src/app/admin/                Pannello admin: offerte, soci e punti, negozi, premi, staff, gestionale
 src/app/manifest.ts           Manifest della PWA
 src/components/               TabBar, Tessera, Barcode, SaldoPunti, …
 src/styles/tokens.json        Token del design system (fonte)
@@ -62,6 +63,21 @@ I soci entrano con un link che ricevono via email (magic link), niente password.
 - **Authentication → SMTP Settings**: il servizio email incluso in Supabase scrive solo agli indirizzi del team e pochi messaggi l'ora. Per le prove va bene Gmail con una password per le app; prima di aprire l'app ai clienti serve un servizio email vero (Resend, Brevo, Postmark, …).
 
 Flussi (`src/app/accesso/`): «Ho già la tessera» chiede numero ed email, manda il link e all'arrivo su `/auth/callback` chiama `collega_tessera`; «Voglio iscrivermi» fa lo stesso con `iscriviti`; «Accedi» manda il link e porta alla Home, o a collegare la tessera se l'account non ne ha una. I dati del modulo aspettano in un cookie per 30 minuti: se il link si apre in un altro browser, il socio entra ma deve ricompilare il modulo.
+
+## Pannello admin
+
+Il pannello è nella stessa app, all'indirizzo `/admin`, con un layout suo pensato per il computer (funziona anche da telefono). Si entra con lo stesso link via email dei soci: chi apre `/admin` senza aver fatto l'accesso va su `/accedi?dopo=admin`, e il link riporta al pannello. Entra solo chi ha il ruolo `admin` nella tabella `staff`; il primo admin si crea dal SQL Editor (vedi [docs/database.md](docs/database.md)), gli altri dalla sezione Staff.
+
+| Sezione | Cosa si fa |
+|---|---|
+| Panoramica | Soci, offerte in corso e in bozza, tessere in attesa della cassa, ultimi import |
+| Offerte | Crea, modifica, pubblica o rimette in bozza, elimina; immagine, prezzi o etichetta, periodo, livello minimo, negozi |
+| Soci | Cerca per tessera, nome o email; modifica la scheda, sospende, registra bonus, rettifiche e riscatti, vede consensi e inviti |
+| Negozi, Premi | Anagrafica, orari, immagine, visibilità nell'app |
+| Staff | Aggiunge admin e operatori per email, cambia ruolo e negozio |
+| Gestionale | Chiavi del server dei negozi, mappatura delle colonne del CSV clienti, esito degli import |
+
+Le pagine e le azioni controllano il ruolo (`src/lib/admin/sessione.ts`), ma la protezione vera sono le regole di Supabase: chi non è admin non legge né scrive nulla anche chiamando il database direttamente. Le immagini si caricano dal browser direttamente su Supabase Storage. Il service worker non salva mai le pagine del pannello.
 
 ## Da decidere prima del lancio
 

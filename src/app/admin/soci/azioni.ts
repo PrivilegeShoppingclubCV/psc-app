@@ -1,0 +1,73 @@
+"use server";
+
+import { revalidatePath } from "next/cache";
+import { redirect } from "next/navigation";
+import { conEsito, intero, messaggioDb, testo, testoONull } from "@/lib/admin/form";
+import { richiediAdmin } from "@/lib/admin/sessione";
+
+const STATI = ["attivo", "sospeso", "cessato"];
+
+export async function salvaSocio(form: FormData) {
+  const { supabase } = await richiediAdmin();
+  const id = testo(form, "id");
+  const pagina = `/admin/soci/${id}`;
+  const stato = testo(form, "stato");
+  const dataNascita = testo(form, "data_nascita");
+  if (!STATI.includes(stato)) redirect(conEsito(pagina, { errore: "Stato non valido." }));
+
+  const { error } = await supabase.from("soci").update({
+    nome: testoONull(form, "nome"),
+    cognome: testoONull(form, "cognome"),
+    email: testoONull(form, "email")?.toLowerCase() ?? null,
+    telefono: testoONull(form, "telefono"),
+    data_nascita: dataNascita || null,
+    cap: testoONull(form, "cap"),
+    citta: testoONull(form, "citta"),
+    livello: testo(form, "livello") || "classic",
+    stato,
+    negozio_preferito_id: testo(form, "negozio_preferito_id") || null,
+  }).eq("id", id);
+  revalidatePath(pagina);
+  redirect(conEsito(pagina, error ? { errore: messaggioDb(error) } : { ok: "Scheda salvata." }));
+}
+
+const TIPI_MANUALI = ["bonus", "rettifica", "acquisto", "storno"];
+
+export async function registraPunti(form: FormData) {
+  const { supabase, userId } = await richiediAdmin();
+  const id = testo(form, "socio_id");
+  const pagina = `/admin/soci/${id}`;
+  const tipo = testo(form, "tipo");
+  const premioId = testo(form, "premio_id");
+
+  let riga: Record<string, unknown>;
+  if (tipo === "riscatto") {
+    const { data: premio } = await supabase.from("premi").select("id, nome, soglia_punti").eq("id", premioId).maybeSingle();
+    if (!premio) redirect(conEsito(pagina, { errore: "Scegli il premio da riscattare." }));
+    riga = { tipo, punti: -premio.soglia_punti, premio_id: premio.id, descrizione: `${premio.nome} riscattato` };
+  } else {
+    const punti = intero(form, "punti");
+    if (!TIPI_MANUALI.includes(tipo)) redirect(conEsito(pagina, { errore: "Tipo di movimento non valido." }));
+    if (!punti || Number.isNaN(punti)) redirect(conEsito(pagina, { errore: "Indica i punti come numero intero diverso da zero (negativo per toglierli)." }));
+    riga = { tipo, punti, descrizione: testoONull(form, "descrizione") };
+  }
+
+  const { error } = await supabase.from("movimenti_punti").insert({
+    ...riga,
+    socio_id: id,
+    negozio_id: testo(form, "negozio_id") || null,
+    fonte: "admin",
+    creato_da: userId,
+  });
+  revalidatePath(pagina);
+  redirect(conEsito(pagina, error ? { errore: messaggioDb(error) } : { ok: "Movimento registrato." }));
+}
+
+export async function scollegaAccount(form: FormData) {
+  const { supabase } = await richiediAdmin();
+  const id = testo(form, "id");
+  const { error } = await supabase.from("soci").update({ user_id: null }).eq("id", id);
+  redirect(conEsito(`/admin/soci/${id}`, error
+    ? { errore: messaggioDb(error) }
+    : { ok: "Account scollegato: la tessera si può ricollegare dall'app con numero ed email." }));
+}

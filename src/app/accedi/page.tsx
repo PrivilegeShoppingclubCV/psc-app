@@ -8,12 +8,20 @@ export const metadata: Metadata = { title: "Accedi" };
 
 export default async function Accedi({ searchParams }: { searchParams: Promise<Record<string, string | string[] | undefined>> }) {
   const q = await searchParams;
-  const { configurato, socio } = await getSessione();
-  if (configurato && socio) redirect("/home");
+  const admin = param(q.dopo) === "admin";
+  const { configurato, email, socio } = await getSessione();
+  if (configurato && admin && email) redirect("/admin");
+  if (configurato && socio && !admin) redirect("/home");
 
   return (
-    <AuthPage eyebrow="Accedi" titolo="Accedi al club" intro="Ti mandiamo un link via email: niente password da ricordare." errore={param(q.errore)}>
+    <AuthPage
+      eyebrow={admin ? "Pannello admin" : "Accedi"}
+      titolo={admin ? "Accedi al pannello" : "Accedi al club"}
+      intro="Ti mandiamo un link via email: niente password da ricordare."
+      errore={param(q.errore)}
+    >
       <form action={accedi}>
+        <input type="hidden" name="dopo" value={admin ? "admin" : "home"} />
         <Campo id="email" label="Email" type="email" autoComplete="email" required={configurato} defaultValue={param(q.email)} />
         <button type="submit" className="psc-btn psc-btn--primary psc-btn--block">Continua</button>
       </form>
