@@ -8,9 +8,12 @@
 <title>Entra nel Privilege Shopping Club</title>
 </head>
 <!--
-  Email di accesso dell'app Privilege Shopping Club: bottone con il link
-  ({{ .ConfirmationURL }}) e, sotto, il codice ({{ .Token }}) per chi usa l'app
-  installata sulla schermata Home, dove il link si aprirebbe nel browser.
+  Email di accesso dell'app Privilege Shopping Club: bottone con il link e,
+  sotto, il codice ({{ .Token }}) per chi usa l'app installata sulla schermata
+  Home, dove il link si aprirebbe nel browser.
+  Il link porta dritto a /auth/callback con {{ .TokenHash }}: a differenza di
+  {{ .ConfirmationURL }} funziona in qualsiasi browser e non dipende dai
+  Redirect URLs. Richiede che la Site URL sia l'indirizzo di produzione.
   Da incollare su Supabase in Authentication → Emails → Templates, sia in
   "Magic Link" sia in "Confirm signup". Oggetto consigliato:
     Entra nel Privilege Shopping Club
@@ -46,7 +49,7 @@
                 Entra con un tocco
               </h1>
               <p style="margin:0 0 24px;font-size:15px;line-height:22px;color:#4a5b53;">
-                Tocca il bottone da questo telefono, nello stesso browser in cui hai chiesto l'accesso. Il link vale per poco tempo e si usa una volta sola.
+                Tocca il bottone per entrare. Il link vale per poco tempo e si usa una volta sola: se ne hai chiesti più di uno, usa l'ultimo.
               </p>
             </td>
           </tr>
@@ -57,7 +60,7 @@
               <table role="presentation" cellpadding="0" cellspacing="0" border="0">
                 <tr>
                   <td align="center" bgcolor="#113f2d" style="border-radius:999px;">
-                    <a href="{{ .ConfirmationURL }}" target="_blank"
+                    <a href="{{ .SiteURL }}/auth/callback?token_hash={{ .TokenHash }}&type=email" target="_blank"
                        style="display:inline-block;padding:16px 40px;font-family:'Helvetica Neue',Helvetica,Arial,sans-serif;font-size:16px;line-height:20px;font-weight:600;color:#ffffff;text-decoration:none;border-radius:999px;">
                       Entra nel club
                     </a>
