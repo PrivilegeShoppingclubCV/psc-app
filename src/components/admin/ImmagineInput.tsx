@@ -11,12 +11,14 @@ const MAX = 5 * 1024 * 1024;
  * solo gli admin scrivono) e mette il percorso nel campo nascosto `name`.
  * Il file non passa dal server dell'app, che ha un limite di dimensione sulle richieste.
  */
-export function ImmagineInput({ bucket, name = "immagine_path", valore, urlBase }: {
-  bucket: "offerte" | "negozi" | "premi";
+export function ImmagineInput({ bucket, name = "immagine_path", valore, urlBase, cartella }: {
+  bucket: "offerte" | "negozi" | "premi" | "prodotti";
   name?: string;
   valore: string | null;
   /** URL pubblico del bucket, a cui si aggiunge il percorso. */
   urlBase: string;
+  /** Cartella dentro il bucket (per i prodotti, l'EAN). Di base l'anno. */
+  cartella?: string;
 }) {
   const [percorso, setPercorso] = useState(valore ?? "");
   const [stato, setStato] = useState<"" | "carico" | string>("");
@@ -32,7 +34,7 @@ export function ImmagineInput({ bucket, name = "immagine_path", valore, urlBase 
     if (!supabase) return setStato("Database non collegato.");
     setStato("carico");
     const estensione = file.name.split(".").pop()?.toLowerCase() ?? "jpg";
-    const nuovo = `${new Date().getFullYear()}/${crypto.randomUUID()}.${estensione}`;
+    const nuovo = `${cartella ?? new Date().getFullYear()}/${crypto.randomUUID()}.${estensione}`;
     const { error } = await supabase.storage.from(bucket).upload(nuovo, file, { contentType: file.type, cacheControl: "31536000" });
     if (error) return setStato(`Caricamento non riuscito: ${error.message}`);
     setPercorso(nuovo);

@@ -72,10 +72,13 @@ Il pannello è nella stessa app, all'indirizzo `/admin`, con un layout suo pensa
 |---|---|
 | Panoramica | Soci, offerte in corso e in bozza, tessere in attesa della cassa, ultimi import |
 | Offerte | Crea, modifica, pubblica o rimette in bozza, elimina; immagine, prezzi o etichetta, periodo, livello minimo, negozi |
+| Prodotti | Incolla le righe del magazzino dall'Excel, carica le foto per codice EAN (anche tante insieme), vede e rifà la vetrina di oggi |
 | Soci | Cerca per tessera, nome o email; modifica la scheda, sospende, registra bonus, rettifiche e riscatti, vede consensi e inviti |
 | Negozi, Premi | Anagrafica, orari, immagine, visibilità nell'app |
 | Staff | Aggiunge admin e operatori per email, cambia ruolo e negozio |
 | Gestionale | Chiavi del server dei negozi, mappatura delle colonne del CSV clienti, esito degli import |
+
+La pagina Offerte dell'app mostra prima le offerte dello staff in corso, poi i prodotti della vetrina del giorno fino a 10 in tutto; «Vedi tutte le offerte» (`/offerte/tutte`) elenca tutti i prodotti con foto. La vetrina la sceglie il database (`vetrina_del_giorno`): valore fermo più alto (pezzi × prezzo tesserati), spinto dalla scadenza vicina, solo prodotti con foto, mai lo stesso prodotto nei 3 giorni dopo un'uscita. Numero di offerte, giorni di pausa e peso della scadenza sono nella tabella `impostazioni` (`vetrina_*`).
 
 Le pagine e le azioni controllano il ruolo (`src/lib/admin/sessione.ts`), ma la protezione vera sono le regole di Supabase: chi non è admin non legge né scrive nulla anche chiamando il database direttamente. Le immagini si caricano dal browser direttamente su Supabase Storage. Il service worker non salva mai le pagine del pannello.
 

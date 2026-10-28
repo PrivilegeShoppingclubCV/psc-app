@@ -140,6 +140,7 @@ export async function getOfferte(): Promise<Offerta[]> {
   if (error) throw error;
   return data.map((o) => ({
     id: o.id,
+    tipo: "staff" as const,
     marca: o.marca ?? "",
     nome: o.titolo,
     prezzoSoci: o.prezzo_soci,
@@ -149,4 +150,69 @@ export async function getOfferte(): Promise<Offerta[]> {
     soloTesserati: o.solo_tesserati,
     immagineUrl: o.immagine_path ? supabase.storage.from("offerte").getPublicUrl(o.immagine_path).data.publicUrl : undefined,
   }));
+}
+
+interface ProdottoDb {
+  id: string;
+  marca: string | null;
+  descrizione: string;
+  colore: string | null;
+  taglia: string | null;
+  prezzo_listino: number | null;
+  prezzo_soci: number;
+  immagine_path: string;
+}
+
+function daProdotto(supabase: NonNullable<Awaited<ReturnType<typeof getSupabase>>>, p: ProdottoDb): Offerta {
+  return {
+    id: p.id,
+    tipo: "prodotto",
+    marca: p.marca ?? "",
+    nome: p.descrizione,
+    dettaglio: [p.colore, p.taglia].filter(Boolean).join(" · ") || undefined,
+    prezzoSoci: p.prezzo_soci,
+    prezzoListino: p.prezzo_listino !== null && p.prezzo_listino > p.prezzo_soci ? p.prezzo_listino : null,
+    scadenza: null,
+    // I prodotti li vedono solo i soci: il bollino su ogni card sarebbe ripetitivo.
+    soloTesserati: false,
+    immagineUrl: supabase.storage.from("prodotti").getPublicUrl(p.immagine_path).data.publicUrl,
+  };
+}
+
+/**
+ * Pagina Offerte: prima tutte le offerte dello staff in corso, poi i prodotti
+ * della vetrina di oggi fino a vetrina_totale (scelti dal database, vedi la
+ * migrazione prodotti_vetrina).
+ */
+export async function getVetrina(): Promise<Offerta[]> {
+  const supabase = await getSupabase();
+  if (!supabase) return mock.offerte;
+  const [staff, prodotti, totale] = await Promise.all([
+    getOfferte(),
+    supabase.rpc("vetrina_del_giorno"),
+    supabase.rpc("vetrina_impostazione", { p_chiave: "vetrina_totale", p_default: 10 }),
+  ]);
+  if (prodotti.error) throw prodotti.error;
+  const posti = Math.max(0, Number(totale.data ?? 10) - staff.length);
+  return [...staff, ...(prodotti.data as ProdottoDb[]).slice(0, posti).map((p) => daProdotto(supabase, p))];
+}
+
+export const PRODOTTI_PER_PAGINA = 40;
+
+/** "Vedi tutte le offerte": i prodotti con foto che possono andare in offerta, dal punteggio più alto. */
+export async function getCatalogo(pagina: number, cerca: string): Promise<{ prodotti: Offerta[]; totale: number }> {
+  const supabase = await getSupabase();
+  if (!supabase) return { prodotti: [], totale: 0 };
+  let query = supabase
+    .from("prodotti_in_offerta")
+    .select("id, marca, descrizione, colore, taglia, prezzo_listino, prezzo_soci, immagine_path", { count: "exact" })
+    .order("punteggio", { ascending: false })
+    .order("ean")
+    .range((pagina - 1) * PRODOTTI_PER_PAGINA, pagina * PRODOTTI_PER_PAGINA - 1);
+  for (const parola of cerca.replace(/[,()*%\\]/g, " ").split(/\s+/).filter(Boolean)) {
+    query = query.or(["marca", "descrizione", "categoria"].map((c) => `${c}.ilike.%${parola}%`).join(","));
+  }
+  const { data, count, error } = await query;
+  if (error) throw error;
+  return { prodotti: (data as ProdottoDb[]).map((p) => daProdotto(supabase, p)), totale: count ?? 0 };
 }

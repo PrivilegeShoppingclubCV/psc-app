@@ -6,6 +6,7 @@ import { usePathname } from "next/navigation";
 const VOCI = [
   { href: "/admin", label: "Panoramica" },
   { href: "/admin/offerte", label: "Offerte" },
+  { href: "/admin/prodotti", label: "Prodotti" },
   { href: "/admin/soci", label: "Soci" },
   { href: "/admin/negozi", label: "Negozi" },
   { href: "/admin/premi", label: "Premi" },

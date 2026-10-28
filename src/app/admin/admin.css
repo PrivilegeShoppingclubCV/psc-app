@@ -16,7 +16,7 @@
 @media (min-width: 900px) {
   .admin { grid-template-columns: 240px minmax(0, 1fr); }
   .admin-side { position: sticky; top: 0; height: 100dvh; border-bottom: 0; border-right: 1px solid var(--line); padding: var(--space-6) var(--space-4); }
-  .admin-nav { flex-direction: column; margin: 0; padding: 0; overflow: visible; }
+  .admin-side .admin-nav { flex-direction: column; margin: 0; padding: 0; overflow: visible; }
   .admin-side__utente { flex-direction: column; align-items: flex-start; gap: var(--space-1); margin-top: auto; }
   .admin-side__utente .psc-btn--ghost { padding: 0; min-height: 0; }
   .admin-main { padding: var(--space-8) var(--space-8) var(--space-12); }
@@ -24,7 +24,7 @@
 
 /* ---------- Testata delle pagine ---------- */
 .admin-head { display: flex; flex-wrap: wrap; align-items: flex-end; justify-content: space-between; gap: var(--space-4); }
-.admin-head > div { display: flex; flex-direction: column; gap: var(--space-1); }
+.admin-head > div:not(.admin-azioni) { display: flex; flex-direction: column; gap: var(--space-1); }
 .admin-back { color: var(--ink-muted); text-decoration: none; font-size: 13px; }
 .admin-back:hover { color: var(--ink); text-decoration: underline; }
 
@@ -82,3 +82,10 @@ a.admin-stat:hover { border-color: var(--ink); }
 .admin-dl dd { margin: 0; }
 .notice--ok { background: var(--success-surface); color: var(--success); font-size: 15px; line-height: 22px; }
 .admin-pagine { display: flex; gap: var(--space-3); align-items: center; justify-content: flex-end; }
+.admin-incolla { font-family: ui-monospace, SFMono-Regular, Menlo, monospace; font-size: 13px; line-height: 18px; white-space: pre; overflow-x: auto; min-height: 200px; }
+.admin-errori { margin: 0; padding-left: var(--space-8); }
+.admin-vetrina { list-style: none; margin: 0; padding: 0; display: grid; grid-template-columns: repeat(auto-fill, minmax(120px, 1fr)); gap: var(--space-4); counter-reset: vetrina; }
+.admin-vetrina li { counter-increment: vetrina; }
+.admin-vetrina a { display: flex; flex-direction: column; gap: var(--space-1); text-decoration: none; color: var(--ink); font-size: 13px; line-height: 18px; position: relative; }
+.admin-vetrina a::before { content: counter(vetrina); position: absolute; top: var(--space-1); left: var(--space-1); background: var(--surface-brand); color: var(--ink-on-brand); border-radius: var(--radius-xs); padding: 0 6px; font-size: 11px; }
+.admin-vetrina img { width: 100%; aspect-ratio: 4 / 5; object-fit: cover; border-radius: var(--radius-sm); background: var(--surface-alt); }
