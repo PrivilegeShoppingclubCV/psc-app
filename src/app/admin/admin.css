@@ -1,0 +1,91 @@
+/* Pannello admin: pensato per il computer, usabile anche da telefono. */
+
+.admin { min-height: 100dvh; display: grid; grid-template-columns: minmax(0, 1fr); background: var(--surface); }
+.admin-side { display: flex; flex-direction: column; gap: var(--space-4); padding: var(--space-4); border-bottom: 1px solid var(--line); background: var(--surface-alt); }
+.admin-side__brand { display: flex; align-items: center; gap: var(--space-3); text-decoration: none; color: var(--ink); }
+.admin-side__brand .logo--wordmark { width: 120px; }
+.admin-nav { display: flex; gap: var(--space-1); overflow-x: auto; margin: 0 calc(-1 * var(--space-4)); padding: 0 var(--space-4); }
+.admin-nav a { flex: none; padding: var(--space-2) var(--space-3); border-radius: var(--radius-sm); color: var(--ink-muted); text-decoration: none; white-space: nowrap; }
+.admin-nav a:hover { background: var(--surface-tint); color: var(--ink); }
+.admin-nav a.is-active { background: var(--surface-brand); color: var(--ink-on-brand); font-weight: 600; }
+.admin-nav a:focus-visible { outline: 2px solid var(--focus); outline-offset: 2px; }
+.admin-side__utente { display: flex; align-items: center; justify-content: space-between; gap: var(--space-2); min-width: 0; }
+.admin-side__utente .t-caption { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.admin-main { padding: var(--space-6) var(--space-4) var(--space-12); display: flex; flex-direction: column; gap: var(--space-6); min-width: 0; max-width: 1100px; }
+
+@media (min-width: 900px) {
+  .admin { grid-template-columns: 240px minmax(0, 1fr); }
+  .admin-side { position: sticky; top: 0; height: 100dvh; border-bottom: 0; border-right: 1px solid var(--line); padding: var(--space-6) var(--space-4); }
+  .admin-side .admin-nav { flex-direction: column; margin: 0; padding: 0; overflow: visible; }
+  .admin-side__utente { flex-direction: column; align-items: flex-start; gap: var(--space-1); margin-top: auto; }
+  .admin-side__utente .psc-btn--ghost { padding: 0; min-height: 0; }
+  .admin-main { padding: var(--space-8) var(--space-8) var(--space-12); }
+}
+
+/* ---------- Testata delle pagine ---------- */
+.admin-head { display: flex; flex-wrap: wrap; align-items: flex-end; justify-content: space-between; gap: var(--space-4); }
+.admin-head > div:not(.admin-azioni) { display: flex; flex-direction: column; gap: var(--space-1); }
+.admin-back { color: var(--ink-muted); text-decoration: none; font-size: 13px; }
+.admin-back:hover { color: var(--ink); text-decoration: underline; }
+
+/* ---------- Riquadri ---------- */
+.admin-card { border: 1px solid var(--line); border-radius: var(--radius-md); padding: var(--space-6); display: flex; flex-direction: column; gap: var(--space-4); background: var(--surface); }
+.admin-card > h2 { margin: 0; }
+.admin-stats { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: var(--space-4); }
+.admin-stat { border: 1px solid var(--line); border-radius: var(--radius-md); padding: var(--space-4); display: flex; flex-direction: column; gap: var(--space-1); text-decoration: none; color: var(--ink); }
+a.admin-stat:hover { border-color: var(--ink); }
+.admin-stat__valore { font-family: var(--font-display); font-size: 36px; line-height: 40px; font-weight: 300; font-variant-numeric: lining-nums tabular-nums; }
+.admin-cols { display: grid; grid-template-columns: 1fr; gap: var(--space-6); }
+@media (min-width: 1100px) { .admin-cols { grid-template-columns: 3fr 2fr; align-items: start; } }
+
+/* ---------- Tabelle ---------- */
+.admin-table-wrap { overflow-x: auto; border: 1px solid var(--line); border-radius: var(--radius-md); }
+.admin-table { width: 100%; border-collapse: collapse; font-size: 14px; line-height: 20px; }
+.admin-table th { text-align: left; font-family: var(--font-label); font-size: 10px; line-height: 14px; font-weight: 600; letter-spacing: .14em; text-transform: uppercase; color: var(--ink-muted); padding: var(--space-3); border-bottom: 1px solid var(--line); background: var(--surface-alt); white-space: nowrap; }
+.admin-table td { padding: var(--space-3); border-bottom: 1px solid var(--line); vertical-align: middle; }
+.admin-table tr:last-child td { border-bottom: 0; }
+.admin-table tbody tr:hover { background: var(--surface-tint); }
+.admin-table a { font-weight: 500; text-decoration: none; }
+.admin-table a:hover { text-decoration: underline; }
+.admin-table .num { text-align: right; font-variant-numeric: tabular-nums; white-space: nowrap; }
+.admin-table .min { color: var(--ink-muted); white-space: nowrap; }
+.admin-table .thumb { width: 48px; height: 48px; border-radius: var(--radius-xs); object-fit: cover; background: var(--surface-alt); }
+.admin-vuoto { padding: var(--space-8) var(--space-4); text-align: center; color: var(--ink-muted); }
+
+/* ---------- Moduli ---------- */
+.admin-form { display: flex; flex-direction: column; gap: var(--space-6); }
+.admin-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: var(--space-4); }
+.admin-grid .psc-field { max-width: none; }
+.admin-field--wide { grid-column: 1 / -1; max-width: none; }
+.admin-textarea { min-height: 96px; padding: var(--space-3); resize: vertical; }
+.admin-form fieldset { border: 0; margin: 0; padding: 0; display: flex; flex-direction: column; gap: var(--space-3); }
+.admin-form legend { font-weight: 600; margin-bottom: var(--space-3); padding: 0; }
+.admin-spunta__help { display: block; }
+.admin-checks { display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: var(--space-2) var(--space-4); }
+.admin-azioni { display: flex; flex-wrap: wrap; gap: var(--space-3); align-items: center; }
+.admin-cerca { display: flex; flex-wrap: wrap; gap: var(--space-3); align-items: flex-end; }
+.admin-cerca .psc-field { flex: 1 1 260px; max-width: 420px; }
+.admin-inline { display: inline; }
+.admin-btn--danger { color: var(--danger); border-color: var(--danger); }
+.admin-btn--danger:hover { background: var(--danger-surface); border-color: var(--danger); }
+.admin-btn--small { min-height: 36px; padding: 0 var(--space-3); font-size: 11px; }
+.admin-errore-campo { color: var(--danger); font-size: 13px; line-height: 18px; margin: 0; }
+
+.admin-immagine { display: flex; flex-direction: column; gap: var(--space-2); }
+.admin-immagine__anteprima { width: 160px; aspect-ratio: 4 / 5; border-radius: var(--radius-sm); background: var(--surface-alt); overflow: hidden; display: grid; place-items: center; }
+.admin-immagine__anteprima img { width: 100%; height: 100%; object-fit: cover; }
+.admin-immagine__azioni { display: flex; gap: var(--space-2); align-items: center; }
+
+.admin-chiave { font-family: ui-monospace, SFMono-Regular, Menlo, monospace; font-size: 14px; word-break: break-all; background: var(--surface-alt); padding: var(--space-3); border-radius: var(--radius-sm); user-select: all; }
+.admin-dl { display: grid; grid-template-columns: max-content 1fr; gap: var(--space-2) var(--space-4); margin: 0; font-size: 14px; }
+.admin-dl dt { color: var(--ink-muted); }
+.admin-dl dd { margin: 0; }
+.notice--ok { background: var(--success-surface); color: var(--success); font-size: 15px; line-height: 22px; }
+.admin-pagine { display: flex; gap: var(--space-3); align-items: center; justify-content: flex-end; }
+.admin-incolla { font-family: ui-monospace, SFMono-Regular, Menlo, monospace; font-size: 13px; line-height: 18px; white-space: pre; overflow-x: auto; min-height: 200px; }
+.admin-errori { margin: 0; padding-left: var(--space-8); }
+.admin-vetrina { list-style: none; margin: 0; padding: 0; display: grid; grid-template-columns: repeat(auto-fill, minmax(120px, 1fr)); gap: var(--space-4); counter-reset: vetrina; }
+.admin-vetrina li { counter-increment: vetrina; }
+.admin-vetrina a { display: flex; flex-direction: column; gap: var(--space-1); text-decoration: none; color: var(--ink); font-size: 13px; line-height: 18px; position: relative; }
+.admin-vetrina a::before { content: counter(vetrina); position: absolute; top: var(--space-1); left: var(--space-1); background: var(--surface-brand); color: var(--ink-on-brand); border-radius: var(--radius-xs); padding: 0 6px; font-size: 11px; }
+.admin-vetrina img { width: 100%; aspect-ratio: 4 / 5; object-fit: cover; border-radius: var(--radius-sm); background: var(--surface-alt); }

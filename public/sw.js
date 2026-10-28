@@ -1,6 +1,7 @@
 // Service worker della PWA Privilege Shopping Club.
 // - Pagine: prima la rete, poi la copia salvata (così la tessera si apre anche offline).
 // - File statici (/_next/static, font, logo, icone): prima la cache.
+// - Il pannello /admin non si salva mai: è solo online.
 // - Le pagine del club dipendono da chi ha fatto l'accesso: si salvano solo dopo
 //   averle visitate, e il bottone Esci svuota le cache.
 // Cambia VERSIONE per svuotare le cache vecchie a ogni rilascio che lo richiede.
@@ -8,7 +9,7 @@
 const VERSIONE = "v2";
 const CACHE_PAGINE = `psc-pagine-${VERSIONE}`;
 const CACHE_STATICI = `psc-statici-${VERSIONE}`;
-const NON_SALVARE = ["/auth/", "/verifica", "/accedi", "/collega-tessera", "/iscriviti"];
+const NON_SALVARE = ["/auth/", "/verifica", "/accedi", "/collega-tessera", "/iscriviti", "/admin"];
 
 self.addEventListener("install", (event) => {
   // Nessuna pagina salvata in anticipo: "/" e "/home" cambiano a seconda di chi ha fatto l'accesso.

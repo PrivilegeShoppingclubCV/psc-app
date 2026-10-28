@@ -23,6 +23,8 @@ select id, 'admin' from auth.users where lower(email) = lower('tua@email.it');
 
 Deve rispondere `INSERT 0 1`; `INSERT 0 0` vuol dire che l'utente con quell'email non esiste ancora.
 
+Da lì in poi il pannello `/admin` è aperto a quell'account, e gli altri admin e operatori si aggiungono dalla sezione Staff. Resta sempre almeno un admin: il database rifiuta di togliere o declassare l'ultimo.
+
 ## Tabelle
 
 | Tabella | Cosa contiene |
@@ -32,6 +34,8 @@ Deve rispondere `INSERT 0 1`; `INSERT 0 0` vuol dire che l'utente con quell'emai
 | `movimenti_punti` | Registro dei punti, in sola aggiunta: saldo iniziale dall'import, acquisti, riscatti, bonus, rettifiche. Il saldo è la somma (vista `saldi_punti`). Un riscatto non può portare il saldo sotto zero. |
 | `premi` | Catalogo punti (buoni da 10, 15, 30 €). |
 | `offerte`, `offerte_negozi` | Offerte con prezzo soci/listino o etichetta ("-30%"), periodo di validità, bozza/pubblicata, solo tesserati, livello minimo, negozi in cui valgono (nessuno = tutti). |
+| `prodotti` | Magazzino incollato dall'Excel di ReadyPro, uno per codice EAN: pezzi, prezzi, scadenze, categoria, foto. `valore_fermo` = pezzi × prezzo tesserati, calcolato dal database. |
+| `vetrina`, vista `prodotti_in_offerta` | I prodotti usciti nella pagina Offerte giorno per giorno; la vista elenca quelli che possono uscire (con foto, disponibili, con prezzo, non scaduti né nascosti) con il punteggio. |
 | `negozi` | Anagrafica, orari, coordinate, `codice_gestionale` per abbinare import e scontrini. |
 | `inviti` | Chi ha invitato chi. Quando un invito si "qualifica" e quanti punti vale è da decidere. |
 | `consensi`, vista `consensi_attuali` | Registro GDPR in sola aggiunta: privacy, regolamento, marketing, profilazione, ognuno separato, con versione del testo e canale (app, negozio, import). |
@@ -55,6 +59,9 @@ Nessuno, admin compresi, può modificare o cancellare un movimento punti o un co
 - `iscriviti(nome, cognome, accetta_privacy, consenso_marketing, telefono, codice_invito, user_agent)` — "Voglio iscrivermi": crea la tessera (APP000001, APP000002, …), registra i consensi e l'invito.
 - `aggiorna_profilo(...)` — recapiti del socio.
 - `importa_soci(batch)`, `importa_movimenti_punti(batch)` — solo admin.
+- `vetrina_del_giorno()` — i prodotti di oggi per la pagina Offerte; li sceglie al primo socio che la apre nella giornata. `vetrina_rigenera()` rifà la scelta (solo admin).
+- `importa_prodotti(import, righe)`, `chiudi_import_prodotti(import)` — salvano le righe del magazzino (per EAN, senza toccare foto e "nascosto") e, se l'elenco era completo, segnano come esauriti i prodotti che mancavano. Solo admin; serviranno anche all'invio automatico da ReadyPro.
+- `admin_elenco_staff()`, `admin_aggiungi_staff(email, ruolo, negozio, nome)` — per la sezione Staff del pannello: mostrano le email degli account e aggiungono allo staff chi ha già fatto almeno un accesso all'app. Solo admin.
 
 ## Import dal gestionale
 
@@ -98,6 +105,7 @@ Vanno su **Supabase Storage**, nello stesso progetto del database:
 | `offerte` | pubblico | foto delle offerte |
 | `negozi` | pubblico | foto dei negozi |
 | `premi` | pubblico | immagini del catalogo punti |
+| `prodotti` | pubblico | foto dei prodotti del magazzino, in una cartella per EAN |
 | `import` | privato, solo admin | file CSV/Excel del gestionale |
 
 I bucket pubblici accettano JPEG, PNG, WebP e AVIF fino a 5 MB; solo gli admin caricano o cancellano. Nelle tabelle si salva il percorso dentro il bucket (`immagine_path`), e l'app costruisce l'URL pubblico. Logo, icone e font restano nel repository, in `public/`.

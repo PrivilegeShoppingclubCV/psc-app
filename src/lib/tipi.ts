@@ -38,6 +38,8 @@ export interface Negozio {
 
 export interface Offerta {
   id: string;
+  /** "staff" = scritta nel pannello; "prodotto" = presa dal magazzino per la vetrina. */
+  tipo: "staff" | "prodotto";
   marca: string;
   nome: string;
   prezzoSoci: number | null;
@@ -48,6 +50,8 @@ export interface Offerta {
   scadenza: string | null;
   soloTesserati: boolean;
   immagineUrl?: string;
+  /** Colore e taglia dei prodotti del magazzino. */
+  dettaglio?: string;
 }
 
 /** Il primo premio non ancora raggiunto, o l'ultimo se li ha superati tutti. */
