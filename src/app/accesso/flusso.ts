@@ -95,8 +95,10 @@ export async function eseguiIscrizione(supabase: Supabase, a: Extract<Attesa, { 
 /** Dopo un accesso riuscito: completa il modulo rimasto in attesa e dice dove andare. */
 export async function completaAccesso(supabase: Supabase, dopo: Dopo): Promise<string> {
   const attesa = await prendiAttesa();
-  if (dopo === "collega" && attesa?.tipo === "collega") return eseguiCollega(supabase, attesa.numero);
-  if (dopo === "iscriviti" && attesa?.tipo === "iscriviti") return eseguiIscrizione(supabase, attesa);
+  // Il modulo in attesa vale anche se "dopo" si è perso per strada (link dell'email
+  // che torna alla Site URL o modello con {{ .TokenHash }}, che non lo porta).
+  if (attesa?.tipo === "collega" && dopo !== "admin") return eseguiCollega(supabase, attesa.numero);
+  if (attesa?.tipo === "iscriviti" && dopo !== "admin") return eseguiIscrizione(supabase, attesa);
   if (dopo === "admin") return "/admin";
 
   // Accesso semplice: chi non ha ancora una tessera collegata va a collegarla.
