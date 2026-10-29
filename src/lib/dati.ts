@@ -5,7 +5,7 @@
 import { cache } from "react";
 import * as mock from "./mock-data";
 import { createClient } from "./supabase/server";
-import type { MovimentoPunti, Negozio, Offerta, Premio, Socio } from "./tipi";
+import { tesseraDaMostrare, type MovimentoPunti, type Negozio, type Offerta, type Premio, type Socio, type TesseraSocio } from "./tipi";
 
 export interface Sessione {
   /** false = Supabase non configurato, l'app usa i dati finti. */
@@ -39,24 +39,33 @@ export const getSessione = cache(async (): Promise<Sessione> => {
 
   const { data, error } = await supabase
     .from("soci")
-    .select("id, numero_tessera, nome, cognome, email, iscritto_il, codice_invito, stato_cassa, livelli(nome)")
+    .select("id, nome, cognome, email, iscritto_il, codice_invito, livelli(nome), tessere(codice, tipo, stato_cassa)")
     .eq("user_id", user.id)
     .eq("stato", "attivo")
+    .eq("tessere.stato", "attiva")
     .maybeSingle();
   if (error) throw error;
+
+  const tessere: TesseraSocio[] = (data?.tessere ?? []).map((t) => ({
+    codice: t.codice,
+    tipo: t.tipo === "digitale" ? "digitale" : "fisica",
+    inAttivazione: t.stato_cassa === "in_attivazione",
+  }));
+  const daMostrare = tesseraDaMostrare(tessere);
 
   return {
     configurato: true,
     email: user.email ?? null,
     socio: data && {
       id: data.id,
-      numeroTessera: data.numero_tessera,
+      numeroTessera: daMostrare?.codice ?? null,
       nome: data.nome ?? "",
       cognome: data.cognome ?? "",
       email: data.email ?? user.email ?? "",
       iscrittoDal: data.iscritto_il,
       codiceInvito: data.codice_invito,
-      inAttivazione: data.stato_cassa === "in_attivazione",
+      inAttivazione: daMostrare?.inAttivazione ?? false,
+      tessere,
       livello: (data.livelli as unknown as { nome: string } | null)?.nome ?? "Classic",
     },
   };

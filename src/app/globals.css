@@ -73,6 +73,8 @@ button { font: inherit; }
 .media-placeholder .logo--crown { width: 40%; }
 
 .notice { background: var(--info-surface); color: var(--info); border-radius: var(--radius-sm); padding: var(--space-3) var(--space-4); font-size: 13px; line-height: 18px; margin: 0; }
+/* Codice da mostrare in negozio per collegare la tessera fisica all'app. */
+.codice-negozio { margin: 0; padding: var(--space-6) var(--space-4); border: 1px dashed var(--line); border-radius: var(--radius-md); text-align: center; font-family: var(--font-text); font-size: 36px; line-height: 44px; font-weight: 500; letter-spacing: .24em; font-variant-numeric: tabular-nums; color: var(--ink); }
 .notice--errore { background: var(--danger-surface); color: var(--danger); font-size: 15px; line-height: 22px; }
 
 /* ---------- Benvenuto ---------- */

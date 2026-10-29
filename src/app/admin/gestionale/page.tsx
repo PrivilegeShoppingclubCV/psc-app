@@ -16,7 +16,7 @@ export default async function Gestionale({ searchParams }: { searchParams: Promi
     supabase.from("gestionale_chiavi").select("id, nome, prefisso, creata_il, ultimo_uso, revocata_il").order("creata_il", { ascending: false }),
     supabase.from("impostazioni").select("valore").eq("chiave", "gestionale_mappatura_soci").maybeSingle(),
     supabase.from("import_batch").select("id, tipo, nome_file, stato, righe_totali, righe_ok, righe_saltate, righe_errore, note, creato_il").order("creato_il", { ascending: false }).limit(20),
-    supabase.from("soci_in_attesa_cassa").select("id", { count: "exact", head: true }),
+    supabase.from("tessere_in_attesa_cassa").select("id", { count: "exact", head: true }),
   ]);
 
   // Il file più recente ancora da elaborare: se ne mostrano le colonne per scrivere la mappatura.
@@ -80,7 +80,7 @@ export default async function Gestionale({ searchParams }: { searchParams: Promi
         <h2 className="t-title">Colonne del CSV clienti</h2>
         <p className="t-caption">
           Per ogni campo dell&apos;app, il nome esatto della colonna nel file di ReadyPro. Campi possibili: numero_tessera (obbligatorio),
-          nome, cognome, email, telefono, data_nascita, cap, citta, livello, punti, negozio, iscritto_il, consenso_privacy, consenso_marketing, consenso_profilazione.
+          altra_tessera (secondo codice dello stesso cliente, se ReadyPro lo esporta), nome, cognome, email, telefono, data_nascita, cap, citta, livello, punti, negozio, iscritto_il, consenso_privacy, consenso_marketing, consenso_profilazione.
           Finché è vuota, i file arrivano ma restano da elaborare.
         </p>
         {daElaborare && (

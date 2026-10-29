@@ -12,6 +12,7 @@ export const socio: Socio = {
   iscrittoDal: "2024-03-12",
   codiceInvito: "GIULIA-7K2",
   inAttivazione: false,
+  tessere: [{ codice: "004718", tipo: "fisica", inAttivazione: false }],
 };
 
 export const movimenti: MovimentoPunti[] = [

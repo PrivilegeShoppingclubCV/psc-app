@@ -8,6 +8,7 @@ const VOCI = [
   { href: "/admin/offerte", label: "Offerte" },
   { href: "/admin/prodotti", label: "Prodotti" },
   { href: "/admin/soci", label: "Soci" },
+  { href: "/admin/tessere", label: "Tessere" },
   { href: "/admin/negozi", label: "Negozi" },
   { href: "/admin/premi", label: "Premi" },
   { href: "/admin/staff", label: "Staff" },
