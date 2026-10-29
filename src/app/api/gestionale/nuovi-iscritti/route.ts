@@ -20,7 +20,7 @@ export async function GET(request: Request) {
   const supabase = supabaseGestionale();
   if (!supabase) return nonConfigurato();
   const chiave = chiaveDa(request);
-  if (!chiave) return errore(401, "Manca la chiave del gestionale.");
+  if (!chiave) return errore(401, "Chiave del gestionale mancante o non valida.");
 
   const { data, error } = await supabase.rpc("gestionale_nuovi_iscritti", { p_chiave: chiave });
   if (error) return erroreDb(error);

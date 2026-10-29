@@ -14,9 +14,14 @@ export function supabaseGestionale() {
   });
 }
 
+/**
+ * La chiave dall'intestazione, solo se ha la forma di quelle create da
+ * gestionale_crea_chiave (psc_ + 64 cifre esadecimali): una richiesta con una
+ * chiave inventata si ferma qui, prima di leggere e inoltrare un file di 4 MB.
+ */
 export function chiaveDa(request: Request): string | null {
   const h = request.headers.get("authorization") ?? "";
-  const m = /^Bearer\s+(\S+)$/i.exec(h);
+  const m = /^Bearer\s+(psc_[0-9a-f]{64})$/i.exec(h);
   return m ? m[1] : null;
 }
 

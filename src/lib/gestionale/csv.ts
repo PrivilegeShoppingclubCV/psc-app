@@ -92,10 +92,15 @@ export function leggiCsv(testo: string): { intestazioni: string[]; righe: RigaCs
   return { intestazioni, righe };
 }
 
-/** CSV con ";" e a capo CRLF, come se lo aspettano i programmi Windows. */
+/**
+ * CSV con ";" e a capo CRLF, come se lo aspettano i programmi Windows.
+ * Nomi e recapiti li scrive il socio: un a capo dentro una cella spezzerebbe la
+ * riga e la seconda metà arriverebbe a ReadyPro come un cliente in più. Gli
+ * a capo e gli altri caratteri di controllo diventano spazi.
+ */
 export function scriviCsv(colonne: string[], righe: Record<string, unknown>[]): string {
   const cella = (v: unknown) => {
-    const s = v == null ? "" : String(v);
+    const s = v == null ? "" : String(v).replace(/[\u0000-\u001f\u007f\u2028\u2029]+/g, " ");
     return /[;"\r\n]/.test(s) ? `"${s.replace(/"/g, '""')}"` : s;
   };
   return [colonne, ...righe.map((r) => colonne.map((c) => r[c]))]
