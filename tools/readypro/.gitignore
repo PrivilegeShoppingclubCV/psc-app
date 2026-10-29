@@ -1,3 +1,5 @@
 config.json
 chiave.bin
 ultimo-invio.txt
+ultimo-invio.csv
+ultimo-invio-completo.txt
