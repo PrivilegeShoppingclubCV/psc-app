@@ -14,7 +14,7 @@ ReadyPro non ha un'API, quindi il collegamento passa da file CSV. Il server dei 
 ```
 
 1. ReadyPro esporta il CSV dei clienti in una cartella locale (procedura pianificata di ReadyPro).
-2. `sincronizza.ps1` lo invia all'app, solo se è cambiato. L'app aggiorna i soci.
+2. `sincronizza.ps1` manda all'app solo i clienti nuovi o modificati dall'ultimo invio, a blocchi di 1.000, e una volta a settimana tutto il file per sicurezza. L'app aggiorna i soci. Così anche decine di migliaia di clienti esportati ogni ora pesano poco: lo script tiene una copia dell'ultimo file inviato (`ultimo-invio.csv`, nella sua cartella protetta) per confrontarlo col nuovo.
 3. Lo script scarica le tessere date dall'app (digitali nate in app e fisiche consegnate dal pannello) e le scrive nel file che ReadyPro importa (import pianificato di ReadyPro), poi conferma all'app.
 4. Quando il codice di una di queste tessere compare nel CSV dei clienti, la cassa la conosce: in app la tessera passa da "in attivazione" ad "attiva" e mostra il codice a barre.
 
@@ -50,6 +50,7 @@ Serve Windows con PowerShell 5.1 o successivo, sempre acceso (lo stesso PC dove 
    - `FileClienti`: dove ReadyPro scrive l'export dei clienti;
    - `FileNuoviIscritti`: il file che ReadyPro importa;
    - `CodificaNuoviIscritti`: `windows-1252` o `utf-8`, come vuole il filtro di import di ReadyPro.
+   - `RighePerInvio` (1000) e `GiorniTraInviiCompleti` (7): di solito non si toccano. Per rimandare subito tutto il file, cancella `ultimo-invio-completo.txt`.
 
    Usa cartelle locali: l'attività gira come SYSTEM, che non vede le cartelle di rete.
 4. **Salva la chiave e installa**, da PowerShell aperto come amministratore nella cartella:

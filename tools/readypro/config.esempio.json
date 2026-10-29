@@ -4,5 +4,7 @@
   "FileNuoviIscritti": "C:\\PSC\\import\\nuovi-iscritti.csv",
   "CodificaNuoviIscritti": "windows-1252",
   "CartellaLog": "C:\\PSC\\log",
-  "MinutiTraInvii": 15
+  "MinutiTraInvii": 15,
+  "RighePerInvio": 1000,
+  "GiorniTraInviiCompleti": 7
 }
