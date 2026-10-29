@@ -28,8 +28,12 @@ export const conErrore = (pagina: string, messaggio: string, extra: Record<strin
   `${pagina}?${new URLSearchParams({ ...extra, errore: messaggio })}`;
 
 export function messaggioAuth(e: { message: string; code?: string; status?: number }) {
+  // Supabase lascia passare un'email ogni 60 secondi per indirizzo ("...only request this
+  // after 42 seconds") e un tetto di email l'ora per tutto il progetto.
+  const secondi = /after (\d+) seconds?/i.exec(e.message)?.[1];
+  if (secondi) return `Ti abbiamo appena mandato un'email: aspetta ${secondi} secondi prima di chiederne un'altra.`;
   if (e.status === 429 || e.code === "over_email_send_rate_limit" || e.code === "over_request_rate_limit")
-    return "Hai chiesto troppi codici: riprova tra qualche minuto.";
+    return "Sono state chieste troppe email di accesso: riprova tra qualche minuto.";
   if (e.code === "otp_expired" || e.code === "invalid_credentials" || /expired|invalid/i.test(e.message))
     return "Link o codice scaduto: chiedi una nuova email e usa l'ultima che ricevi.";
   if (e.code === "email_address_invalid" || /email/i.test(e.message)) return "Controlla l'indirizzo email.";
