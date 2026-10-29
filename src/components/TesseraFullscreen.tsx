@@ -35,7 +35,7 @@ export function ApriTessera({ socio }: { socio: Socio }) {
 
   useEffect(() => rilascia, [rilascia]);
 
-  const numero = formatTessera(socio.numeroTessera);
+  const numero = socio.numeroTessera ? formatTessera(socio.numeroTessera) : "";
 
   return (
     <>
@@ -53,7 +53,9 @@ export function ApriTessera({ socio }: { socio: Socio }) {
         </div>
         <Tessera socio={socio} />
         <div className="psc-tessera-back">
-          {socio.inAttivazione ? (
+          {!socio.numeroTessera ? (
+            <p className="psc-hint">Non hai una tessera attiva: chiedi in negozio una tessera nuova.</p>
+          ) : socio.inAttivazione ? (
             <>
               <span className="psc-badge psc-badge--warning">In attivazione</span>
               <span className="psc-code">{numero}</span>

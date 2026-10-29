@@ -7,7 +7,7 @@ import { Esito } from "@/components/admin/Esito";
 import { dataBreve, dataOra } from "@/lib/admin/form";
 import { richiediAdmin } from "@/lib/admin/sessione";
 import { formatPunti, formatTessera } from "@/lib/format";
-import { registraPunti, salvaSocio, scollegaAccount } from "../azioni";
+import { assegnaTesseraFisica, bloccaTessera, collegaConCodice, registraPunti, salvaSocio, scollegaAccount, unisciSoci } from "../azioni";
 
 export const metadata: Metadata = { title: "Socio" };
 
@@ -24,13 +24,14 @@ export default async function SchedaSocio({ params, searchParams }: {
 }) {
   const [{ id }, q] = await Promise.all([params, searchParams]);
   const { supabase } = await richiediAdmin();
-  const [socio, saldo, movimenti, consensi, invitati, invitatoDa, livelli, negozi, premi] = await Promise.all([
+  const [socio, tessere, saldo, movimenti, consensi, invitati, invitatoDa, livelli, negozi, premi] = await Promise.all([
     supabase.from("soci").select("*").eq("id", id).maybeSingle(),
+    supabase.from("tessere").select("id, codice, tipo, stato, stato_cassa, consegnata_il, bloccata_il, motivo_blocco").eq("socio_id", id).order("creato_il"),
     supabase.from("saldi_punti").select("saldo").eq("socio_id", id).maybeSingle(),
     supabase.from("movimenti_punti").select("id, data_movimento, tipo, descrizione, punti, fonte, negozi(nome)").eq("socio_id", id).order("data_movimento", { ascending: false }).limit(100),
     supabase.from("consensi_attuali").select("tipo, concesso, versione_testo, canale, registrato_il").eq("socio_id", id),
-    supabase.from("inviti").select("id, stato, creato_il, invitato:soci!inviti_invitato_id_fkey(id, numero_tessera, nome, cognome)").eq("invitante_id", id),
-    supabase.from("inviti").select("stato, invitante:soci!inviti_invitante_id_fkey(id, numero_tessera, nome, cognome)").eq("invitato_id", id).maybeSingle(),
+    supabase.from("inviti").select("id, stato, creato_il, invitato:soci!inviti_invitato_id_fkey(id, nome, cognome, email)").eq("invitante_id", id),
+    supabase.from("inviti").select("stato, invitante:soci!inviti_invitante_id_fkey(id, nome, cognome, email)").eq("invitato_id", id).maybeSingle(),
     supabase.from("livelli").select("codice, nome").order("ordine"),
     supabase.from("negozi").select("id, nome").order("ordine").order("nome"),
     supabase.from("premi").select("id, nome, soglia_punti").eq("attivo", true).order("soglia_punti"),
@@ -40,8 +41,10 @@ export default async function SchedaSocio({ params, searchParams }: {
 
   const nome = [s.nome, s.cognome].filter(Boolean).join(" ") || "Senza nome";
   const opzioniNegozi = [{ value: "", label: "Nessuno" }, ...(negozi.data ?? []).map((n) => ({ value: n.id, label: n.nome }))];
-  type Persona = { id: string; numero_tessera: string; nome: string | null; cognome: string | null };
-  const chi = (p: Persona) => <Link href={`/admin/soci/${p.id}`}>{[p.nome, p.cognome].filter(Boolean).join(" ") || p.numero_tessera}</Link>;
+  type Persona = { id: string; nome: string | null; cognome: string | null; email: string | null };
+  const chi = (p: Persona) => <Link href={`/admin/soci/${p.id}`}>{[p.nome, p.cognome].filter(Boolean).join(" ") || p.email || "Senza nome"}</Link>;
+  const attive = (tessere.data ?? []).filter((t) => t.stato === "attiva");
+  const fisica = attive.find((t) => t.tipo === "fisica");
   const da = invitatoDa.data?.invitante as unknown as Persona | null;
 
   return (
@@ -51,7 +54,7 @@ export default async function SchedaSocio({ params, searchParams }: {
           <Link href="/admin/soci" className="admin-back">← Soci</Link>
           <h1 className="t-display-l">{nome}</h1>
           <p className="t-caption">
-            {formatTessera(s.numero_tessera)} · da {ORIGINI[s.origine] ?? s.origine} · iscritto il {dataBreve(s.iscritto_il)}
+            {attive.length ? attive.map((t) => formatTessera(t.codice)).join(" · ") : "Nessuna tessera attiva"} · da {ORIGINI[s.origine] ?? s.origine} · iscritto il {dataBreve(s.iscritto_il)}
           </p>
         </div>
         <div className="admin-stat">
@@ -68,7 +71,7 @@ export default async function SchedaSocio({ params, searchParams }: {
           <div className="admin-grid">
             <Campo id="nome" label="Nome" defaultValue={s.nome ?? ""} />
             <Campo id="cognome" label="Cognome" defaultValue={s.cognome ?? ""} />
-            <Campo id="email" label="Email" type="email" defaultValue={s.email ?? ""} help="Serve per collegare la tessera all'app." />
+            <Campo id="email" label="Email" type="email" defaultValue={s.email ?? ""} help="Con questa email il socio collega da solo la tessera all'app." />
             <Campo id="telefono" label="Telefono" type="tel" defaultValue={s.telefono ?? ""} />
             <Campo id="data_nascita" label="Data di nascita" type="date" defaultValue={s.data_nascita ?? ""} />
             <Campo id="cap" label="CAP" defaultValue={s.cap ?? ""} />
@@ -78,7 +81,6 @@ export default async function SchedaSocio({ params, searchParams }: {
               opzioni={[{ value: "attivo", label: "Attivo" }, { value: "sospeso", label: "Sospeso" }, { value: "cessato", label: "Cessato" }]} />
             <Scelta id="negozio_preferito_id" label="Negozio preferito" defaultValue={s.negozio_preferito_id ?? ""} opzioni={opzioniNegozi} />
           </div>
-          <p className="t-caption">Il numero tessera non si modifica: arriva dal gestionale ed è stampato sulla tessera.</p>
           <div className="admin-azioni">
             <button type="submit" className="psc-btn psc-btn--primary">Salva scheda</button>
           </div>
@@ -89,16 +91,23 @@ export default async function SchedaSocio({ params, searchParams }: {
             <h2 className="t-title">App</h2>
             <dl className="admin-dl">
               <dt>Account</dt><dd>{s.user_id ? "Collegato" : "Non collegato"}</dd>
-              <dt>Cassa</dt><dd>{s.stato_cassa === "in_attivazione" ? "In attivazione: ReadyPro non la conosce ancora" : "Attiva"}</dd>
               <dt>Codice invito</dt><dd>{s.codice_invito}</dd>
               {da && <><dt>Invitato da</dt><dd>{chi(da)}</dd></>}
             </dl>
             {s.user_id && (
               <form action={scollegaAccount}>
                 <input type="hidden" name="id" value={s.id} />
-                <Conferma messaggio="Scollegare l'account dell'app da questa tessera? Il socio dovrà ricollegarla." className="psc-btn psc-btn--secondary admin-btn--small admin-btn--danger">
+                <Conferma messaggio="Scollegare l'account dell'app da questo socio? Dovrà ricollegare la tessera." className="psc-btn psc-btn--secondary admin-btn--small admin-btn--danger">
                   Scollega account
                 </Conferma>
+              </form>
+            )}
+            {!s.user_id && (
+              <form action={collegaConCodice} className="admin-form">
+                <input type="hidden" name="id" value={s.id} />
+                <Campo id="codice" label="Codice mostrato dall'app" autoComplete="off" required placeholder="K7M2QX"
+                  help="Per chi non ha lasciato un'email o ne usa un'altra: nell'app sceglie «In negozio non ho lasciato questa email» e ti mostra un codice valido 15 minuti." />
+                <div className="admin-azioni"><button type="submit" className="psc-btn psc-btn--secondary admin-btn--small">Collega l&apos;app</button></div>
               </form>
             )}
           </section>
@@ -129,6 +138,70 @@ export default async function SchedaSocio({ params, searchParams }: {
           )}
         </div>
       </div>
+
+      <section className="admin-card">
+        <h2 className="t-title">Tessere</h2>
+        <p className="t-caption">
+          Al massimo una fisica e una digitale attive: tutte e due valgono in cassa e i punti sono gli stessi.
+          Il codice non si modifica mai; una tessera persa si blocca e se ne consegna un&apos;altra.
+        </p>
+        {tessere.data?.length ? (
+          <div className="admin-table-wrap">
+            <table className="admin-table">
+              <thead><tr><th>Codice</th><th>Tipo</th><th>Stato</th><th>Data</th><th></th></tr></thead>
+              <tbody>
+                {tessere.data.map((t) => (
+                  <tr key={t.id}>
+                    <td className="psc-code">{t.codice}</td>
+                    <td>{t.tipo === "fisica" ? "Fisica" : "Digitale"}</td>
+                    <td>
+                      {t.stato === "bloccata"
+                        ? <><span className="psc-badge psc-badge--danger">Bloccata</span> <span className="t-caption">{t.motivo_blocco}</span></>
+                        : t.stato_cassa === "in_attivazione"
+                          ? <span className="psc-badge psc-badge--warning">In attivazione</span>
+                          : <span className="psc-badge psc-badge--success">Attiva in cassa</span>}
+                    </td>
+                    <td className="min">{dataBreve(t.stato === "bloccata" ? t.bloccata_il : t.consegnata_il)}</td>
+                    <td>
+                      {t.stato === "attiva" && (
+                        <form action={bloccaTessera} className="admin-azioni">
+                          <input type="hidden" name="socio_id" value={s.id} />
+                          <input type="hidden" name="tessera_id" value={t.id} />
+                          <input name="motivo" className="psc-field__input admin-input--small" placeholder="Motivo (persa, rubata…)" required aria-label={`Motivo del blocco di ${t.codice}`} />
+                          <Conferma messaggio={`Bloccare la tessera ${t.codice}? Non si potrà riattivare. Ricorda di bloccarla anche in ReadyPro.`} className="psc-btn psc-btn--secondary admin-btn--small admin-btn--danger">
+                            Blocca
+                          </Conferma>
+                        </form>
+                      )}
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        ) : <p className="admin-vuoto">Nessuna tessera.</p>}
+
+        <div className="admin-cols">
+          <form action={assegnaTesseraFisica} className="admin-form">
+            <input type="hidden" name="socio_id" value={s.id} />
+            <h3 className="t-eyebrow">{fisica ? "Sostituisci la tessera fisica" : "Consegna una tessera fisica"}</h3>
+            <div className="admin-grid">
+              <Campo id="codice_fisica" label="Codice della tessera" autoComplete="off" required inputMode="numeric" help="Scansiona il codice a barre o scrivilo con gli zeri iniziali." />
+              {fisica && <Campo id="motivo" label="Perché la sostituisci" required placeholder="Persa, rovinata…" help={`La ${fisica.codice} verrà bloccata.`} />}
+            </div>
+            <div className="admin-azioni"><button type="submit" className="psc-btn psc-btn--primary">{fisica ? "Sostituisci" : "Consegna"}</button></div>
+          </form>
+          <form action={unisciSoci} className="admin-form">
+            <input type="hidden" name="socio_id" value={s.id} />
+            <h3 className="t-eyebrow">Unisci un doppione</h3>
+            <Campo id="codice_altro" label="Una tessera dell'altra scheda" autoComplete="off" required
+              help="Se la stessa persona ha due schede (es. tessera fatta in negozio e iscrizione dall'app), tessere, punti e consensi dell'altra passano qui e l'altra scheda sparisce." />
+            <div className="admin-azioni">
+              <Conferma messaggio="Unire l'altra scheda a questa? L'operazione non si annulla.">Unisci a questa scheda</Conferma>
+            </div>
+          </form>
+        </div>
+      </section>
 
       <section className="admin-card">
         <h2 className="t-title">Punti</h2>

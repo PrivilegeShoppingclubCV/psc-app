@@ -12,7 +12,7 @@ export default async function Panoramica() {
     supabase.from("offerte").select("id", { count: "exact", head: true })
       .eq("pubblicata", true).lte("valida_dal", adesso).or(`valida_al.is.null,valida_al.gt.${adesso}`),
     supabase.from("offerte").select("id", { count: "exact", head: true }).eq("pubblicata", false),
-    supabase.from("soci_in_attesa_cassa").select("id, numero_tessera, nome, cognome, email, ore_di_attesa, inviata_il").limit(10),
+    supabase.from("tessere_in_attesa_cassa").select("id, codice, tipo, socio_id, nome, cognome, email, ore_di_attesa, inviata_il").limit(10),
     supabase.from("import_batch").select("id, nome_file, stato, righe_totali, righe_ok, righe_errore, creato_il").order("creato_il", { ascending: false }).limit(5),
   ]);
 
@@ -46,7 +46,7 @@ export default async function Panoramica() {
         <section className="admin-card">
           <h2 className="t-title">Tessere in attesa della cassa</h2>
           <p className="t-caption">
-            Iscritti dall&apos;app che ReadyPro non ha ancora ricevuto: finché non compaiono in un import, l&apos;app nasconde il loro codice a barre.
+            Tessere date dall&apos;app o dal pannello che ReadyPro non ha ancora ricevuto: finché non compaiono in un import, l&apos;app nasconde il loro codice a barre.
           </p>
           {attesa.data?.length ? (
             <div className="admin-table-wrap">
@@ -55,7 +55,7 @@ export default async function Panoramica() {
                 <tbody>
                   {attesa.data.map((s) => (
                     <tr key={s.id}>
-                      <td><Link href={`/admin/soci/${s.id}`}>{s.numero_tessera}</Link></td>
+                      <td><Link href={`/admin/soci/${s.socio_id}`}>{s.codice}</Link> <span className="t-caption">{s.tipo}</span></td>
                       <td>{[s.nome, s.cognome].filter(Boolean).join(" ") || s.email}</td>
                       <td className="min">{s.inviata_il ? dataOra(s.inviata_il) : "Non ancora"}</td>
                       <td className="num">{Number(s.ore_di_attesa).toLocaleString("it-IT")}</td>

@@ -1,7 +1,9 @@
 import { chiaveDa, errore, erroreDb, nonConfigurato, supabaseGestionale } from "@/lib/gestionale/api";
 import { scriviCsv } from "@/lib/gestionale/csv";
 
-// Il server dei negozi scarica qui le tessere create in app, da importare in ReadyPro:
+// Il server dei negozi scarica qui le tessere date dall'app (digitali nate in app,
+// fisiche consegnate dal pannello), da importare in ReadyPro. Una riga per tessera;
+// altra_tessera è l'altro codice attivo dello stesso socio, se ne ha uno:
 //   GET /api/gestionale/nuovi-iscritti
 //   Authorization: Bearer <chiave>
 // 204 = nessuna tessera nuova. 200 = CSV (UTF-8, ";") con l'id del lotto
@@ -10,7 +12,7 @@ import { scriviCsv } from "@/lib/gestionale/csv";
 // stesse tessere tornano in un lotto nuovo.
 
 const COLONNE = [
-  "numero_tessera", "cognome", "nome", "email", "telefono", "data_nascita",
+  "numero_tessera", "tipo_tessera", "altra_tessera", "cognome", "nome", "email", "telefono", "data_nascita",
   "cap", "citta", "negozio", "iscritto_il", "consenso_privacy", "consenso_marketing",
 ];
 

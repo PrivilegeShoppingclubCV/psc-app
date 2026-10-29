@@ -2,7 +2,7 @@
 
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
-import { conEsito, intero, messaggioDb, testo, testoONull } from "@/lib/admin/form";
+import { conEsito, intero, messaggioDb, spunta, testo, testoONull } from "@/lib/admin/form";
 import { richiediAdmin } from "@/lib/admin/sessione";
 
 const STATI = ["attivo", "sospeso", "cessato"];
@@ -70,4 +70,68 @@ export async function scollegaAccount(form: FormData) {
   redirect(conEsito(`/admin/soci/${id}`, error
     ? { errore: messaggioDb(error) }
     : { ok: "Account scollegato: la tessera si può ricollegare dall'app con numero ed email." }));
+}
+
+// Tessere: le regole (magazzino, una fisica attiva, blocco) stanno nelle funzioni
+// del database, qui si passano solo i campi e si mostra l'esito.
+
+export async function nuovoSocioFisica(form: FormData) {
+  const { supabase } = await richiediAdmin();
+  const campi = Object.fromEntries(["codice", "nome", "cognome", "telefono", "email", "data_nascita", "negozio_id"].map((k) => [k, testo(form, k)]));
+  const { data, error } = await supabase.rpc("staff_nuovo_socio_fisica", {
+    p_codice: campi.codice,
+    p_nome: campi.nome,
+    p_cognome: campi.cognome,
+    p_privacy_firmata: spunta(form, "privacy"),
+    p_consenso_marketing: spunta(form, "marketing"),
+    p_telefono: campi.telefono || null,
+    p_email: campi.email || null,
+    p_data_nascita: campi.data_nascita || null,
+    p_negozio_id: campi.negozio_id || null,
+  });
+  if (error) redirect(conEsito(`/admin/soci/nuovo?${new URLSearchParams(campi)}`, { errore: messaggioDb(error) }));
+  revalidatePath("/admin/soci");
+  redirect(conEsito(`/admin/soci/${(data as { id: string }).id}`, { ok: `Socio creato con la tessera ${campi.codice}. ReadyPro la riceve con il prossimo invio.` }));
+}
+
+export async function assegnaTesseraFisica(form: FormData) {
+  const { supabase } = await richiediAdmin();
+  const id = testo(form, "socio_id");
+  const pagina = `/admin/soci/${id}`;
+  const { error } = await supabase.rpc("staff_assegna_tessera_fisica", {
+    p_socio_id: id,
+    p_codice: testo(form, "codice_fisica"),
+    p_motivo_sostituzione: testoONull(form, "motivo"),
+  });
+  revalidatePath(pagina);
+  redirect(conEsito(pagina, error ? { errore: messaggioDb(error) } : { ok: "Tessera fisica consegnata: ReadyPro la riceve con il prossimo invio." }));
+}
+
+export async function bloccaTessera(form: FormData) {
+  const { supabase } = await richiediAdmin();
+  const pagina = `/admin/soci/${testo(form, "socio_id")}`;
+  const { error } = await supabase.rpc("staff_blocca_tessera", { p_tessera_id: testo(form, "tessera_id"), p_motivo: testo(form, "motivo") });
+  revalidatePath(pagina);
+  redirect(conEsito(pagina, error ? { errore: messaggioDb(error) } : { ok: "Tessera bloccata. Bloccala anche in ReadyPro." }));
+}
+
+export async function collegaConCodice(form: FormData) {
+  const { supabase } = await richiediAdmin();
+  const id = testo(form, "id");
+  const pagina = `/admin/soci/${id}`;
+  const { error } = await supabase.rpc("staff_collega_account", { p_socio_id: id, p_codice: testo(form, "codice") });
+  revalidatePath(pagina);
+  redirect(conEsito(pagina, error ? { errore: messaggioDb(error) } : { ok: "App collegata: il socio ora vede tessera e punti." }));
+}
+
+export async function unisciSoci(form: FormData) {
+  const { supabase } = await richiediAdmin();
+  const id = testo(form, "socio_id");
+  const pagina = `/admin/soci/${id}`;
+  const codice = testo(form, "codice_altro").replace(/\s/g, "");
+  const { data: altra } = await supabase.from("tessere").select("socio_id").eq("codice", codice).maybeSingle();
+  if (!altra?.socio_id) redirect(conEsito(pagina, { errore: `Nessun socio ha la tessera ${codice}.` }));
+  const { error } = await supabase.rpc("admin_unisci_soci", { p_tieni: id, p_togli: altra.socio_id });
+  revalidatePath("/admin/soci");
+  redirect(conEsito(pagina, error ? { errore: messaggioDb(error) } : { ok: `Scheda della tessera ${codice} unita a questa.` }));
 }

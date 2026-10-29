@@ -12,6 +12,7 @@ const PER_PAGINA = 50;
 const FILTRI = [
   { value: "", label: "Tutti" },
   { value: "app", label: "Con l'app" },
+  { value: "senza-app", label: "Senza app" },
   { value: "attesa", label: "In attesa della cassa" },
   { value: "sospesi", label: "Sospesi o cessati" },
 ];
@@ -24,17 +25,18 @@ export default async function Soci({ searchParams }: { searchParams: Promise<Rec
   const { supabase } = await richiediAdmin();
 
   let query = supabase
-    .from("soci")
-    .select("id, numero_tessera, nome, cognome, email, livello, stato, stato_cassa, origine, user_id, iscritto_il", { count: "exact" })
+    .from("soci_con_tessere")
+    .select("id, fisica, digitale, nome, cognome, email, telefono, livello, stato, in_attivazione, origine, user_id, iscritto_il", { count: "exact" })
     .order("cognome", { nullsFirst: false })
     .order("nome")
     .range((pagina - 1) * PER_PAGINA, pagina * PER_PAGINA - 1);
-  // Ogni parola deve comparire in tessera, nome, cognome o email. Via i caratteri che hanno un senso nei filtri.
+  // Ogni parola deve comparire in una tessera, nome, cognome, email o telefono. Via i caratteri che hanno un senso nei filtri.
   for (const parola of cerca.replace(/[,()*%\\]/g, " ").split(/\s+/).filter(Boolean)) {
-    query = query.or(["numero_tessera", "nome", "cognome", "email"].map((c) => `${c}.ilike.%${parola}%`).join(","));
+    query = query.or(["codici", "nome", "cognome", "email", "telefono"].map((c) => `${c}.ilike.%${parola}%`).join(","));
   }
   if (filtro === "app") query = query.not("user_id", "is", null);
-  if (filtro === "attesa") query = query.eq("stato_cassa", "in_attivazione");
+  if (filtro === "senza-app") query = query.is("user_id", null);
+  if (filtro === "attesa") query = query.eq("in_attivazione", true);
   if (filtro === "sospesi") query = query.neq("stato", "attivo");
   const { data: soci, count, error } = await query;
 
@@ -57,13 +59,14 @@ export default async function Soci({ searchParams }: { searchParams: Promise<Rec
           <p className="t-eyebrow">Club</p>
           <h1 className="t-display-l">Soci</h1>
         </div>
+        <Link href="/admin/soci/nuovo" className="psc-btn psc-btn--primary">Nuovo socio con tessera fisica</Link>
       </div>
       <Esito q={error ? { errore: error.message } : q} />
 
       <form className="admin-cerca" action="/admin/soci">
         <div className="psc-field">
           <label className="psc-field__label" htmlFor="q">Cerca</label>
-          <input id="q" name="q" type="search" className="psc-field__input" defaultValue={cerca} placeholder="Tessera, nome, cognome o email" />
+          <input id="q" name="q" type="search" className="psc-field__input" defaultValue={cerca} placeholder="Tessera, nome, cognome, email o telefono" />
         </div>
         {filtro && <input type="hidden" name="filtro" value={filtro} />}
         <button type="submit" className="psc-btn psc-btn--primary">Cerca</button>
@@ -81,22 +84,25 @@ export default async function Soci({ searchParams }: { searchParams: Promise<Rec
         <div className="admin-table-wrap">
           <table className="admin-table">
             <thead>
-              <tr><th>Tessera</th><th>Socio</th><th>Livello</th><th>App</th><th>Iscritto</th><th className="num">Punti</th></tr>
+              <tr><th>Tessere</th><th>Socio</th><th>Livello</th><th>App</th><th>Iscritto</th><th className="num">Punti</th></tr>
             </thead>
             <tbody>
               {soci.map((s) => (
                 <tr key={s.id}>
-                  <td><Link href={`/admin/soci/${s.id}`}>{s.numero_tessera}</Link></td>
+                  <td>
+                    <Link href={`/admin/soci/${s.id}`}>{s.fisica ?? s.digitale ?? "Nessuna"}</Link>
+                    {s.fisica && s.digitale && <div className="t-caption">{s.digitale}</div>}
+                  </td>
                   <td>
                     {[s.nome, s.cognome].filter(Boolean).join(" ") || "—"}
-                    <div className="t-caption">{s.email}</div>
+                    <div className="t-caption">{s.email ?? s.telefono}</div>
                   </td>
                   <td>
                     {s.livello}
                     {s.stato !== "attivo" && <> <span className="psc-badge psc-badge--danger">{s.stato}</span></>}
                   </td>
                   <td>
-                    {s.stato_cassa === "in_attivazione"
+                    {s.in_attivazione
                       ? <span className="psc-badge psc-badge--warning">In attivazione</span>
                       : s.user_id ? <span className="psc-badge psc-badge--success">Collegata</span> : <span className="min">No</span>}
                   </td>

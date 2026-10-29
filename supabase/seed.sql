@@ -16,14 +16,21 @@ insert into public.offerte (marca, titolo, prezzo_soci, prezzo_listino, valida_a
   ('Esempio', 'Sciarpa in cashmere', 39.90, 55.00, '2026-11-16', true, true),
   ('Esempio', 'Borsa a mano in pelle', 119.00, 160.00, '2026-11-30', false, true);
 
-insert into public.soci (numero_tessera, nome, cognome, email, livello, origine, iscritto_il, codice_invito, negozio_preferito_id)
-select '004718', 'Giulia', 'Rossi', 'giulia.rossi@example.com', 'gold', 'import', '2024-03-12', 'GIULIA', id
+insert into public.soci (nome, cognome, email, livello, origine, iscritto_il, codice_invito, negozio_preferito_id)
+select 'Giulia', 'Rossi', 'giulia.rossi@example.com', 'gold', 'import', '2024-03-12', 'GIULIA', id
 from public.negozi where codice_gestionale = 'N01';
+
+insert into public.tessere (codice, tipo, socio_id, attivata_in_cassa_il, consegnata_il)
+select '004718', 'fisica', id, '2024-03-12', '2024-03-12' from public.soci where codice_invito = 'GIULIA';
+
+-- Tessere fisiche stampate e non ancora consegnate.
+insert into public.tessere (codice, tipo, stato)
+select lpad(n::text, 6, '0'), 'fisica', 'da_consegnare' from generate_series(5001, 5010) n;
 
 -- Prima il saldo iniziale, poi il resto: il riscatto richiede punti sufficienti.
 insert into public.movimenti_punti (socio_id, punti, tipo, descrizione, fonte, data_movimento)
 select id, 1788, 'saldo_iniziale', 'Saldo importato dal gestionale', 'import', '2026-01-01'
-from public.soci where numero_tessera = '004718';
+from public.soci where codice_invito = 'GIULIA';
 
 insert into public.movimenti_punti (socio_id, punti, tipo, descrizione, negozio_id, fonte, data_movimento)
 select s.id, m.punti, m.tipo, m.descrizione, n.id, m.fonte, m.data::timestamptz
@@ -34,9 +41,9 @@ cross join (values
   (86, 'acquisto', 'Acquisto', 'N01', 'app', '2026-10-21')
 ) as m (punti, tipo, descrizione, negozio, fonte, data)
 left join public.negozi n on n.codice_gestionale = m.negozio
-where s.numero_tessera = '004718';
+where s.codice_invito = 'GIULIA';
 
 insert into public.movimenti_punti (socio_id, punti, tipo, descrizione, premio_id, fonte, data_movimento)
 select s.id, -1000, 'riscatto', 'Buono da 10 € riscattato', p.id, 'app', '2026-09-28'
 from public.soci s, public.premi p
-where s.numero_tessera = '004718' and p.soglia_punti = 1000;
+where s.codice_invito = 'GIULIA' and p.soglia_punti = 1000;

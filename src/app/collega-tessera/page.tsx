@@ -28,7 +28,12 @@ export default async function CollegaTessera({ searchParams }: { searchParams: P
         {!conAccesso && <Campo id="email" label="Email" type="email" autoComplete="email" required={configurato} defaultValue={param(q.email)} />}
         <button type="submit" className="psc-btn psc-btn--primary psc-btn--block">Continua</button>
       </form>
-      {conAccesso && <Link href="/iscriviti" className="psc-btn psc-btn--ghost">Non hai la tessera? Iscriviti</Link>}
+      {conAccesso && (
+        <>
+          <Link href="/collega-tessera/negozio" className="psc-btn psc-btn--secondary">In negozio non ho lasciato questa email</Link>
+          <Link href="/iscriviti" className="psc-btn psc-btn--ghost">Non hai la tessera? Iscriviti</Link>
+        </>
+      )}
     </AuthPage>
   );
 }
