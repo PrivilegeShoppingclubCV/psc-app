@@ -17,7 +17,7 @@ export async function POST(request: Request) {
   const supabase = supabaseGestionale();
   if (!supabase) return nonConfigurato();
   const chiave = chiaveDa(request);
-  if (!chiave) return errore(401, "Manca la chiave del gestionale.");
+  if (!chiave) return errore(401, "Chiave del gestionale mancante o non valida.");
 
   const bytes = new Uint8Array(await request.arrayBuffer());
   if (bytes.length === 0) return errore(400, "Il file è vuoto.");
