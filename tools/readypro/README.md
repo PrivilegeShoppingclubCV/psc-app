@@ -18,22 +18,20 @@ ReadyPro non ha un'API, quindi il collegamento passa da file CSV. Il server dei 
 3. Lo script scarica le tessere date dall'app (digitali nate in app e fisiche consegnate dal pannello) e le scrive nel file che ReadyPro importa (import pianificato di ReadyPro), poi conferma all'app.
 4. Quando il codice di una di queste tessere compare nel CSV dei clienti, la cassa la conosce: in app la tessera passa da "in attivazione" ad "attiva" e mostra il codice a barre.
 
-Un socio può avere una tessera fisica (codice stampato) e una digitale (`APP000123`), **tutte e due valide in cassa** e con gli stessi punti. Nell'app i punti stanno sulla persona, quindi un acquisto fatto con l'una o con l'altra finisce sullo stesso saldo.
+Ogni socio ha **una tessera sola**: la digitale (`APP000123`) finché non riceve quella di plastica, poi la fisica. Quando lo staff consegna la fisica a chi aveva la digitale, nel file dei nuovi iscritti arriva la fisica con `tessera_precedente` = il codice APP: in ReadyPro va **cambiato il codice a barre di quel cliente**, non creato un cliente nuovo.
 
 ## Cosa chiedere al rivenditore ReadyPro
 
 - Un **filtro di esportazione** dei clienti in CSV, con almeno: codice a barre della tessera, nome, cognome, email, cellulare, data di nascita, negozio, consensi privacy/marketing. Una **procedura pianificata** che lo esegue ogni ora e scrive sempre lo stesso file locale (es. `C:\PSC\export\clienti.csv`).
 - Un **filtro di importazione** dei clienti dal file `C:\PSC\import\nuovi-iscritti.csv` (colonne qui sotto), che **aggiorna** il cliente se il codice tessera esiste già invece di crearne un doppione, e una procedura pianificata che lo esegue ogni 15–30 minuti. Va bene se dopo l'import ReadyPro sposta o cancella il file.
 - Che il codice tessera creato in app (es. `APP000001`) venga salvato come **codice a barre del cliente**, così la cassa lo riconosce.
-- **Se un cliente può avere più di un codice a barre** (o un codice tessera alternativo) nella stessa anagrafica. Serve per chi ha sia la tessera fisica sia quella digitale:
-  - se sì, nel file c'è `altra_tessera` (l'altro codice dello stesso cliente): l'import deve aggiungere `numero_tessera` come secondo codice del cliente che ha `altra_tessera`, e l'export dei clienti deve avere una colonna col secondo codice, da mappare su `altra_tessera`;
-  - se no, ReadyPro avrà due clienti per la stessa persona. All'app va bene, perché riconosce la persona da tutti e due i codici; ma se i punti li calcolasse ReadyPro si dividerebbero sui due clienti.
+- Che l'import, quando `tessera_precedente` è pieno, **cerchi il cliente con quel codice e gli sostituisca il codice a barre** con `numero_tessera`. Se `tessera_precedente` non esiste in ReadyPro (la digitale non era ancora arrivata alla cassa), crea il cliente come nuovo.
 
 Colonne di `nuovi-iscritti.csv` (separatore `;`, codifica configurabile, Windows-1252 di default):
 
-`numero_tessera;tipo_tessera;altra_tessera;cognome;nome;email;telefono;data_nascita;cap;citta;negozio;iscritto_il;consenso_privacy;consenso_marketing`
+`numero_tessera;tipo_tessera;tessera_precedente;cognome;nome;email;telefono;data_nascita;cap;citta;negozio;iscritto_il;consenso_privacy;consenso_marketing`
 
-Una riga per tessera. `tipo_tessera` è `fisica` o `digitale`; `altra_tessera` è l'altro codice attivo dello stesso socio, vuoto se ne ha uno solo. Le date sono `GG/MM/AAAA`, i consensi `SI`/`NO`, `negozio` è il codice del negozio nel gestionale.
+Una riga per tessera. `tipo_tessera` è `fisica` o `digitale`; `tessera_precedente` è il codice che questa tessera sostituisce sullo stesso cliente, vuoto per un cliente nuovo. Le date sono `GG/MM/AAAA`, i consensi `SI`/`NO`, `negozio` è il codice del negozio nel gestionale.
 
 ## Installazione sul server
 
@@ -72,7 +70,7 @@ set valore = '{"numero_tessera": "Codice a barre", "nome": "Nome", "cognome": "C
 where chiave = 'gestionale_mappatura_soci';
 ```
 
-A sinistra i campi dell'app (elenco in `docs/database.md`, sezione Import), a destra le intestazioni esatte del CSV di ReadyPro. Se ReadyPro esporta un secondo codice per cliente, mappalo su `altra_tessera`. Dal giro successivo i file vengono importati.
+A sinistra i campi dell'app (elenco in `docs/database.md`, sezione Import), a destra le intestazioni esatte del CSV di ReadyPro. Dal giro successivo i file vengono importati.
 
 ## Se qualcosa va storto
 

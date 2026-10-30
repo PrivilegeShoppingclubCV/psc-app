@@ -5,10 +5,7 @@ export interface Socio {
   nome: string;
   cognome: string;
   email: string;
-  /**
-   * Il codice da mostrare in cassa: la digitale se la cassa la conosce, altrimenti
-   * la fisica, altrimenti la digitale in attivazione. null = nessuna tessera attiva.
-   */
+  /** Il codice da mostrare in cassa. null = nessuna tessera attiva (es. persa e non ancora sostituita). */
   numeroTessera: string | null;
   /** Nome del livello da mostrare ("Classic", "Gold"). */
   livello: string;
@@ -16,7 +13,10 @@ export interface Socio {
   codiceInvito: string;
   /** La tessera da mostrare è stata creata in app e la cassa non la conosce ancora: il codice a barre resta nascosto. */
   inAttivazione: boolean;
-  /** Le tessere attive del socio: al massimo una fisica e una digitale, con gli stessi punti. */
+  /**
+   * La tessera attiva del socio (al massimo una): la digitale finché non riceve
+   * quella di plastica, poi la fisica, che nel telefono si vede con il suo codice.
+   */
   tessere: TesseraSocio[];
 }
 
@@ -28,10 +28,9 @@ export interface TesseraSocio {
   inAttivazione: boolean;
 }
 
-/** Quale tessera mostrare in cassa: prima una che la cassa conosce, a parità la digitale. */
+/** Quale tessera mostrare in cassa: il database ne lascia attiva una sola, la fisica se c'è. */
 export function tesseraDaMostrare(tessere: TesseraSocio[]): TesseraSocio | undefined {
-  const peso = (t: TesseraSocio) => (t.inAttivazione ? 2 : 0) + (t.tipo === "digitale" ? 0 : 1);
-  return [...tessere].sort((a, b) => peso(a) - peso(b))[0];
+  return tessere.find((t) => t.tipo === "fisica") ?? tessere[0];
 }
 
 export interface MovimentoPunti {
