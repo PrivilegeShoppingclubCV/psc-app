@@ -44,7 +44,8 @@ export default async function SchedaSocio({ params, searchParams }: {
   type Persona = { id: string; nome: string | null; cognome: string | null; email: string | null };
   const chi = (p: Persona) => <Link href={`/admin/soci/${p.id}`}>{[p.nome, p.cognome].filter(Boolean).join(" ") || p.email || "Senza nome"}</Link>;
   const attive = (tessere.data ?? []).filter((t) => t.stato === "attiva");
-  const fisica = attive.find((t) => t.tipo === "fisica");
+  const attiva = attive[0];
+  const fisica = attiva?.tipo === "fisica" ? attiva : undefined;
   const da = invitatoDa.data?.invitante as unknown as Persona | null;
 
   return (
@@ -142,8 +143,8 @@ export default async function SchedaSocio({ params, searchParams }: {
       <section className="admin-card">
         <h2 className="t-title">Tessere</h2>
         <p className="t-caption">
-          Al massimo una fisica e una digitale attive: tutte e due valgono in cassa e i punti sono gli stessi.
-          Il codice non si modifica mai; una tessera persa si blocca e se ne consegna un&apos;altra.
+          Una tessera attiva per socio: la digitale finché non riceve quella di plastica, poi la fisica (che vede anche nell&apos;app).
+          Il codice non si modifica mai; una tessera persa si blocca e se ne consegna un&apos;altra. I punti restano sul socio.
         </p>
         {tessere.data?.length ? (
           <div className="admin-table-wrap">
@@ -185,6 +186,9 @@ export default async function SchedaSocio({ params, searchParams }: {
           <form action={assegnaTesseraFisica} className="admin-form">
             <input type="hidden" name="socio_id" value={s.id} />
             <h3 className="t-eyebrow">{fisica ? "Sostituisci la tessera fisica" : "Consegna una tessera fisica"}</h3>
+            {attiva?.tipo === "digitale" && (
+              <p className="t-caption">La fisica prende il posto della digitale {attiva.codice}: nell&apos;app il socio vedrà il codice della plastica.</p>
+            )}
             <div className="admin-grid">
               <Campo id="codice_fisica" label="Codice della tessera" autoComplete="off" required inputMode="numeric" help="Scansiona il codice a barre o scrivilo con gli zeri iniziali." />
               {fisica && <Campo id="motivo" label="Perché la sostituisci" required placeholder="Persa, rovinata…" help={`La ${fisica.codice} verrà bloccata.`} />}
@@ -195,7 +199,7 @@ export default async function SchedaSocio({ params, searchParams }: {
             <input type="hidden" name="socio_id" value={s.id} />
             <h3 className="t-eyebrow">Unisci un doppione</h3>
             <Campo id="codice_altro" label="Una tessera dell'altra scheda" autoComplete="off" required
-              help="Se la stessa persona ha due schede (es. tessera fatta in negozio e iscrizione dall'app), tessere, punti e consensi dell'altra passano qui e l'altra scheda sparisce." />
+              help="Se la stessa persona ha due schede (es. tessera fatta in negozio e iscrizione dall'app), punti, consensi e tessere dell'altra passano qui e l'altra scheda sparisce. Se una ha la fisica e l'altra la digitale, resta la fisica." />
             <div className="admin-azioni">
               <Conferma messaggio="Unire l'altra scheda a questa? L'operazione non si annulla.">Unisci a questa scheda</Conferma>
             </div>

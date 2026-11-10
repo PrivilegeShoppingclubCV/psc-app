@@ -80,7 +80,7 @@ export default async function Gestionale({ searchParams }: { searchParams: Promi
         <h2 className="t-title">Colonne del CSV clienti</h2>
         <p className="t-caption">
           Per ogni campo dell&apos;app, il nome esatto della colonna nel file di ReadyPro. Campi possibili: numero_tessera (obbligatorio),
-          altra_tessera (secondo codice dello stesso cliente, se ReadyPro lo esporta), nome, cognome, email, telefono, data_nascita, cap, citta, livello, punti, negozio, iscritto_il, consenso_privacy, consenso_marketing, consenso_profilazione.
+          altra_tessera (un vecchio codice dello stesso cliente, usato solo per riconoscerlo), nome, cognome, email, telefono, data_nascita, cap, citta, livello, punti, negozio, iscritto_il, consenso_privacy, consenso_marketing, consenso_profilazione.
           Finché è vuota, i file arrivano ma restano da elaborare.
         </p>
         {daElaborare && (

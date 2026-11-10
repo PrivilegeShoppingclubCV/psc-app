@@ -30,7 +30,7 @@ Da lì in poi il pannello `/admin` è aperto a quell'account, e gli altri admin 
 | Tabella | Cosa contiene |
 |---|---|
 | `soci` | La persona: anagrafica, livello, punti, consensi. `user_id` si riempie quando collega l'app; chi ha solo la tessera fisica può non averlo mai. |
-| `tessere` | I codici che la cassa legge, legati al socio: al massimo una `fisica` (stampata, consegnata in negozio) e una `digitale` (`APP000123`, creata dall'app) attive, tutte e due valide in cassa. Stato: `da_consegnare` (fisica nel magazzino, senza socio), `attiva`, `bloccata` (persa, sostituita: non torna attiva). `stato_cassa`: `in_attivazione` finché ReadyPro non la esporta, poi `attiva`. Il codice è testo, unico, senza spazi, e non si modifica mai (un trigger lo blocca). |
+| `tessere` | I codici che la cassa legge, legati al socio, **una sola attiva per socio**: la `digitale` (`APP000123`, creata dall'app) finché non riceve quella di plastica, poi la `fisica` (stampata, consegnata in negozio), che l'app mostra al posto della digitale. `sostituisce_id` è la tessera di cui ha preso il posto. Stato: `da_consegnare` (fisica nel magazzino, senza socio), `attiva`, `bloccata` (persa, sostituita: non torna attiva). `stato_cassa`: `in_attivazione` finché ReadyPro non la esporta, poi `attiva`. Il codice è testo, unico, senza spazi, e non si modifica mai (un trigger lo blocca). |
 | `codici_collegamento` | Codici di 6 caratteri, validi 15 minuti, che l'app mostra a chi deve farsi collegare la tessera in negozio. |
 | `livelli` | Classic, Gold, … Il livello è un campo del socio; la regola per passare di livello è da decidere. |
 | `movimenti_punti` | Registro dei punti, in sola aggiunta: saldo iniziale dall'import, acquisti, riscatti, bonus, rettifiche. Il saldo è la somma (vista `saldi_punti`). Un riscatto non può portare il saldo sotto zero. |
@@ -63,8 +63,8 @@ Nessuno, admin compresi, può modificare o cancellare un movimento punti o un co
 - `attiva_tessera_digitale()` — chi ha solo la fisica e ha collegato l'app aggiunge la digitale.
 - `aggiorna_profilo(...)` — recapiti del socio.
 - `importa_soci(batch)`, `importa_movimenti_punti(batch)` — solo admin.
-- Tessere fisiche, per lo staff (il pannello le usa da admin): `staff_carica_tessere_fisiche(codici)` e `staff_togli_dal_magazzino(codice)` (solo admin), `staff_nuovo_socio_fisica(codice, nome, cognome, privacy_firmata, …)` per il cliente che si iscrive in negozio senza app, `staff_assegna_tessera_fisica(socio, codice, motivo)` (con il motivo sostituisce e blocca quella vecchia), `staff_blocca_tessera(tessera, motivo)`.
-- `admin_unisci_soci(tieni, togli)` — due schede per la stessa persona: tessere, punti, consensi e inviti passano a `tieni`, l'altra sparisce. Rifiuta se tutti e due hanno l'app o una tessera dello stesso tipo attiva.
+- Tessere fisiche, per lo staff (il pannello le usa da admin): `staff_carica_tessere_fisiche(codici)` e `staff_togli_dal_magazzino(codice)` (solo admin), `staff_nuovo_socio_fisica(codice, nome, cognome, privacy_firmata, …)` per il cliente che si iscrive in negozio senza app, `staff_assegna_tessera_fisica(socio, codice, motivo)` (prende il posto della digitale; per sostituire una fisica serve il motivo; la vecchia si blocca), `staff_blocca_tessera(tessera, motivo)`.
+- `admin_unisci_soci(tieni, togli)` — due schede per la stessa persona: tessere, punti, consensi e inviti passano a `tieni`, l'altra sparisce. Se una scheda ha la fisica e l'altra la digitale, resta la fisica. Rifiuta se tutti e due hanno l'app o due tessere attive dello stesso tipo.
 - Regole in `impostazioni`: `tessera_fisica_formato` (espressione regolare dei codici stampati, vuota = qualsiasi) e `tessere_fisiche_solo_magazzino` (true = si consegnano solo codici caricati). Si cambiano dalla sezione Tessere del pannello.
 - `vetrina_del_giorno()` — i prodotti di oggi per la pagina Offerte; li sceglie al primo socio che la apre nella giornata. `vetrina_rigenera()` rifà la scelta (solo admin).
 - `importa_prodotti(import, righe)`, `chiudi_import_prodotti(import)` — salvano le righe del magazzino (per EAN, senza toccare foto e "nascosto") e, se l'elenco era completo, segnano come esauriti i prodotti che mancavano. Solo admin; serviranno anche all'invio automatico da ReadyPro.
@@ -75,13 +75,13 @@ Nessuno, admin compresi, può modificare o cancellare un movimento punti o un co
 Il formato del gestionale non è ancora noto, quindi l'import funziona con qualsiasi intestazione di colonna:
 
 1. il pannello admin legge il CSV/Excel nel browser **con tutte le colonne come testo** e carica il file originale nel bucket `import`;
-2. crea un `import_batch` con la mappatura, es. `{"numero_tessera": "Codice cliente", "nome": "Nome", "punti": "Saldo"}`, e una riga di `import_righe` per ogni riga del file (campo facoltativo `altra_tessera`: un secondo codice dello stesso cliente);
+2. crea un `import_batch` con la mappatura, es. `{"numero_tessera": "Codice cliente", "nome": "Nome", "punti": "Saldo"}`, e una riga di `import_righe` per ogni riga del file (campo facoltativo `altra_tessera`: un vecchio codice dello stesso cliente, usato solo per riconoscerlo);
 3. chiama `importa_soci(batch)`.
 
 Regole:
 
-- il socio si trova da qualunque sua tessera (`numero_tessera`, poi `altra_tessera`): reimportare aggiorna, non duplica; una cella vuota non cancella il dato salvato. Due righe con i due codici della stessa persona aggiornano lo stesso socio;
-- un codice che non esiste ancora diventa una tessera del socio (digitale se ha il prefisso `APP`, fisica altrimenti); se il socio aveva già una tessera attiva dello stesso tipo, quella vecchia si blocca come "sostituita nel gestionale";
+- il socio si trova da qualunque sua tessera (`numero_tessera`, poi `altra_tessera`): reimportare aggiorna, non duplica; una cella vuota non cancella il dato salvato. 
+- un codice che non esiste ancora diventa una tessera del socio (digitale se ha il prefisso `APP`, fisica altrimenti); se il socio aveva già una tessera attiva, quella vecchia si blocca come "sostituita nel gestionale";
 - se il numero tessera arriva come numero invece che testo la riga va in errore, perché gli zeri iniziali sarebbero già persi;
 - il saldo punti del file diventa il movimento `saldo_iniziale` solo al primo import; ai successivi viene segnalato ma non applicato;
 - i consensi del file si importano solo se il socio non ne ha già per quel tipo: una scelta fatta in app non viene mai sovrascritta;
@@ -99,7 +99,7 @@ Il gestionale dei negozi è ReadyPro. Il server dei negozi invia il CSV dei clie
 | `gestionale_chiavi` | Chiavi del server dei negozi: solo l'impronta SHA-256. Si creano con `gestionale_crea_chiave(nome)` e si revocano con `gestionale_revoca_chiave(id)`. |
 | `gestionale_ricevi_soci(chiave, …)` | Riceve il CSV dei clienti e lo passa a `importa_soci` con la mappatura salvata in `impostazioni.gestionale_mappatura_soci`. Lo stesso file mandato due volte non si rielabora. |
 | `tessere.stato_cassa` | `attiva` per le tessere arrivate dal gestionale, `in_attivazione` per quelle date dall'app (digitali nate in app, fisiche consegnate dal pannello). Diventa `attiva` quando il codice compare in un import del gestionale: finché non succede l'app nasconde il codice a barre. |
-| `gestionale_lotti`, `gestionale_nuovi_iscritti(chiave)`, `gestionale_conferma_lotto(chiave, lotto)` | Le tessere in attivazione vanno al server a lotti, una riga per tessera con `tipo_tessera` e `altra_tessera` (l'altro codice dello stesso socio). Un lotto non confermato si rimanda al giro dopo. |
+| `gestionale_lotti`, `gestionale_nuovi_iscritti(chiave)`, `gestionale_conferma_lotto(chiave, lotto)` | Le tessere in attivazione vanno al server a lotti, una riga per tessera con `tipo_tessera` e `tessera_precedente` (il codice che sostituisce sullo stesso cliente). Un lotto non confermato si rimanda al giro dopo. |
 | vista `tessere_in_attesa_cassa` | Tessere che la cassa non conosce ancora, con le ore di attesa. |
 | vista `soci_con_tessere` | I soci con i codici delle tessere attive, per cercarli da qualunque codice nel pannello. |
 
