@@ -59,7 +59,7 @@ Nessuno, admin compresi, può modificare o cancellare un movimento punti o un co
 
 - `collega_tessera(numero)` — "Ho già la tessera": collega l'account se il codice è di una tessera attiva (fisica o digitale) e l'email del login è quella del socio.
 - `crea_codice_collegamento()` — per chi in negozio non ha lasciato un'email (o ne ha lasciata un'altra): codice da mostrare alla cassa; lo staff lo usa con `staff_collega_account(socio, codice)`.
-- `iscriviti(nome, cognome, accetta_privacy, consenso_marketing, telefono, codice_invito, user_agent)` — "Voglio iscrivermi": crea il socio con la tessera digitale (APP000001, APP000002, …), registra i consensi e l'invito.
+- `iscriviti(nome, cognome, accetta_privacy, consenso_marketing, telefono, codice_invito, user_agent)` — "Voglio iscrivermi": crea il socio con la tessera digitale (900000000001, 900000000002, …: 12 cifre come quelle stampate; le prime create in prova erano APP000001…), registra i consensi e l'invito.
 - `attiva_tessera_digitale()` — chi ha solo la fisica e ha collegato l'app aggiunge la digitale.
 - `aggiorna_profilo(...)` — recapiti del socio.
 - `importa_soci(batch)`, `importa_movimenti_punti(batch)` — solo admin.

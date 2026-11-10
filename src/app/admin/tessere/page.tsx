@@ -60,7 +60,7 @@ export default async function Tessere({ searchParams }: { searchParams: Promise<
       </div>
 
       <form className="admin-cerca" action="/admin/tessere">
-        <Campo id="codice" label="Cerca una tessera" defaultValue={cerca} autoComplete="off" placeholder="Codice stampato o APP000123" />
+        <Campo id="codice" label="Cerca una tessera" defaultValue={cerca} autoComplete="off" placeholder="Codice stampato o 900000000123" />
         <button type="submit" className="psc-btn psc-btn--primary">Cerca</button>
       </form>
       {cerca && (
