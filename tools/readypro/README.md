@@ -74,6 +74,16 @@ where chiave = 'gestionale_mappatura_soci';
 
 A sinistra i campi dell'app (elenco in `docs/database.md`, sezione Import), a destra le intestazioni esatte del CSV di ReadyPro. Dal giro successivo i file vengono importati.
 
+## Punti dalle vendite
+
+Le casse sono ReadyPro: quando il commesso scansiona la tessera, la vendita resta attaccata al cliente. Per dare i punti:
+
+1. In ReadyPro crea un filtro di esportazione delle **vendite** (scontrini), con almeno: codice a barre del cliente, totale pagato, un identificativo univoco della vendita (es. ID o numero + data), data, negozio. Pianificalo come quello dei clienti, sempre nello stesso file (es. `C:\PSC\export\vendite.csv`). Bastano le vendite degli ultimi giorni: lo script manda solo le righe nuove e l'app scarta quelle già contate grazie all'identificativo.
+2. In `config.json` imposta `FileVendite` con quel percorso. Vuoto = le vendite non si mandano.
+3. Al primo invio, nel pannello (Gestionale → Colonne del CSV vendite) abbina le colonne: `numero_tessera`, `importo`, `riferimento`, `data`, `negozio`. Lì imposti anche quanti punti vale un euro.
+
+Le vendite senza tessera e quelle sotto il primo punto si saltano; un reso (totale negativo) toglie i punti. Gli invii arrivano dopo quelli dei clienti, così una tessera appena creata è già conosciuta.
+
 ## Se qualcosa va storto
 
 - **Una tessera resta "in attivazione".** La vista `tessere_in_attesa_cassa` (o la Panoramica del pannello) mostra da quante ore aspetta, quando è stata mandata e quando il server l'ha ritirata. Ritirata ma non attiva = ReadyPro non l'ha importata o non la esporta col codice giusto.
