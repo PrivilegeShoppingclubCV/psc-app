@@ -24,8 +24,10 @@ Ogni socio ha **una tessera sola**: la digitale (`APP000123`) finché non riceve
 
 - Un **filtro di esportazione** dei clienti in CSV, con almeno: codice a barre della tessera, nome, cognome, email, cellulare, data di nascita, negozio, consensi privacy/marketing. Una **procedura pianificata** che lo esegue ogni ora e scrive sempre lo stesso file locale (es. `C:\PSC\export\clienti.csv`).
 - Un **filtro di importazione** dei clienti dal file `C:\PSC\import\nuovi-iscritti.csv` (colonne qui sotto), che **aggiorna** il cliente se il codice tessera esiste già invece di crearne un doppione, e una procedura pianificata che lo esegue ogni 15–30 minuti. Va bene se dopo l'import ReadyPro sposta o cancella il file.
-- Che il codice tessera creato in app (es. `APP000001`) venga salvato come **codice a barre del cliente**, così la cassa lo riconosce.
-- Che l'import, quando `tessera_precedente` è pieno, **cerchi il cliente con quel codice e gli sostituisca il codice a barre** con `numero_tessera`. Se `tessera_precedente` non esiste in ReadyPro (la digitale non era ancora arrivata alla cassa), crea il cliente come nuovo.
+- Che il codice tessera creato in app (es. `900000000001`, 12 cifre come quelli stampati) venga salvato come **codice a barre del cliente**, così la cassa lo riconosce.
+- **Se un cliente può avere più di un codice a barre** (o un codice tessera alternativo) nella stessa anagrafica. Serve per chi ha sia la tessera fisica sia quella digitale:
+  - se sì, nel file c'è `altra_tessera` (l'altro codice dello stesso cliente): l'import deve aggiungere `numero_tessera` come secondo codice del cliente che ha `altra_tessera`, e l'export dei clienti deve avere una colonna col secondo codice, da mappare su `altra_tessera`;
+  - se no, ReadyPro avrà due clienti per la stessa persona. All'app va bene, perché riconosce la persona da tutti e due i codici; ma se i punti li calcolasse ReadyPro si dividerebbero sui due clienti.
 
 Colonne di `nuovi-iscritti.csv` (separatore `;`, codifica configurabile, Windows-1252 di default):
 

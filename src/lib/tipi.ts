@@ -23,7 +23,7 @@ export interface Socio {
 export interface TesseraSocio {
   /** Codice letto dalla cassa: testo, zeri iniziali compresi, mai rigenerato. */
   codice: string;
-  /** "fisica" = stampata e consegnata in negozio; "digitale" = creata dall'app (APP000123). */
+  /** "fisica" = stampata e consegnata in negozio; "digitale" = creata dall'app (900000000123). */
   tipo: "fisica" | "digitale";
   inAttivazione: boolean;
 }
