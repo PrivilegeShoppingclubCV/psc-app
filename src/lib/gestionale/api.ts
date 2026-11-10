@@ -3,8 +3,10 @@
 // controlla il database (gestionale_verifica_chiave), qui si inoltra soltanto.
 // Basta la anon key: le funzioni del database non fanno nulla senza una chiave valida.
 
+import { createHash } from "node:crypto";
 import { createClient, type PostgrestError } from "@supabase/supabase-js";
 import { NextResponse } from "next/server";
+import { leggiCsv, decodificaCsv } from "@/lib/gestionale/csv";
 import { isSupabaseConfigured, supabaseAnonKey, supabaseUrl } from "@/lib/supabase/config";
 
 export function supabaseGestionale() {
@@ -38,4 +40,37 @@ export function erroreDb(e: PostgrestError) {
 
 export function nonConfigurato() {
   return errore(503, "Supabase non è ancora configurato.");
+}
+
+// Vercel accetta corpi fino a 4,5 MB; lo script manda blocchi da 1000 righe.
+const MAX_BYTE = 4 * 1024 * 1024;
+const MAX_RIGHE = 50_000;
+
+/**
+ * Riceve un CSV dal server dei negozi e lo passa alla funzione del database
+ * (gestionale_ricevi_soci, gestionale_ricevi_vendite), che controlla la chiave.
+ */
+export async function riceviCsv(request: Request, funzione: string, nomePredefinito: string) {
+  const supabase = supabaseGestionale();
+  if (!supabase) return nonConfigurato();
+  const chiave = chiaveDa(request);
+  if (!chiave) return errore(401, "Chiave del gestionale mancante o non valida.");
+
+  const bytes = new Uint8Array(await request.arrayBuffer());
+  if (bytes.length === 0) return errore(400, "Il file è vuoto.");
+  if (bytes.length > MAX_BYTE) return errore(413, "File troppo grande: esporta solo le righe modificate o dividi il file.");
+
+  const { intestazioni, righe } = leggiCsv(decodificaCsv(bytes));
+  if (righe.length === 0) return errore(400, "Il file non contiene righe dopo l'intestazione.");
+  if (righe.length > MAX_RIGHE) return errore(413, `Troppe righe (${righe.length}): il massimo è ${MAX_RIGHE}.`);
+
+  const { data, error } = await supabase.rpc(funzione, {
+    p_chiave: chiave,
+    p_nome_file: request.headers.get("x-nome-file") ?? nomePredefinito,
+    p_impronta_file: createHash("sha256").update(bytes).digest("hex"),
+    p_righe: righe,
+  });
+  if (error) return erroreDb(error);
+
+  return NextResponse.json({ ...data, intestazioni });
 }

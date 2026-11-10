@@ -4,8 +4,8 @@
   Gira sul server dei negozi come attività pianificata. Fa solo connessioni in
   uscita verso l'app (HTTPS): nessuna porta aperta, nessuna cartella condivisa.
 
-  1. Se ReadyPro ha esportato un nuovo CSV dei clienti, invia all'app i clienti
-     nuovi o modificati (e ogni tanto tutto il file).
+  1. Se ReadyPro ha esportato un nuovo CSV dei clienti o delle vendite, invia
+     all'app le righe nuove o modificate (e ogni tanto tutto il file).
   2. Scarica le tessere create in app e le aggiunge al file che ReadyPro importa,
      poi conferma all'app di averle salvate.
 
@@ -28,9 +28,6 @@ Add-Type -AssemblyName System.Security
 
 $NomeAttivita = 'PSC - Sincronizzazione ReadyPro'
 $FileChiave = Join-Path $PSScriptRoot 'chiave.bin'
-$FileUltimoInvio = Join-Path $PSScriptRoot 'ultimo-invio.txt'
-$FileUltimoCsv = Join-Path $PSScriptRoot 'ultimo-invio.csv'
-$FileUltimoCompleto = Join-Path $PSScriptRoot 'ultimo-invio-completo.txt'
 # Latin-1 legge e riscrive ogni byte così com'è: il file arriva all'app nella sua
 # codifica originale (UTF-8 o Windows-1252), che l'app riconosce da sola.
 $Latin1 = [Text.Encoding]::GetEncoding(28591)
@@ -133,13 +130,18 @@ function Righe-Csv([string]$Testo) {
   ,$righe.ToArray()
 }
 
-# 1. ReadyPro -> app: clienti del CSV, solo le righe cambiate dall'ultimo invio
-# riuscito (una riga diversa = un cliente nuovo o modificato), a blocchi.
+# 1. ReadyPro -> app: un CSV (clienti o vendite), solo le righe cambiate
+# dall'ultimo invio riuscito (una riga diversa = nuova o modificata), a blocchi.
 # Ogni GiorniTraInviiCompleti giorni, o se cambiano le colonne, si manda tutto.
-function Invia-Clienti($Auth) {
-  if (-not (Test-Path $cfg.FileClienti)) { Scrivi-Log "Nessun file clienti in $($cfg.FileClienti)."; return }
-  $file = Get-Item $cfg.FileClienti
-  if ($file.LastWriteTime -gt (Get-Date).AddMinutes(-1)) { Scrivi-Log 'File clienti appena scritto: lo invio al prossimo giro.'; return }
+# $Stato è il prefisso dei file con cui lo script ricorda l'ultimo invio.
+function Invia-Csv([string]$Percorso, [string]$Endpoint, [string]$Stato, [string]$Cosa, $Auth) {
+  $FileUltimoInvio = Join-Path $PSScriptRoot "$Stato.txt"
+  $FileUltimoCsv = Join-Path $PSScriptRoot "$Stato.csv"
+  $FileUltimoCompleto = Join-Path $PSScriptRoot "$Stato-completo.txt"
+
+  if (-not (Test-Path $Percorso)) { Scrivi-Log "Nessun file $Cosa in $Percorso."; return }
+  $file = Get-Item $Percorso
+  if ($file.LastWriteTime -gt (Get-Date).AddMinutes(-1)) { Scrivi-Log "File $Cosa appena scritto: lo invio al prossimo giro."; return }
 
   $bytes = [IO.File]::ReadAllBytes($file.FullName)
   $impronta = [BitConverter]::ToString([Security.Cryptography.SHA256]::Create().ComputeHash($bytes)).Replace('-', '')
@@ -149,14 +151,14 @@ function Invia-Clienti($Auth) {
 
   $righe = Righe-Csv ($Latin1.GetString($bytes))
   $intestazione = $righe[0]
-  $clienti = @($righe | Select-Object -Skip 1 | Where-Object { $_.Trim() -ne '' })
+  $dati = @($righe | Select-Object -Skip 1 | Where-Object { $_.Trim() -ne '' })
 
-  $daInviare = $clienti
+  $daInviare = $dati
   if (-not $completo -and (Test-Path $FileUltimoCsv)) {
     $precedenti = Righe-Csv ([IO.File]::ReadAllText($FileUltimoCsv, $Latin1))
     if ($precedenti.Count -gt 0 -and $precedenti[0] -eq $intestazione) {
       $giaInviati = [Collections.Generic.HashSet[string]]::new([string[]]$precedenti)
-      $daInviare = @($clienti | Where-Object { -not $giaInviati.Contains($_) })
+      $daInviare = @($dati | Where-Object { -not $giaInviati.Contains($_) })
     } else {
       $completo = $true
     }
@@ -168,16 +170,26 @@ function Invia-Clienti($Auth) {
     $a = [Math]::Min($da + $RighePerInvio, $daInviare.Count) - 1
     $corpo = $Latin1.GetBytes(((@($intestazione) + $daInviare[$da..$a]) -join "`r`n") + "`r`n")
     $nome = if ($blocchi -gt 1) { "$($file.Name) ($($b + 1) di $blocchi)" } else { $file.Name }
-    $r = Chiama-App 'POST' '/api/gestionale/clienti' ($Auth + @{ 'X-Nome-File' = $nome }) $corpo
-    Scrivi-Log "Clienti inviati ($nome): $($r.Content)"
+    $r = Chiama-App 'POST' $Endpoint ($Auth + @{ 'X-Nome-File' = $nome }) $corpo
+    Scrivi-Log "File $Cosa inviato ($nome): $($r.Content)"
   }
 
   # Solo dopo che tutti i blocchi sono andati: se uno fallisce, al prossimo giro si rimanda tutto il cambiato.
-  [IO.File]::WriteAllText($FileUltimoCsv, ((@($intestazione) + $clienti) -join "`r`n"), $Latin1)
+  [IO.File]::WriteAllText($FileUltimoCsv, ((@($intestazione) + $dati) -join "`r`n"), $Latin1)
   Set-Content -Path $FileUltimoInvio -Value $impronta
   if ($completo) { Set-Content -Path $FileUltimoCompleto -Value (Get-Date -Format o) }
-  $tipo = if ($completo) { 'invio completo' } else { 'solo cambiati' }
-  Scrivi-Log "Clienti: $($daInviare.Count) di $($clienti.Count) inviati ($tipo)."
+  $tipo = if ($completo) { 'invio completo' } else { 'solo cambiate' }
+  Scrivi-Log "File ${Cosa}: $($daInviare.Count) righe di $($dati.Count) inviate ($tipo)."
+}
+
+function Invia-Clienti($Auth) {
+  Invia-Csv $cfg.FileClienti '/api/gestionale/clienti' 'ultimo-invio' 'clienti' $Auth
+}
+
+# Le vendite servono per i punti: se FileVendite non è configurato si salta.
+function Invia-Vendite($Auth) {
+  if (-not $cfg.FileVendite) { return }
+  Invia-Csv $cfg.FileVendite '/api/gestionale/vendite' 'ultimo-invio-vendite' 'vendite' $Auth
 }
 
 # 2. app -> ReadyPro: tessere create in app.
@@ -222,7 +234,7 @@ function Scarica-NuoviIscritti($Auth) {
 try {
   $auth = @{ Authorization = "Bearer $(Leggi-Chiave)" }
   $errori = 0
-  foreach ($passo in 'Invia-Clienti', 'Scarica-NuoviIscritti') {
+  foreach ($passo in 'Invia-Clienti', 'Invia-Vendite', 'Scarica-NuoviIscritti') {
     try { & $passo $auth } catch { $errori++; Scrivi-Log "ERRORE in ${passo}: $($_.Exception.Message)" }
   }
   Get-ChildItem $cfg.CartellaLog -Filter 'sincronizza-*.log' |

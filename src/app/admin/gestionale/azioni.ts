@@ -22,8 +22,22 @@ export async function revocaChiave(form: FormData) {
   redirect(conEsito("/admin/gestionale", error ? { errore: messaggioDb(error) } : { ok: "Chiave revocata: smette subito di funzionare." }));
 }
 
+// I due file che arrivano da ReadyPro: per ognuno la sua mappatura e la sua funzione di import.
+const FILE = {
+  soci: { chiave: "gestionale_mappatura_soci", importa: "importa_soci", richiesti: ["numero_tessera"] },
+  vendite: { chiave: "gestionale_mappatura_vendite", importa: "importa_movimenti_punti", richiesti: ["numero_tessera", "importo|punti"] },
+} as const;
+
+function tipoFile(form: FormData) {
+  return testo(form, "tipo") === "vendite" ? FILE.vendite : FILE.soci;
+}
+
+const mancanti = (m: Record<string, string>, richiesti: readonly string[]) =>
+  richiesti.filter((r) => !r.split("|").some((c) => m[c]));
+
 export async function salvaMappatura(form: FormData) {
   const { supabase } = await richiediAdmin();
+  const file = tipoFile(form);
   let valore: unknown;
   try {
     valore = JSON.parse(testo(form, "mappatura") || "{}");
@@ -32,26 +46,36 @@ export async function salvaMappatura(form: FormData) {
   }
   const valida = valore && typeof valore === "object" && !Array.isArray(valore)
     && Object.values(valore).every((v) => typeof v === "string");
-  if (!valida) redirect(conEsito("/admin/gestionale", { errore: "La mappatura è un elenco campo → colonna, es. {\"numero_tessera\": \"Codice a barre\"}." }));
+  if (!valida) redirect(conEsito("/admin/gestionale", { errore: "La mappatura è un elenco campo → colonna, es. {\"numero_tessera\": \"Cod.Barre\"}." }));
 
   const { error } = await supabase
     .from("impostazioni")
     .update({ valore })
-    .eq("chiave", "gestionale_mappatura_soci");
+    .eq("chiave", file.chiave);
   redirect(conEsito("/admin/gestionale", error ? { errore: messaggioDb(error) } : { ok: "Mappatura salvata: vale dal prossimo file inviato da ReadyPro." }));
 }
 
 /** Elabora un file arrivato prima che la mappatura fosse impostata. */
 export async function elaboraImport(form: FormData) {
   const { supabase } = await richiediAdmin();
+  const file = tipoFile(form);
   const id = testo(form, "id");
-  const { data: mappa } = await supabase.from("impostazioni").select("valore").eq("chiave", "gestionale_mappatura_soci").maybeSingle();
+  const { data: mappa } = await supabase.from("impostazioni").select("valore").eq("chiave", file.chiave).maybeSingle();
   const mappatura = (mappa?.valore ?? {}) as Record<string, string>;
-  if (!mappatura.numero_tessera) redirect(conEsito("/admin/gestionale", { errore: "Prima salva la mappatura, con almeno numero_tessera." }));
+  const manca = mancanti(mappatura, file.richiesti);
+  if (manca.length) redirect(conEsito("/admin/gestionale", { errore: `Prima salva la mappatura, con almeno ${manca.join(" e ").replace("|", " o ")}.` }));
 
   const { error: e1 } = await supabase.from("import_batch").update({ mappatura_colonne: mappatura }).eq("id", id);
   if (e1) redirect(conEsito("/admin/gestionale", { errore: messaggioDb(e1) }));
-  const { error } = await supabase.rpc("importa_soci", { p_batch_id: id });
+  const { error } = await supabase.rpc(file.importa, { p_batch_id: id });
   revalidatePath("/admin", "layout");
   redirect(conEsito("/admin/gestionale", error ? { errore: messaggioDb(error) } : { ok: "File elaborato: vedi l'esito qui sotto." }));
+}
+
+export async function salvaPuntiPerEuro(form: FormData) {
+  const { supabase } = await richiediAdmin();
+  const valore = Number(testo(form, "punti_per_euro").replace(",", "."));
+  if (!Number.isFinite(valore) || valore < 0) redirect(conEsito("/admin/gestionale", { errore: "Scrivi un numero, es. 1 o 0,5." }));
+  const { error } = await supabase.from("impostazioni").update({ valore }).eq("chiave", "punti_per_euro");
+  redirect(conEsito("/admin/gestionale", error ? { errore: messaggioDb(error) } : { ok: "Regola dei punti salvata: vale per le prossime vendite." }));
 }

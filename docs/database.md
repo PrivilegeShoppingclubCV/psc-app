@@ -88,7 +88,7 @@ Regole:
 - date `27/10/2026` o `2026-10-27`, numeri all'italiana (`1.500`, `12,50`);
 - le colonne non mappate finiscono in `soci.dati_gestionale`, così non si perde nulla.
 
-`importa_movimenti_punti` serve se il gestionale esporta scontrini o accrediti (il socio si trova da qualunque sua tessera, anche bloccata): il campo `riferimento` (id scontrino) impedisce di contare due volte lo stesso movimento.
+`importa_movimenti_punti` serve se il gestionale esporta scontrini o accrediti (il socio si trova da qualunque sua tessera, anche bloccata): il campo `riferimento` (id scontrino) impedisce di contare due volte lo stesso movimento. Senza la colonna `punti` li calcola dall'`importo`: importo × `impostazioni.punti_per_euro`, per difetto (un reso, importo negativo, li toglie come `storno`); le vendite senza tessera o sotto il primo punto si saltano.
 
 ## Sincronizzazione con ReadyPro
 
@@ -98,6 +98,7 @@ Il gestionale dei negozi è ReadyPro. Il server dei negozi invia il CSV dei clie
 |---|---|
 | `gestionale_chiavi` | Chiavi del server dei negozi: solo l'impronta SHA-256. Si creano con `gestionale_crea_chiave(nome)` e si revocano con `gestionale_revoca_chiave(id)`. |
 | `gestionale_ricevi_soci(chiave, …)` | Riceve il CSV dei clienti e lo passa a `importa_soci` con la mappatura salvata in `impostazioni.gestionale_mappatura_soci`. Lo stesso file mandato due volte non si rielabora. |
+| `gestionale_ricevi_vendite(chiave, …)` | Lo stesso per il CSV delle vendite: lo passa a `importa_movimenti_punti` con `impostazioni.gestionale_mappatura_vendite` (servono `numero_tessera` e `importo` o `punti`). |
 | `tessere.stato_cassa` | `attiva` per le tessere arrivate dal gestionale, `in_attivazione` per quelle date dall'app (digitali nate in app, fisiche consegnate dal pannello). Diventa `attiva` quando il codice compare in un import del gestionale: finché non succede l'app nasconde il codice a barre. |
 | `gestionale_lotti`, `gestionale_nuovi_iscritti(chiave)`, `gestionale_conferma_lotto(chiave, lotto)` | Le tessere in attivazione vanno al server a lotti, una riga per tessera con `tipo_tessera` e `altra_tessera` (l'altro codice dello stesso socio). Un lotto non confermato si rimanda al giro dopo. |
 | vista `tessere_in_attesa_cassa` | Tessere che la cassa non conosce ancora, con le ore di attesa. |
