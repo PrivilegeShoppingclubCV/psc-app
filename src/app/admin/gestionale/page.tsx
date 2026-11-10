@@ -84,7 +84,7 @@ export default async function Gestionale({ searchParams }: { searchParams: Promi
       <Mappatura
         tipo="soci"
         titolo="Colonne del CSV clienti"
-        campi="numero_tessera (obbligatorio), altra_tessera (secondo codice dello stesso cliente, se ReadyPro lo esporta), nome, cognome, email, telefono, data_nascita, cap, citta, livello, punti, negozio, iscritto_il, consenso_privacy, consenso_marketing, consenso_profilazione."
+        campi="numero_tessera (obbligatorio), altra_tessera (un vecchio codice dello stesso cliente, usato solo per riconoscerlo), nome, cognome, email, telefono, data_nascita, cap, citta, livello, punti, negozio, iscritto_il, consenso_privacy, consenso_marketing, consenso_profilazione."
         valore={valore("gestionale_mappatura_soci")}
         daElaborare={daElaborareSoci}
       />
