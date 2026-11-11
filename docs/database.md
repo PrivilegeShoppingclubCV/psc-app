@@ -75,7 +75,7 @@ Nessuno, admin compresi, può modificare o cancellare un movimento punti o un co
 Il formato del gestionale non è ancora noto, quindi l'import funziona con qualsiasi intestazione di colonna:
 
 1. il pannello admin legge il CSV/Excel nel browser **con tutte le colonne come testo** e carica il file originale nel bucket `import`;
-2. crea un `import_batch` con la mappatura, es. `{"numero_tessera": "Codice cliente", "nome": "Nome", "punti": "Saldo"}`, e una riga di `import_righe` per ogni riga del file (campo facoltativo `altra_tessera`: un vecchio codice dello stesso cliente, usato solo per riconoscerlo);
+2. crea un `import_batch` con la mappatura, es. `{"numero_tessera": "Codice cliente", "nome": "Nome", "punti": "Saldo"}`, e una riga di `import_righe` per ogni riga del file (campo facoltativo `altra_tessera`: un vecchio codice dello stesso cliente, usato solo per riconoscerlo; un valore che inizia con `=` vale per tutte le righe, es. `"consenso_marketing": "=si"`);
 3. chiama `importa_soci(batch)`.
 
 Regole:

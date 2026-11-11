@@ -72,7 +72,9 @@ set valore = '{"numero_tessera": "Codice a barre", "nome": "Nome", "cognome": "C
 where chiave = 'gestionale_mappatura_soci';
 ```
 
-A sinistra i campi dell'app (elenco in `docs/database.md`, sezione Import), a destra le intestazioni esatte del CSV di ReadyPro. Dal giro successivo i file vengono importati.
+A sinistra i campi dell'app (elenco in `docs/database.md`, sezione Import), a destra le intestazioni esatte del CSV di ReadyPro. Dal giro successivo i file vengono importati. La mappatura si può incollare anche dal pannello (Gestionale → Colonne del CSV clienti).
+
+Un valore che inizia con `=` non è una colonna ma un valore uguale per tutte le righe, per i dati che il file non ha. Es. i consensi firmati sul modulo cartaceo della tessera: `"consenso_privacy": "=si", "consenso_marketing": "=si"`. I consensi importati restano registrati con canale `import` e versione `impostazioni.versione_consensi_import` ("modulo cartaceo della tessera").
 
 ## Punti dalle vendite
 
