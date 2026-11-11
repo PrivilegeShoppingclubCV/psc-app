@@ -131,3 +131,12 @@ button { font: inherit; }
 .modulo { display: flex; flex-direction: column; gap: var(--space-4); }
 .modulo .psc-field { max-width: none; }
 .notice--ok { background: var(--success-surface); color: var(--success); font-size: 15px; line-height: 22px; }
+
+/* Banner "Metti l'app sulla schermata Home" */
+.installa { position: relative; display: flex; flex-direction: column; gap: var(--space-3); padding: var(--space-4); border: 1px solid var(--line-strong); border-radius: var(--radius-md); background: var(--surface-tint); }
+.installa__titolo { font-family: var(--font-display); font-size: 20px; line-height: 26px; font-weight: 400; margin: 0; padding-right: var(--space-8); }
+.installa__testo { margin: 0; font-size: 15px; line-height: 22px; }
+.installa__passi { margin: 0; padding-left: 1.25em; display: flex; flex-direction: column; gap: var(--space-2); font-size: 15px; line-height: 22px; }
+.installa__icona { display: inline-block; width: 18px; height: 18px; vertical-align: -3px; }
+.installa__chiudi { position: absolute; top: var(--space-2); right: var(--space-2); width: 40px; height: 40px; display: grid; place-items: center; background: none; border: 0; color: var(--ink-muted); cursor: pointer; }
+.installa__chiudi svg { width: 20px; height: 20px; }

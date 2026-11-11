@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import Link from "next/link";
+import { InstallaApp } from "@/components/InstallaApp";
 import { PageHead } from "@/components/PageHead";
 import { SaldoPunti } from "@/components/SaldoPunti";
 import { ApriTessera } from "@/components/TesseraFullscreen";
@@ -23,6 +24,8 @@ export default async function Home() {
         )}
         <ApriTessera socio={socio} />
       </section>
+
+      <InstallaApp />
 
       <section className="section" aria-labelledby="invita">
         <div className="psc-referral">
