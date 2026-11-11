@@ -145,7 +145,7 @@ function Mappatura({ tipo, titolo, campi, valore, daElaborare, children }: {
     <section className="admin-card">
       <h2 className="t-title">{titolo}</h2>
       <p className="t-caption">
-        Per ogni campo dell&apos;app, il nome esatto della colonna nel file di ReadyPro. Campi possibili: {campi} Finché è vuota, i file arrivano ma restano da elaborare.
+        Per ogni campo dell&apos;app, il nome esatto della colonna nel file di ReadyPro. Campi possibili: {campi} Un valore che inizia con = vale per tutte le righe (es. &quot;consenso_privacy&quot;: &quot;=si&quot;). Finché è vuota, i file arrivano ma restano da elaborare.
       </p>
       {daElaborare && (
         <div className="notice">
