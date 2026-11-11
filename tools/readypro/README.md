@@ -31,7 +31,9 @@ Ogni socio ha **una tessera sola**: la digitale (`APP000123`) finché non riceve
 
 Colonne di `nuovi-iscritti.csv` (separatore `;`, codifica configurabile, Windows-1252 di default):
 
-`numero_tessera;tipo_tessera;tessera_precedente;cognome;nome;email;telefono;data_nascita;cap;citta;negozio;iscritto_il;consenso_privacy;consenso_marketing`
+`numero_tessera;tipo_tessera;tessera_precedente;cognome;nome;email;telefono;data_nascita;cap;citta;negozio;iscritto_il;consenso_privacy;consenso_marketing;ragione_sociale`
+
+`ragione_sociale` è "COGNOME NOME" in maiuscolo, per il campo "Ragione sociale oppure cognome e nome" di ReadyPro, che non ha cognome e nome separati in importazione. ReadyPro legge le colonne per posizione: nel filtro di importazione le colonne che non servono vanno messe come "Ignora campo".
 
 Una riga per tessera. `tipo_tessera` è `fisica` o `digitale`; `tessera_precedente` è il codice che questa tessera sostituisce sullo stesso cliente, vuoto per un cliente nuovo. Le date sono `GG/MM/AAAA`, i consensi `SI`/`NO`, `negozio` è il codice del negozio nel gestionale.
 

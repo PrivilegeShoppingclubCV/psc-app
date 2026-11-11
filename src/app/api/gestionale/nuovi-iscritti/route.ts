@@ -14,7 +14,14 @@ import { scriviCsv } from "@/lib/gestionale/csv";
 const COLONNE = [
   "numero_tessera", "tipo_tessera", "tessera_precedente", "cognome", "nome", "email", "telefono", "data_nascita",
   "cap", "citta", "negozio", "iscritto_il", "consenso_privacy", "consenso_marketing",
+  // In fondo, per non spostare le colonne di un filtro di importazione già fatto:
+  // ReadyPro ha un campo solo per il nome ("Ragione sociale oppure cognome e nome")
+  // e in anagrafica lo scrive "COGNOME NOME".
+  "ragione_sociale",
 ];
+
+const ragioneSociale = (r: Record<string, unknown>) =>
+  [r.cognome, r.nome].map((v) => String(v ?? "").trim()).filter(Boolean).join(" ").toLocaleUpperCase("it-IT");
 
 export async function GET(request: Request) {
   const supabase = supabaseGestionale();
@@ -28,7 +35,7 @@ export async function GET(request: Request) {
   const { lotto, righe } = data as { lotto: string | null; righe: Record<string, unknown>[] };
   if (!lotto) return new Response(null, { status: 204 });
 
-  return new Response(scriviCsv(COLONNE, righe), {
+  return new Response(scriviCsv(COLONNE, righe.map((r) => ({ ...r, ragione_sociale: ragioneSociale(r) }))), {
     headers: {
       "Content-Type": "text/csv; charset=utf-8",
       "Content-Disposition": `attachment; filename="nuovi-iscritti-${lotto}.csv"`,
