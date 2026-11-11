@@ -47,5 +47,8 @@ export function Spunta({ id, children, ...input }: { id: string; children: React
   );
 }
 
+/** La data di oggi come AAAA-MM-GG, per il massimo dei campi data. */
+export const oggi = () => new Date().toISOString().slice(0, 10);
+
 /** Legge un parametro della query string come testo (Next li passa come string | string[]). */
 export const param = (v: string | string[] | undefined) => (Array.isArray(v) ? v[0] : v) ?? "";

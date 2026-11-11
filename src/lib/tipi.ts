@@ -76,3 +76,12 @@ export interface Offerta {
 export function prossimoPremio(premi: Premio[], saldo: number): Premio | undefined {
   return premi.find((p) => p.soglia > saldo) ?? premi[premi.length - 1];
 }
+
+/** Dati che il socio può modificare dal profilo. Date come AAAA-MM-GG, "" = non indicato. */
+export interface Recapiti {
+  telefono: string;
+  nascita: string;
+  cap: string;
+  citta: string;
+  negozioPreferitoId: string | null;
+}

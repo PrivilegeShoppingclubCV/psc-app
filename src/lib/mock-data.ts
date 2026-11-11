@@ -1,7 +1,7 @@
 // Dati finti: li usa src/lib/dati.ts finché Supabase non è configurato
 // (anteprime senza chiavi, sviluppo in locale).
 
-import type { MovimentoPunti, Negozio, Offerta, Premio, Socio } from "./tipi";
+import type { MovimentoPunti, Negozio, Offerta, Premio, Recapiti, Socio } from "./tipi";
 
 export const socio: Socio = {
   nome: "Giulia",
@@ -14,6 +14,8 @@ export const socio: Socio = {
   inAttivazione: false,
   tessere: [{ codice: "004718", tipo: "fisica", inAttivazione: false }],
 };
+
+export const recapiti: Recapiti = { telefono: "3331234567", nascita: "", cap: "00053", citta: "Civitavecchia", negozioPreferitoId: null };
 
 export const movimenti: MovimentoPunti[] = [
   { id: "m1", data: "2026-10-21", descrizione: "Acquisto", negozio: "Negozio Centro", punti: 86 },

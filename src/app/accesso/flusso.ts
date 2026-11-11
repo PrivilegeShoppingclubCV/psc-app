@@ -21,7 +21,29 @@ export const COOKIE_ATTESA = "psc_attesa";
 
 export type Attesa =
   | { tipo: "collega"; numero: string }
-  | { tipo: "iscriviti"; nome: string; cognome: string; invito: string; marketing: boolean };
+  | {
+      tipo: "iscriviti";
+      nome: string;
+      cognome: string;
+      telefono: string;
+      nascita: string;
+      cap: string;
+      citta: string;
+      invito: string;
+      marketing: boolean;
+    };
+
+/** Campi del modulo di iscrizione da rimettere nella pagina se qualcosa va storto. */
+// (Un cookie salvato prima di questi campi può non averli: diventano vuoti.)
+export const campiIscrizione = (a: Extract<Attesa, { tipo: "iscriviti" }>) => ({
+  nome: a.nome ?? "",
+  cognome: a.cognome ?? "",
+  telefono: a.telefono ?? "",
+  nascita: a.nascita ?? "",
+  cap: a.cap ?? "",
+  citta: a.citta ?? "",
+  invito: a.invito ?? "",
+});
 
 export const testo = (f: FormData, k: string) => String(f.get(k) ?? "").trim();
 export const conErrore = (pagina: string, messaggio: string, extra: Record<string, string> = {}) =>
@@ -92,8 +114,12 @@ export async function eseguiIscrizione(supabase: Supabase, a: Extract<Attesa, { 
     p_consenso_marketing: a.marketing,
     p_codice_invito: a.invito || null,
     p_user_agent: h.get("user-agent"),
+    p_telefono: a.telefono,
+    p_data_nascita: a.nascita || null,
+    p_cap: a.cap || null,
+    p_citta: a.citta || null,
   });
-  return error ? conErrore("/iscriviti", error.message, { nome: a.nome, cognome: a.cognome, invito: a.invito }) : "/home";
+  return error ? conErrore("/iscriviti", error.message, campiIscrizione(a)) : "/home";
 }
 
 /** Dopo un accesso riuscito: completa il modulo rimasto in attesa e dice dove andare. */

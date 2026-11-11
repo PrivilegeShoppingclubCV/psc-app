@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import { redirect } from "next/navigation";
-import { AuthPage, Campo, Spunta, param } from "@/components/AuthPage";
+import { AuthPage, Campo, Spunta, oggi, param } from "@/components/AuthPage";
 import { getSessione } from "@/lib/dati";
 import { iscriviti } from "../accesso/azioni";
 
@@ -18,6 +18,10 @@ export default async function Iscriviti({ searchParams }: { searchParams: Promis
         <Campo id="nome" label="Nome" autoComplete="given-name" required={configurato} defaultValue={param(q.nome)} />
         <Campo id="cognome" label="Cognome" autoComplete="family-name" required={configurato} defaultValue={param(q.cognome)} />
         {!conAccesso && <Campo id="email" label="Email" type="email" autoComplete="email" required={configurato} defaultValue={param(q.email)} />}
+        <Campo id="telefono" label="Cellulare" type="tel" autoComplete="tel" inputMode="tel" required={configurato} defaultValue={param(q.telefono)} />
+        <Campo id="nascita" label="Data di nascita (facoltativa)" type="date" autoComplete="bday" max={oggi()} defaultValue={param(q.nascita)} />
+        <Campo id="cap" label="CAP (facoltativo)" autoComplete="postal-code" inputMode="numeric" pattern="[0-9]{5}" maxLength={5} defaultValue={param(q.cap)} />
+        <Campo id="citta" label="Città (facoltativa)" autoComplete="address-level2" maxLength={80} defaultValue={param(q.citta)} />
         <Campo id="invito" label="Codice invito (facoltativo)" autoComplete="off" autoCapitalize="characters" defaultValue={param(q.invito)} help="Se un amico ti ha invitato, inserisci il suo codice." />
         <Spunta id="privacy" required={configurato}>Ho letto l&apos;informativa privacy (obbligatorio)</Spunta>
         <Spunta id="marketing">Voglio ricevere offerte e novità via email e notifica (facoltativo, puoi cambiare idea quando vuoi)</Spunta>
