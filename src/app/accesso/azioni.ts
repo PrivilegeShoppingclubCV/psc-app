@@ -5,6 +5,7 @@
 import { redirect } from "next/navigation";
 import { getSupabase } from "@/lib/dati";
 import {
+  campiIscrizione,
   completaAccesso,
   conErrore,
   eseguiCollega,
@@ -60,11 +61,16 @@ export async function iscriviti(form: FormData) {
     tipo: "iscriviti",
     nome: testo(form, "nome"),
     cognome: testo(form, "cognome"),
+    telefono: testo(form, "telefono"),
+    nascita: testo(form, "nascita"),
+    cap: testo(form, "cap"),
+    citta: testo(form, "citta"),
     invito: testo(form, "invito"),
     marketing: form.get("marketing") === "on",
   };
-  const campi = { nome: attesa.nome, cognome: attesa.cognome, invito: attesa.invito };
+  const campi = campiIscrizione(attesa);
   if (!attesa.nome || !attesa.cognome) redirect(conErrore("/iscriviti", "Nome e cognome sono obbligatori.", campi));
+  if (!attesa.telefono) redirect(conErrore("/iscriviti", "Il numero di telefono è obbligatorio.", campi));
   if (form.get("privacy") !== "on") redirect(conErrore("/iscriviti", "Per iscriverti conferma di aver letto l'informativa privacy.", campi));
 
   if (await utenteCorrente(supabase)) redirect(await eseguiIscrizione(supabase, attesa));

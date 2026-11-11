@@ -37,6 +37,10 @@ Colonne di `nuovi-iscritti.csv` (separatore `;`, codifica configurabile, Windows
 
 Una riga per tessera. `tipo_tessera` è `fisica` o `digitale`; `tessera_precedente` è il codice che questa tessera sostituisce sullo stesso cliente, vuoto per un cliente nuovo. Le date sono `GG/MM/AAAA`, i consensi `SI`/`NO`, `negozio` è il codice del negozio nel gestionale.
 
+Nello stesso file arrivano anche i **recapiti modificati dal socio in app** (cellulare, data di nascita, CAP, città): una riga con la tessera attuale del socio e `tessera_precedente` vuota. Con la chiave Email il filtro di importazione la vede come "Aggiornamento" del cliente esistente. Se nel file c'è già una riga della stessa tessera non ancora importata, lo script la sostituisce con quella nuova.
+
+Vince l'ultima modifica: l'export clienti arriva una volta l'ora e può avere ancora i recapiti di prima, quindi per 20 minuti dopo che la modifica è partita verso ReadyPro l'import clienti tiene quelli dell'app (con un avviso sulla riga). Dopo, vale quello che c'è in ReadyPro: una correzione fatta in negozio arriva con l'export successivo.
+
 ## Installazione sul server
 
 Serve Windows con PowerShell 5.1 o successivo, sempre acceso (lo stesso PC dove gira lo Schedulatore di ReadyPro va bene).

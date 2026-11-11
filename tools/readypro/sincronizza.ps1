@@ -192,10 +192,11 @@ function Invia-Vendite($Auth) {
   Invia-Csv $cfg.FileVendite '/api/gestionale/vendite' 'ultimo-invio-vendite' 'vendite' $Auth
 }
 
-# 2. app -> ReadyPro: tessere create in app.
+# 2. app -> ReadyPro: tessere create in app e recapiti modificati in app.
 # ReadyPro importa sempre lo stesso file. Se c'è ancora il file del giro prima
-# (ReadyPro non l'ha ancora importato), le righe nuove si aggiungono in fondo
-# senza ripetere le tessere già presenti.
+# (ReadyPro non l'ha ancora importato), le righe nuove si aggiungono in fondo;
+# una tessera già presente viene sostituita dalla riga nuova, che ha i dati più
+# recenti.
 function Scarica-NuoviIscritti($Auth) {
   $r = Chiama-App 'GET' '/api/gestionale/nuovi-iscritti' $Auth
   if ($r.StatusCode -eq 204) { return }
@@ -206,21 +207,24 @@ function Scarica-NuoviIscritti($Auth) {
   $destinazione = $cfg.FileNuoviIscritti
   New-Item -ItemType Directory -Force -Path (Split-Path $destinazione) | Out-Null
 
-  $contenuto = New-Object Collections.Generic.List[string]
-  $presenti = @{}
+  # Intestazione + righe per tessera (prima colonna), nell'ordine in cui sono arrivate.
+  $intestazione = $righe[0]
+  $perTessera = [ordered]@{}
   if (Test-Path $destinazione) {
-    foreach ($riga in [IO.File]::ReadAllLines($destinazione, $codifica)) {
-      if ($riga -eq '') { continue }
-      $contenuto.Add($riga)
-      $presenti[$riga.Split(';')[0]] = $true
-    }
-  } else {
-    $contenuto.Add($righe[0])
+    $vecchie = [IO.File]::ReadAllLines($destinazione, $codifica) | Where-Object { $_ -ne '' }
+    if ($vecchie) { $intestazione = @($vecchie)[0] }
+    foreach ($riga in $vecchie | Select-Object -Skip 1) { $perTessera[$riga.Split(';')[0]] = $riga }
   }
   $aggiunte = 0
   foreach ($riga in $righe | Select-Object -Skip 1) {
-    if (-not $presenti.ContainsKey($riga.Split(';')[0])) { $contenuto.Add($riga); $aggiunte++ }
+    $tessera = $riga.Split(';')[0]
+    if ($perTessera.Contains($tessera)) { $perTessera.Remove($tessera) }
+    $perTessera[$tessera] = $riga
+    $aggiunte++
   }
+  $contenuto = New-Object Collections.Generic.List[string]
+  $contenuto.Add($intestazione)
+  foreach ($riga in $perTessera.Values) { $contenuto.Add($riga) }
 
   # Scrittura in un file temporaneo e poi rinomina: ReadyPro non legge mai un file a metà.
   $temporaneo = "$destinazione.tmp"
@@ -228,7 +232,7 @@ function Scarica-NuoviIscritti($Auth) {
   Move-Item -Force $temporaneo $destinazione
 
   Chiama-App 'POST' "/api/gestionale/nuovi-iscritti/conferma?lotto=$lotto" $Auth | Out-Null
-  Scrivi-Log "Nuovi iscritti: $aggiunte tessere aggiunte a $destinazione (lotto $lotto)."
+  Scrivi-Log "Nuovi iscritti: $aggiunte righe (tessere nuove o recapiti modificati) scritte in $destinazione (lotto $lotto)."
 }
 
 try {

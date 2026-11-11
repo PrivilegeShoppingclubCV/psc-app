@@ -5,7 +5,7 @@
 import { cache } from "react";
 import * as mock from "./mock-data";
 import { createClient } from "./supabase/server";
-import { tesseraDaMostrare, type MovimentoPunti, type Negozio, type Offerta, type Premio, type Socio, type TesseraSocio } from "./tipi";
+import { tesseraDaMostrare, type MovimentoPunti, type Negozio, type Offerta, type Premio, type Recapiti, type Socio, type TesseraSocio } from "./tipi";
 
 export interface Sessione {
   /** false = Supabase non configurato, l'app usa i dati finti. */
@@ -99,6 +99,24 @@ export async function getMovimenti(socioId: string): Promise<MovimentoPunti[]> {
     negozio: (m.negozi as unknown as { nome: string } | null)?.nome,
     punti: m.punti,
   }));
+}
+
+export async function getRecapiti(socioId: string): Promise<Recapiti> {
+  const supabase = await getSupabase();
+  if (!supabase) return mock.recapiti;
+  const { data, error } = await supabase
+    .from("soci")
+    .select("telefono, data_nascita, cap, citta, negozio_preferito_id")
+    .eq("id", socioId)
+    .single();
+  if (error) throw error;
+  return {
+    telefono: data.telefono ?? "",
+    nascita: data.data_nascita ?? "",
+    cap: data.cap ?? "",
+    citta: data.citta ?? "",
+    negozioPreferitoId: data.negozio_preferito_id,
+  };
 }
 
 export async function getPremi(): Promise<Premio[]> {
