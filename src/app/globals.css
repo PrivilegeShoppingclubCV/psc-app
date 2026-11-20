@@ -92,6 +92,8 @@ button { font: inherit; }
 .welcome .psc-btn--secondary { color: var(--bianco); border-color: rgba(255, 255, 255, 0.6); }
 .welcome .psc-btn--secondary:hover { background: rgba(255, 255, 255, 0.08); border-color: var(--bianco); }
 .welcome .psc-btn--ghost { color: var(--bianco); }
+.welcome .installa-grande { max-width: 320px; gap: var(--space-2); }
+.welcome .installa-grande svg { width: 18px; height: 18px; }
 .welcome .psc-btn:focus-visible { outline-color: var(--oro-300); }
 
 /* ---------- Pagine di accesso ---------- */
@@ -151,7 +153,7 @@ button { font: inherit; }
 }
 .installa-tasto svg { width: 16px; height: 16px; }
 .installa-tasto:focus-visible { outline: 2px solid var(--focus); outline-offset: 2px; }
-.installa-dialog { width: min(100% - 2 * var(--space-4), 420px); margin: auto auto calc(var(--safe-bottom) + var(--space-4)); padding: 0; border: 0; border-radius: var(--radius-md); background: var(--surface); color: var(--ink); }
+.installa-dialog { text-align: left; width: min(100% - 2 * var(--space-4), 420px); margin: auto auto calc(var(--safe-bottom) + var(--space-4)); padding: 0; border: 0; border-radius: var(--radius-md); background: var(--surface); color: var(--ink); }
 .installa-dialog::backdrop { background: rgba(9, 29, 16, 0.45); }
 .installa-dialog[open] { animation: sheet-up .22s ease-out; }
 .installa--dialog { border: 0; background: var(--surface); }

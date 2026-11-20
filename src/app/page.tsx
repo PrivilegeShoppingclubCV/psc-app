@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { redirect } from "next/navigation";
+import { TastoInstalla } from "@/components/InstallaApp";
 import { getSessione } from "@/lib/dati";
 
 export default async function Benvenuto({ searchParams }: { searchParams: Promise<Record<string, string | string[] | undefined>> }) {
@@ -19,6 +20,7 @@ export default async function Benvenuto({ searchParams }: { searchParams: Promis
       <div className="welcome__brand">
         <span className="logo logo--lockup" role="img" aria-label="Privilege Shopping Club" />
         <p className="t-body-l">La tua tessera, i punti e le offerte riservate ai soci, sempre in tasca.</p>
+        <TastoInstalla grande />
       </div>
       <div className="welcome__actions">
         <Link href="/collega-tessera" className="psc-btn psc-btn--primary psc-btn--block">Ho già la tessera</Link>
