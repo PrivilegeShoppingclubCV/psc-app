@@ -83,7 +83,7 @@ export function PrendiFotoSito() {
 
   return (
     <div className="admin-foto-sito">
-      <button type="button" className="psc-btn psc-btn--secondary" onClick={avvia} disabled={inCorso} title={`Cerca le foto in ${FOTO_SITO_BASE}/verticali/`}>
+      <button type="button" className="psc-btn psc-btn--secondary" onClick={avvia} disabled={inCorso} title={`Le foto nuove si collegano da sole quando lo strumento foto le carica. Questo serve solo per quelle caricate prima: cerca in ${FOTO_SITO_BASE}/verticali/`}>
         {inCorso ? "Cerco…" : "Prendi foto dal sito"}
       </button>
       {stato && <p className="t-caption" role="status">{stato}</p>}
