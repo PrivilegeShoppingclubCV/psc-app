@@ -5,9 +5,12 @@ import { Esito } from "@/components/admin/Esito";
 import { dataBreve, urlBucket } from "@/lib/admin/form";
 import { richiediAdmin } from "@/lib/admin/sessione";
 import { formatEuro } from "@/lib/format";
-import { rigeneraVetrina } from "./azioni";
+import { cercaFotoSito, rigeneraVetrina } from "./azioni";
+import { FOTO_SITO_BASE, urlImmagine } from "@/lib/foto-sito";
 
 export const metadata: Metadata = { title: "Prodotti" };
+// "Prendi foto dal sito" controlla una foto per ogni prodotto senza foto: può volerci un po'.
+export const maxDuration = 300;
 
 const PER_PAGINA = 50;
 const FILTRI = [
@@ -63,6 +66,11 @@ export default async function Prodotti({ searchParams }: { searchParams: Promise
           <p className="t-caption">Ultimo import: {ultimo.data?.importato_il ? dataBreve(ultimo.data.importato_il) : "mai"}</p>
         </div>
         <div className="admin-azioni">
+          <form action={cercaFotoSito}>
+            <button className="psc-btn psc-btn--secondary" title={`Cerca le foto in ${FOTO_SITO_BASE}/verticali/`}>
+              Prendi foto dal sito
+            </button>
+          </form>
           <Link href="/admin/prodotti/foto" className="psc-btn psc-btn--secondary">Carica foto</Link>
           <Link href="/admin/prodotti/importa" className="psc-btn psc-btn--primary">Importa da Excel</Link>
         </div>
@@ -81,7 +89,7 @@ export default async function Prodotti({ searchParams }: { searchParams: Promise
             {(vetrina.data as { id: string; ean: string; descrizione: string; marca: string | null; prezzo_soci: number; immagine_path: string }[]).map((p) => (
               <li key={p.id}>
                 <Link href={`/admin/prodotti/${p.id}`}>
-                  <img src={`${foto}/${p.immagine_path}`} alt="" />
+                  <img src={urlImmagine(foto, p.immagine_path)} alt="" />
                   <span>{p.descrizione}</span>
                   <span className="t-caption">{formatEuro(p.prezzo_soci)}</span>
                 </Link>
@@ -125,7 +133,7 @@ export default async function Prodotti({ searchParams }: { searchParams: Promise
             <tbody>
               {prodotti.map((p) => (
                 <tr key={p.id}>
-                  <td>{p.immagine_path ? <img className="thumb" src={`${foto}/${p.immagine_path}`} alt="" /> : <span className="thumb" style={{ display: "block" }} />}</td>
+                  <td>{p.immagine_path ? <img className="thumb" src={urlImmagine(foto, p.immagine_path)} alt="" /> : <span className="thumb" style={{ display: "block" }} />}</td>
                   <td>
                     <Link href={`/admin/prodotti/${p.id}`}>{p.descrizione}</Link>
                     <div className="t-caption">{[p.marca, p.colore, p.taglia].filter(Boolean).join(" · ")}</div>

@@ -202,7 +202,10 @@ function daProdotto(supabase: NonNullable<Awaited<ReturnType<typeof getSupabase>
     scadenza: null,
     // I prodotti li vedono solo i soci: il bollino su ogni card sarebbe ripetitivo.
     soloTesserati: false,
-    immagineUrl: supabase.storage.from("prodotti").getPublicUrl(p.immagine_path).data.publicUrl,
+    // Foto dal sito (URL completo) o dal bucket "prodotti".
+    immagineUrl: /^https?:\/\//i.test(p.immagine_path)
+      ? p.immagine_path
+      : supabase.storage.from("prodotti").getPublicUrl(p.immagine_path).data.publicUrl,
   };
 }
 
