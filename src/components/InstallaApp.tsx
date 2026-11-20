@@ -7,6 +7,7 @@ import { IconChiudi, IconInstalla } from "./Icons";
 // Banner "Installa l'app" in Home e tasto "Installa" nell'intestazione.
 // - Android/Chrome (e Edge desktop): il pulsante apre l'installazione del browser.
 // - iPhone/iPad: si spiega come aggiungerla dal tasto Condividi di Safari.
+// - Altri telefoni: si spiega come farlo dal menu del browser.
 // Nessuno dei due compare se l'app è già aperta dalla schermata Home.
 // Il banner si può chiudere per sempre; il tasto in alto resta, così chi
 // l'ha chiuso può installarla quando vuole.
@@ -47,15 +48,20 @@ export function InstallaApp() {
           <p className="installa__testo">La apri con un tocco, come le altre app, e la tessera è sempre a portata di mano.</p>
           <button type="button" className="psc-btn psc-btn--primary psc-btn--block" onClick={installaAndroid}>Installa l&apos;app</button>
         </>
-      ) : (
+      ) : tipo === "ios" ? (
         <PassiIOS />
+      ) : (
+        <PassiMenu />
       )}
     </aside>
   );
 }
 
-/** Tasto piccolo nell'intestazione, su tutte le pagine del club. */
-export function TastoInstalla() {
+/**
+ * Tasto "Installa l'app": piccolo nell'intestazione delle pagine del club,
+ * grande nella pagina di benvenuto (la prima che si vede aprendo l'app).
+ */
+export function TastoInstalla({ grande = false }: { grande?: boolean }) {
   const tipo = useInstallazione();
   const dialog = useRef<HTMLDialogElement>(null);
 
@@ -65,11 +71,11 @@ export function TastoInstalla() {
 
   return (
     <>
-      <button type="button" className="installa-tasto" onClick={premi}>
+      <button type="button" className={grande ? "psc-btn psc-btn--secondary psc-btn--block installa-grande" : "installa-tasto"} onClick={premi}>
         <IconInstalla />
         Installa l&apos;app
       </button>
-      {tipo === "ios" && (
+      {tipo !== "android" && (
         <dialog
           ref={dialog}
           className="installa-dialog"
@@ -81,7 +87,7 @@ export function TastoInstalla() {
               <IconChiudi />
             </button>
             <h2 id="installa-dialog-titolo" className="installa__titolo">Metti l&apos;app sulla schermata Home</h2>
-            <PassiIOS />
+            {tipo === "ios" ? <PassiIOS /> : <PassiMenu />}
           </div>
         </dialog>
       )}
@@ -95,6 +101,21 @@ const PassiIOS = () => (
     <li>Tocca <strong>Condividi</strong> <IconCondividi /> in basso (o in alto su iPad).</li>
     <li>Scegli <strong>Aggiungi alla schermata Home</strong>, poi <strong>Aggiungi</strong>.</li>
   </ol>
+);
+
+const PassiMenu = () => (
+  <ol className="installa__passi">
+    <li>Tocca il menu del browser <IconMenu /> (in alto a destra, o in basso su Samsung Internet).</li>
+    <li>Scegli <strong>Installa app</strong> oppure <strong>Aggiungi a schermata Home</strong>.</li>
+    <li>Conferma con <strong>Installa</strong> o <strong>Aggiungi</strong>.</li>
+  </ol>
+);
+
+// I tre puntini del menu di Chrome.
+const IconMenu = () => (
+  <svg className="installa__icona" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+    <circle cx="12" cy="5" r="1.8" /><circle cx="12" cy="12" r="1.8" /><circle cx="12" cy="19" r="1.8" />
+  </svg>
 );
 
 // Il simbolo del tasto Condividi di Safari, per riconoscerlo.
