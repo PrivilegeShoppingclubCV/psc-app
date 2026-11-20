@@ -5,12 +5,11 @@ import { Esito } from "@/components/admin/Esito";
 import { dataBreve, urlBucket } from "@/lib/admin/form";
 import { richiediAdmin } from "@/lib/admin/sessione";
 import { formatEuro } from "@/lib/format";
-import { cercaFotoSito, rigeneraVetrina } from "./azioni";
-import { FOTO_SITO_BASE, urlImmagine } from "@/lib/foto-sito";
+import { rigeneraVetrina } from "./azioni";
+import { urlImmagine } from "@/lib/foto-sito";
+import { PrendiFotoSito } from "./PrendiFotoSito";
 
 export const metadata: Metadata = { title: "Prodotti" };
-// "Prendi foto dal sito" controlla una foto per ogni prodotto senza foto: può volerci un po'.
-export const maxDuration = 300;
 
 const PER_PAGINA = 50;
 const FILTRI = [
@@ -66,11 +65,7 @@ export default async function Prodotti({ searchParams }: { searchParams: Promise
           <p className="t-caption">Ultimo import: {ultimo.data?.importato_il ? dataBreve(ultimo.data.importato_il) : "mai"}</p>
         </div>
         <div className="admin-azioni">
-          <form action={cercaFotoSito}>
-            <button className="psc-btn psc-btn--secondary" title={`Cerca le foto in ${FOTO_SITO_BASE}/verticali/`}>
-              Prendi foto dal sito
-            </button>
-          </form>
+          <PrendiFotoSito />
           <Link href="/admin/prodotti/foto" className="psc-btn psc-btn--secondary">Carica foto</Link>
           <Link href="/admin/prodotti/importa" className="psc-btn psc-btn--primary">Importa da Excel</Link>
         </div>

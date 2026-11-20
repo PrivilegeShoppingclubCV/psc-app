@@ -90,3 +90,6 @@ a.admin-stat:hover { border-color: var(--ink); }
 .admin-vetrina a { display: flex; flex-direction: column; gap: var(--space-1); text-decoration: none; color: var(--ink); font-size: 13px; line-height: 18px; position: relative; }
 .admin-vetrina a::before { content: counter(vetrina); position: absolute; top: var(--space-1); left: var(--space-1); background: var(--surface-brand); color: var(--ink-on-brand); border-radius: var(--radius-xs); padding: 0 6px; font-size: 11px; }
 .admin-vetrina img { width: 100%; aspect-ratio: 4 / 5; object-fit: cover; border-radius: var(--radius-sm); background: var(--surface-alt); }
+
+/* Prodotti → «Prendi foto dal sito» */
+.admin-foto-sito { display: flex; flex-direction: column; gap: var(--space-1, 4px); max-width: 420px; }
