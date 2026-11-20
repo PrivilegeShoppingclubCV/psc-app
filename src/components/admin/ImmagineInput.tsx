@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { createClient } from "@/lib/supabase/client";
+import { urlImmagine } from "@/lib/foto-sito";
 
 const TIPI = ["image/jpeg", "image/png", "image/webp", "image/avif"];
 const MAX = 5 * 1024 * 1024;
@@ -45,7 +46,7 @@ export function ImmagineInput({ bucket, name = "immagine_path", valore, urlBase,
     <div className="admin-immagine">
       <input type="hidden" name={name} value={percorso} />
       <div className="admin-immagine__anteprima">
-        {percorso ? <img src={`${urlBase}/${percorso}`} alt="" /> : <span className="t-caption">Nessuna immagine</span>}
+        {percorso ? <img src={urlImmagine(urlBase, percorso)} alt="" /> : <span className="t-caption">Nessuna immagine</span>}
       </div>
       <div className="admin-immagine__azioni">
         <label className="psc-btn psc-btn--secondary">
