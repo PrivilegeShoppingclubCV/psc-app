@@ -1,27 +1,17 @@
 "use client";
 
-import { useEffect, useState } from "react";
-import { IconChiudi } from "./Icons";
+import { useEffect, useRef, useState } from "react";
+import { installaAndroid, useInstallazione } from "@/lib/installa";
+import { IconChiudi, IconInstalla } from "./Icons";
 
-// Banner "Installa l'app" in Home.
-// - Android/Chrome (e Edge desktop): il browser offre l'installazione
-//   (beforeinstallprompt) e il pulsante la apre.
-// - iPhone/iPad: Safari non ha un'installazione da pulsante, si spiega come
-//   aggiungerla dal tasto Condividi.
-// Non compare se l'app è già aperta dalla schermata Home o se il socio l'ha chiuso.
+// Banner "Installa l'app" in Home e tasto "Installa" nell'intestazione.
+// - Android/Chrome (e Edge desktop): il pulsante apre l'installazione del browser.
+// - iPhone/iPad: si spiega come aggiungerla dal tasto Condividi di Safari.
+// Nessuno dei due compare se l'app è già aperta dalla schermata Home.
+// Il banner si può chiudere per sempre; il tasto in alto resta, così chi
+// l'ha chiuso può installarla quando vuole.
 
 const CHIAVE = "psc_installa_chiuso";
-
-interface EventoInstalla extends Event {
-  prompt: () => Promise<void>;
-  userChoice: Promise<{ outcome: "accepted" | "dismissed" }>;
-}
-
-type Stato = { tipo: "nascosto" } | { tipo: "android"; evento: EventoInstalla } | { tipo: "ios" };
-
-function giaInstallata() {
-  return window.matchMedia("(display-mode: standalone)").matches || (navigator as { standalone?: boolean }).standalone === true;
-}
 
 function chiusoDalSocio() {
   try {
@@ -32,44 +22,18 @@ function chiusoDalSocio() {
 }
 
 export function InstallaApp() {
-  const [stato, setStato] = useState<Stato>({ tipo: "nascosto" });
+  const tipo = useInstallazione();
+  const [chiuso, setChiuso] = useState(true);
 
-  useEffect(() => {
-    if (giaInstallata() || chiusoDalSocio()) return;
-    const ua = navigator.userAgent;
-    // iPadOS si presenta come Mac: lo tradisce il touch.
-    const ios = /iPhone|iPad|iPod/.test(ua) || (/Macintosh/.test(ua) && navigator.maxTouchPoints > 1);
-    if (ios) {
-      setStato({ tipo: "ios" });
-      return;
-    }
-    const offerta = (e: Event) => {
-      e.preventDefault();
-      setStato({ tipo: "android", evento: e as EventoInstalla });
-    };
-    const installata = () => setStato({ tipo: "nascosto" });
-    window.addEventListener("beforeinstallprompt", offerta);
-    window.addEventListener("appinstalled", installata);
-    return () => {
-      window.removeEventListener("beforeinstallprompt", offerta);
-      window.removeEventListener("appinstalled", installata);
-    };
-  }, []);
+  useEffect(() => setChiuso(chiusoDalSocio()), []);
 
-  if (stato.tipo === "nascosto") return null;
+  if (tipo === "nessuna" || chiuso) return null;
 
   const chiudi = () => {
     try {
       localStorage.setItem(CHIAVE, "1");
     } catch {}
-    setStato({ tipo: "nascosto" });
-  };
-
-  const installa = async () => {
-    if (stato.tipo !== "android") return;
-    await stato.evento.prompt();
-    const { outcome } = await stato.evento.userChoice;
-    if (outcome === "accepted") setStato({ tipo: "nascosto" });
+    setChiuso(true);
   };
 
   return (
@@ -78,21 +42,60 @@ export function InstallaApp() {
         <IconChiudi />
       </button>
       <h2 id="installa-titolo" className="installa__titolo">Metti l&apos;app sulla schermata Home</h2>
-      {stato.tipo === "android" ? (
+      {tipo === "android" ? (
         <>
           <p className="installa__testo">La apri con un tocco, come le altre app, e la tessera è sempre a portata di mano.</p>
-          <button type="button" className="psc-btn psc-btn--primary psc-btn--block" onClick={installa}>Installa l&apos;app</button>
+          <button type="button" className="psc-btn psc-btn--primary psc-btn--block" onClick={installaAndroid}>Installa l&apos;app</button>
         </>
       ) : (
-        <ol className="installa__passi">
-          <li>Apri questa pagina in Safari.</li>
-          <li>Tocca <strong>Condividi</strong> <IconCondividi /> in basso (o in alto su iPad).</li>
-          <li>Scegli <strong>Aggiungi alla schermata Home</strong>, poi <strong>Aggiungi</strong>.</li>
-        </ol>
+        <PassiIOS />
       )}
     </aside>
   );
 }
+
+/** Tasto piccolo nell'intestazione, su tutte le pagine del club. */
+export function TastoInstalla() {
+  const tipo = useInstallazione();
+  const dialog = useRef<HTMLDialogElement>(null);
+
+  if (tipo === "nessuna") return null;
+
+  const premi = () => (tipo === "android" ? installaAndroid() : dialog.current?.showModal());
+
+  return (
+    <>
+      <button type="button" className="installa-tasto" onClick={premi}>
+        <IconInstalla />
+        Installa l&apos;app
+      </button>
+      {tipo === "ios" && (
+        <dialog
+          ref={dialog}
+          className="installa-dialog"
+          aria-labelledby="installa-dialog-titolo"
+          onClick={(e) => e.target === e.currentTarget && dialog.current?.close()}
+        >
+          <div className="installa installa--dialog">
+            <button type="button" className="installa__chiudi" onClick={() => dialog.current?.close()} aria-label="Chiudi">
+              <IconChiudi />
+            </button>
+            <h2 id="installa-dialog-titolo" className="installa__titolo">Metti l&apos;app sulla schermata Home</h2>
+            <PassiIOS />
+          </div>
+        </dialog>
+      )}
+    </>
+  );
+}
+
+const PassiIOS = () => (
+  <ol className="installa__passi">
+    <li>Apri questa pagina in Safari.</li>
+    <li>Tocca <strong>Condividi</strong> <IconCondividi /> in basso (o in alto su iPad).</li>
+    <li>Scegli <strong>Aggiungi alla schermata Home</strong>, poi <strong>Aggiungi</strong>.</li>
+  </ol>
+);
 
 // Il simbolo del tasto Condividi di Safari, per riconoscerlo.
 const IconCondividi = () => (

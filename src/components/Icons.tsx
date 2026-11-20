@@ -36,3 +36,6 @@ export const IconChiudi = (p: P) => (
 export const IconIndietro = (p: P) => (
   <svg {...base(p)}><path d="M15 5l-7 7 7 7" /></svg>
 );
+export const IconInstalla = (p: P) => (
+  <svg {...base(p)}><path d="M12 4v11M7.5 10.5 12 15l4.5-4.5" /><path d="M5 19.5h14" /></svg>
+);

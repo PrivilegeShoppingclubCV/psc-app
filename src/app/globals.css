@@ -140,3 +140,19 @@ button { font: inherit; }
 .installa__icona { display: inline-block; width: 18px; height: 18px; vertical-align: -3px; }
 .installa__chiudi { position: absolute; top: var(--space-2); right: var(--space-2); width: 40px; height: 40px; display: grid; place-items: center; background: none; border: 0; color: var(--ink-muted); cursor: pointer; }
 .installa__chiudi svg { width: 20px; height: 20px; }
+
+/* Tasto "Installa l'app" nell'intestazione: resta anche se il banner è stato chiuso. */
+.app-header__azioni { display: flex; align-items: center; gap: var(--space-2); }
+.installa-tasto {
+  display: inline-flex; align-items: center; gap: var(--space-1); min-height: 36px; padding: 0 var(--space-3);
+  border: 1px solid var(--line-strong); border-radius: var(--radius-pill); background: var(--surface); color: var(--ink);
+  font-family: var(--font-label); font-size: 10px; line-height: 16px; font-weight: 600; letter-spacing: 0.14em; text-transform: uppercase; white-space: nowrap;
+  cursor: pointer;
+}
+.installa-tasto svg { width: 16px; height: 16px; }
+.installa-tasto:focus-visible { outline: 2px solid var(--focus); outline-offset: 2px; }
+.installa-dialog { width: min(100% - 2 * var(--space-4), 420px); margin: auto auto calc(var(--safe-bottom) + var(--space-4)); padding: 0; border: 0; border-radius: var(--radius-md); background: var(--surface); color: var(--ink); }
+.installa-dialog::backdrop { background: rgba(9, 29, 16, 0.45); }
+.installa-dialog[open] { animation: sheet-up .22s ease-out; }
+.installa--dialog { border: 0; background: var(--surface); }
+@media (prefers-reduced-motion: reduce) { .installa-dialog[open] { animation: none; } }
