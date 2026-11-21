@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import { redirect } from "next/navigation";
 import { AuthPage, param } from "@/components/AuthPage";
-import { CampoCodice } from "@/components/CampoCodice";
+import { CampoCodice, TastoEntra } from "@/components/CampoCodice";
 import { accedi, verifica } from "../accesso/azioni";
 
 export const metadata: Metadata = { title: "Controlla la posta" };
@@ -27,7 +27,7 @@ export default async function Verifica({ searchParams }: { searchParams: Promise
         <input type="hidden" name="email" value={email} />
         <input type="hidden" name="dopo" value={dopo} />
         <CampoCodice />
-        <button type="submit" className="psc-btn psc-btn--primary psc-btn--block">Entra</button>
+        <TastoEntra />
       </form>
 
       <form action={accedi}>
