@@ -52,6 +52,10 @@ export const dataOra = (iso: string | null) =>
 export const dataBreve = (iso: string | null) =>
   iso ? new Intl.DateTimeFormat("it-IT", { timeZone: FUSO, day: "2-digit", month: "2-digit", year: "numeric" }).format(new Date(iso)) : "—";
 
+/** Data di un movimento punti: le vendite importate senza ora sono a mezzanotte UTC e si mostrano come sola data. */
+export const dataMovimento = (iso: string | null) =>
+  iso && new Date(iso).toISOString().endsWith("T00:00:00.000Z") ? dataBreve(iso) : dataOra(iso);
+
 /** Indirizzo con l'esito dell'operazione, letto da <Esito> in cima alla pagina. */
 export const conEsito = (pagina: string, esito: { ok?: string; errore?: string }) => {
   const [percorso, query = ""] = pagina.split("?");

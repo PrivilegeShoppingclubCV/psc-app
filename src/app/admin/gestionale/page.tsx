@@ -92,7 +92,7 @@ export default async function Gestionale({ searchParams }: { searchParams: Promi
       <Mappatura
         tipo="vendite"
         titolo="Colonne del CSV vendite (punti)"
-        campi="numero_tessera e importo (obbligatori), riferimento (id univoco della vendita: senza, un reinvio raddoppierebbe i punti), data, negozio, descrizione. Se il file ha già i punti calcolati, mappa punti al posto di importo."
+        campi="numero_tessera e importo (obbligatori), riferimento (id univoco della vendita: senza, un reinvio raddoppierebbe i punti), data, ora (se manca, si mostra solo la data), negozio, descrizione. Se il file ha già i punti calcolati, mappa punti al posto di importo."
         valore={valore("gestionale_mappatura_vendite")}
         daElaborare={daElaborareVendite}
       >

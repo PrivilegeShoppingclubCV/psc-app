@@ -1,7 +1,7 @@
 const euro = new Intl.NumberFormat("it-IT", { style: "currency", currency: "EUR" });
 // "always": in italiano Intl non separa le migliaia sotto 10.000 (1240), il design system vuole 1.240.
 const numero = new Intl.NumberFormat("it-IT", { useGrouping: "always" });
-const data = new Intl.DateTimeFormat("it-IT", { day: "numeric", month: "long", year: "numeric" });
+const data = new Intl.DateTimeFormat("it-IT", { day: "numeric", month: "long", year: "numeric", timeZone: "Europe/Rome" });
 
 export const formatEuro = (v: number) => euro.format(v);
 export const formatPunti = (v: number) => numero.format(v);
