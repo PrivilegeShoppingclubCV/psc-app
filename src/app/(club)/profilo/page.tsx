@@ -22,10 +22,14 @@ export default async function Profilo({ searchParams }: { searchParams: Promise<
       <section className="section" aria-labelledby="dati">
         <h2 id="dati" className="t-title">I tuoi dati</h2>
         {param(q.salvato) && <p className="notice notice--ok" role="status">Dati salvati. Arrivano alle casse dei negozi in pochi minuti.</p>}
+        {param(q.segnalato) && <p className="notice notice--ok" role="status">Grazie, abbiamo ricevuto la segnalazione: sistemiamo il dato al più presto.</p>}
         <ul className="list">
+          <li><span className="t-caption">Nome</span><span>{socio.nome || nonIndicato}</span></li>
+          <li><span className="t-caption">Cognome</span><span>{socio.cognome || nonIndicato}</span></li>
           <li><span className="t-caption">Email</span><span>{socio.email}</span></li>
           <li><span className="t-caption">Cellulare</span><span>{r.telefono || nonIndicato}</span></li>
           <li><span className="t-caption">Data di nascita</span><span>{r.nascita ? formatData(r.nascita) : nonIndicato}</span></li>
+          <li><span className="t-caption">Indirizzo</span><span>{r.indirizzo || nonIndicato}</span></li>
           <li><span className="t-caption">CAP e città</span><span>{[r.cap, r.citta].filter(Boolean).join(" ") || nonIndicato}</span></li>
           {socio.tessere.map((t) => (
             <li key={t.codice}>
@@ -36,6 +40,7 @@ export default async function Profilo({ searchParams }: { searchParams: Promise<
           <li><span className="t-caption">Socio dal</span><span>{formatData(socio.iscrittoDal)}</span></li>
         </ul>
         <Link href="/profilo/dati" className="psc-btn psc-btn--secondary psc-btn--block">Modifica i tuoi dati</Link>
+        <Link href="/profilo/segnala" className="psc-btn psc-btn--ghost psc-btn--block">Un dato è sbagliato? Segnalacelo</Link>
       </section>
 
       <section className="section" aria-labelledby="invita">
