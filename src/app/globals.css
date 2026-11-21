@@ -43,7 +43,8 @@ button { font: inherit; }
   display: flex; flex-direction: column; gap: var(--space-8);
 }
 .app-header { display: flex; align-items: center; justify-content: space-between; gap: var(--space-3); min-height: var(--space-12); }
-.app-header .logo--crown { width: 40px; color: var(--ink); }
+/* Corona con la scritta Privilege Shopping Club, come nella pagina di benvenuto. */
+.app-header .logo--lockup { width: 92px; color: var(--ink); }
 .app-main { display: flex; flex-direction: column; gap: var(--space-8); }
 .page-head { display: flex; flex-direction: column; gap: var(--space-2); }
 .section { display: flex; flex-direction: column; gap: var(--space-4); }

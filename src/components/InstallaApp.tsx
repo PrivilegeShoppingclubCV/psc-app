@@ -68,7 +68,7 @@ export function TastoInstalla() {
     <>
       <button type="button" className="installa-tasto" onClick={() => premiInstalla(tipo, dialog.current)}>
         <IconInstalla />
-        Installa l&apos;app
+        Installa
       </button>
       <FinestraPassi tipo={tipo} ref={dialog} />
     </>

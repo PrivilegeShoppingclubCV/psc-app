@@ -11,7 +11,7 @@ export default async function ClubLayout({ children }: { children: React.ReactNo
       <div className="app">
         <header className="app-header">
           <Link href="/home" aria-label="Privilege Shopping Club, vai alla Home">
-            <span className="logo logo--crown" />
+            <span className="logo logo--lockup" />
           </Link>
           <div className="app-header__azioni">
             <TastoInstalla />
