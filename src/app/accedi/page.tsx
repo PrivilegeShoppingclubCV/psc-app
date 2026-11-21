@@ -18,7 +18,7 @@ export default async function Accedi({ searchParams }: { searchParams: Promise<R
     <AuthPage
       eyebrow={admin ? "Pannello admin" : "Accedi"}
       titolo={admin ? "Accedi al pannello" : "Accedi al club"}
-      intro="Ti mandiamo un link via email: niente password da ricordare."
+      intro="Ti mandiamo un codice di 6 cifre via email: niente password da ricordare."
       errore={param(q.errore)}
     >
       <form action={accedi}>

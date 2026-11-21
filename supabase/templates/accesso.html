@@ -8,22 +8,21 @@
 <title>Entra nel Privilege Shopping Club</title>
 </head>
 <!--
-  Email di accesso dell'app Privilege Shopping Club: bottone con il link e,
-  sotto, il codice ({{ .Token }}) per chi usa l'app installata sulla schermata
-  Home, dove il link si aprirebbe nel browser.
-  Il link porta dritto a /auth/callback con {{ .TokenHash }}: a differenza di
-  {{ .ConfirmationURL }} funziona in qualsiasi browser e non dipende dai
-  Redirect URLs. Richiede che la Site URL sia l'indirizzo di produzione.
+  Email di accesso dell'app Privilege Shopping Club: solo il codice di 6 cifre
+  ({{ .Token }}) da scrivere nell'app. Niente link: aperto dall'app installata
+  finirebbe nel browser predefinito, fuori dall'app.
   Da incollare su Supabase in Authentication → Emails → Templates, sia in
   "Magic Link" sia in "Confirm signup". Oggetto consigliato:
-    Entra nel Privilege Shopping Club
+    Il tuo codice per il Privilege Shopping Club
+  La lunghezza del codice si imposta in Authentication → Sign In / Providers →
+  Email → "Email OTP Length": 6.
   Solo tabelle e stili in linea: è quello che le app di posta leggono tutte.
   Il logo è un PNG servito dall'app (gli SVG in Gmail non si vedono).
 -->
 <body style="margin:0;padding:0;background-color:#f3f6f4;">
   <!-- Anteprima nella lista delle email -->
   <div style="display:none;max-height:0;overflow:hidden;mso-hide:all;font-size:1px;line-height:1px;color:#f3f6f4;">
-    Tocca il bottone per entrare nel club. Il link vale per poco tempo.
+    Il tuo codice è {{ .Token }}. Scrivilo nell'app per entrare.
   </div>
 
   <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="background-color:#f3f6f4;">
@@ -46,38 +45,21 @@
                 Accesso al club
               </p>
               <h1 style="margin:0 0 16px;font-family:Georgia,'Times New Roman',serif;font-size:28px;line-height:34px;font-weight:normal;color:#113f2d;">
-                Entra con un tocco
+                Il tuo codice
               </h1>
               <p style="margin:0 0 24px;font-size:15px;line-height:22px;color:#4a5b53;">
-                Tocca il bottone per entrare. Il link vale per poco tempo e si usa una volta sola: se ne hai chiesti più di uno, usa l'ultimo.
+                Scrivi queste 6 cifre nell'app per entrare. Il codice vale per poco tempo e si usa una volta sola: se ne hai chiesti più di uno, usa l'ultimo.
               </p>
             </td>
           </tr>
 
-          <!-- Bottone -->
+          <!-- Codice -->
           <tr>
             <td align="center" style="padding:0 32px 28px;">
               <table role="presentation" cellpadding="0" cellspacing="0" border="0">
                 <tr>
-                  <td align="center" bgcolor="#113f2d" style="border-radius:999px;">
-                    <a href="{{ .SiteURL }}/auth/callback?token_hash={{ .TokenHash }}&type=email" target="_blank"
-                       style="display:inline-block;padding:16px 40px;font-family:'Helvetica Neue',Helvetica,Arial,sans-serif;font-size:16px;line-height:20px;font-weight:600;color:#ffffff;text-decoration:none;border-radius:999px;">
-                      Entra nel club
-                    </a>
-                  </td>
-                </tr>
-              </table>
-            </td>
-          </tr>
-
-          <!-- Codice, per l'app installata -->
-          <tr>
-            <td style="padding:0 32px 28px;font-family:'Helvetica Neue',Helvetica,Arial,sans-serif;">
-              <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0">
-                <tr>
-                  <td style="background-color:#f3f6f4;border-radius:8px;padding:14px 16px;font-size:13px;line-height:19px;color:#4a5b53;">
-                    Usi l'app installata sulla schermata Home? Tocca «Nell'email c'è anche un codice?» e inserisci
-                    <span style="font-family:'SFMono-Regular',Menlo,Consolas,'Courier New',monospace;font-size:15px;letter-spacing:3px;font-weight:bold;color:#113f2d;white-space:nowrap;">{{ .Token }}</span>
+                  <td align="center" style="background-color:#f3f6f4;border-radius:12px;padding:18px 28px;font-family:'SFMono-Regular',Menlo,Consolas,'Courier New',monospace;font-size:34px;line-height:40px;letter-spacing:10px;font-weight:bold;color:#113f2d;white-space:nowrap;">
+                    {{ .Token }}
                   </td>
                 </tr>
               </table>
@@ -87,7 +69,7 @@
           <tr>
             <td style="padding:0 32px 36px;font-family:'Helvetica Neue',Helvetica,Arial,sans-serif;">
               <p style="margin:0;font-size:13px;line-height:19px;color:#4a5b53;">
-                Non hai chiesto tu di entrare? Puoi ignorare questa email: senza questo link nessuno può entrare nel tuo account.
+                Non hai chiesto tu di entrare? Puoi ignorare questa email: senza questo codice nessuno può entrare nel tuo account.
               </p>
             </td>
           </tr>

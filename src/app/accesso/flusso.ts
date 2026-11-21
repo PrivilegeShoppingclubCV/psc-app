@@ -1,4 +1,5 @@
-// Accesso con link via email (magic link), collegamento della tessera, iscrizione, uscita.
+// Accesso con codice di 6 cifre via email, collegamento della tessera, iscrizione, uscita.
+// (Dal 2026-11-21 l'email non ha più il link: /auth/callback resta solo per le email vecchie.)
 //
 // L'email si verifica sempre prima di toccare la tessera: chi compila "Ho già la
 // tessera" o "Voglio iscrivermi" senza aver fatto l'accesso riceve un link, e i
@@ -59,7 +60,7 @@ export function messaggioAuth(e: { message: string; code?: string; status?: numb
   if (e.status === 429 || e.code === "over_email_send_rate_limit" || e.code === "over_request_rate_limit")
     return "Sono state chieste troppe email di accesso: riprova tra qualche minuto.";
   if (e.code === "otp_expired" || e.code === "invalid_credentials" || /expired|invalid/i.test(e.message))
-    return "Link o codice scaduto: chiedi una nuova email e usa l'ultima che ricevi.";
+    return "Codice sbagliato o scaduto: controlla le cifre oppure chiedi un nuovo codice e usa l'ultimo che ricevi.";
   if (e.code === "email_address_invalid" || /email/i.test(e.message)) return "Controlla l'indirizzo email.";
   return "Qualcosa non ha funzionato. Riprova tra poco.";
 }
