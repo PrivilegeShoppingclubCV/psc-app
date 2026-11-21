@@ -63,8 +63,9 @@ export function ApriTessera({ socio }: { socio: Socio }) {
               <span className="psc-code">{numero}</span>
               <span className="psc-badge psc-badge--warning">Appena creata</span>
               <p className="psc-hint">
-                La stiamo registrando nelle casse dei negozi, di solito in pochi minuti.
-                Se la cassa non la riconosce, riprova tra un po&apos;.
+                {socio.daUnire
+                  ? "In cassa usa la tessera fatta in negozio: alla prossima visita uniamo le due tessere."
+                  : <>La stiamo registrando nelle casse dei negozi, di solito in pochi minuti. Se la cassa non la riconosce, riprova tra un po&apos;.</>}
               </p>
             </>
           ) : (

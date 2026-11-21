@@ -7,7 +7,7 @@ import { Esito } from "@/components/admin/Esito";
 import { dataBreve, dataMovimento } from "@/lib/admin/form";
 import { richiediAdmin } from "@/lib/admin/sessione";
 import { formatPunti, formatTessera } from "@/lib/format";
-import { assegnaTesseraFisica, bloccaTessera, collegaConCodice, registraPunti, salvaSocio, scollegaAccount, unisciSoci } from "../azioni";
+import { annullaUnione, assegnaTesseraFisica, bloccaTessera, collegaConCodice, registraPunti, salvaSocio, scollegaAccount, unisciDaApp, unisciSoci } from "../azioni";
 import { CampoData } from "@/components/CampoData";
 
 export const metadata: Metadata = { title: "Socio" };
@@ -41,6 +41,9 @@ export default async function SchedaSocio({ params, searchParams }: {
   ]);
   const s = socio.data;
   if (!s) notFound();
+  // Iscritti dall'app con il cellulare di una scheda senza email: da unire in negozio.
+  const { data: daUnire } = await supabase.from("soci").select("id, nome, cognome, email, da_unire_con")
+    .or(`id.eq.${s.da_unire_con ?? "00000000-0000-0000-0000-000000000000"},da_unire_con.eq.${s.id}`);
 
   const nome = [s.nome, s.cognome].filter(Boolean).join(" ") || "Senza nome";
   const opzioniNegozi = [{ value: "", label: "Nessuno" }, ...(negozi.data ?? []).map((n) => ({ value: n.id, label: n.nome }))];
@@ -67,6 +70,35 @@ export default async function SchedaSocio({ params, searchParams }: {
         </div>
       </div>
       <Esito q={q} />
+      {(daUnire ?? []).map((altra) => {
+        // "app" è la scheda nata dall'app, "vecchia" quella con la tessera di ReadyPro.
+        const app = altra.da_unire_con === s.id ? altra.id : s.id;
+        const vecchia = altra.da_unire_con === s.id ? s.id : altra.id;
+        return (
+          <section key={altra.id} className="admin-card">
+            <h2 className="t-title">Probabile doppione da unire</h2>
+            <p className="t-body">
+              {app === s.id
+                ? <>Questa scheda è nata dall&apos;app con lo stesso cellulare di {chi(altra)}, che in negozio non aveva lasciato un&apos;email. </>
+                : <>{chi(altra)} si è iscritto dall&apos;app con lo stesso cellulare di questa scheda, che non ha un&apos;email. </>}
+              Chiedi conferma al cliente quando passa in negozio. Finché non decidi, la tessera digitale dell&apos;app non va a ReadyPro.
+            </p>
+            <div className="admin-azioni">
+              <form action={unisciDaApp}>
+                <input type="hidden" name="tieni" value={vecchia} />
+                <input type="hidden" name="togli" value={app} />
+                <input type="hidden" name="pagina" value={s.id} />
+                <Conferma messaggio="Unire le due schede? Resta la tessera fisica, con i punti di tutte e due. L'operazione non si annulla.">È la stessa persona: unisci</Conferma>
+              </form>
+              <form action={annullaUnione}>
+                <input type="hidden" name="id" value={app} />
+                <input type="hidden" name="pagina" value={s.id} />
+                <button type="submit" className="psc-btn psc-btn--secondary">Non è la stessa persona</button>
+              </form>
+            </div>
+          </section>
+        );
+      })}
 
       <div className="admin-cols">
         <form action={salvaSocio} className="admin-card admin-form">

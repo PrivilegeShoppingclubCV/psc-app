@@ -16,6 +16,7 @@ export default async function DaCompletare({ searchParams }: { searchParams: Pro
   const { supabase } = await richiediAdmin();
   const { clienti, error } = await clientiDaCompletare(supabase, dal);
   const senzaTessera = clienti.filter((c) => !c.tessera).length;
+  const senzaEmail = clienti.filter((c) => !c.email).length;
 
   return (
     <>
@@ -28,9 +29,10 @@ export default async function DaCompletare({ searchParams }: { searchParams: Pro
       </div>
       <Esito q={error ? { errore: error.message } : q} />
       <p className="t-body">
-        Clienti di ReadyPro con nome, cognome ed email ma senza cellulare e/o senza codice tessera, iscritti dal giorno scelto.
+        Clienti di ReadyPro con nome e cognome a cui manca l&apos;email, il cellulare o il codice tessera, iscritti dal giorno scelto.
         Vengono dagli ultimi file clienti ricevuti (gli ordini Amazon ed eBay sono esclusi). Si completano in ReadyPro: cerca il
-        cliente per ID e aggiungi cellulare e tessera. Se il socio ha già scritto il cellulare nell&apos;app, lo trovi nell&apos;ultima colonna.
+        cliente per ID e aggiungi quello che manca, chiedendolo al cliente quando passa in negozio. Se il socio ha già collegato la
+        tessera nell&apos;app, nelle ultime colonne trovi il cellulare e l&apos;email che ha lì.
       </p>
 
       <form className="admin-cerca" action="/admin/soci/da-completare">
@@ -42,7 +44,7 @@ export default async function DaCompletare({ searchParams }: { searchParams: Pro
       </form>
 
       <p className="t-caption">
-        {clienti.length} clienti, di cui {senzaTessera} senza tessera.
+        {clienti.length} clienti: {senzaEmail} senza email, {senzaTessera} senza tessera.
         {clienti.length > MOSTRATI && ` Qui ne vedi ${MOSTRATI}: scarica il CSV per l'elenco completo.`}
       </p>
 
@@ -50,7 +52,7 @@ export default async function DaCompletare({ searchParams }: { searchParams: Pro
         <div className="admin-table-wrap">
           <table className="admin-table">
             <thead>
-              <tr><th>ID ReadyPro</th><th>Cliente</th><th>Manca</th><th>Tessera</th><th>Iscritto</th><th>Cellulare in app</th></tr>
+              <tr><th>ID ReadyPro</th><th>Cliente</th><th>Manca</th><th>Tessera</th><th>Iscritto</th><th>Cellulare in app</th><th>Email in app</th></tr>
             </thead>
             <tbody>
               {clienti.slice(0, MOSTRATI).map((c, i) => (
@@ -58,12 +60,13 @@ export default async function DaCompletare({ searchParams }: { searchParams: Pro
                   <td className="min">{c.id_readypro ?? "—"}</td>
                   <td>
                     {c.nome} {c.cognome}
-                    <div className="t-caption">{c.email}{c.cellulare ? ` · ${c.cellulare}` : ""}</div>
+                    <div className="t-caption">{[c.email, c.cellulare].filter(Boolean).join(" · ")}</div>
                   </td>
                   <td>{c.manca}</td>
                   <td className="min">{c.tessera ?? "—"}</td>
                   <td className="min">{dataBreve(c.iscritto_il)}</td>
                   <td className="min">{c.telefono_app ?? ""}</td>
+                  <td className="min">{c.email_app ?? ""}</td>
                 </tr>
               ))}
             </tbody>

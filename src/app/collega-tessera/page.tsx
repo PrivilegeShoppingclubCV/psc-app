@@ -20,7 +20,7 @@ export default async function CollegaTessera({ searchParams }: { searchParams: P
       eyebrow="Ho già la tessera"
       titolo="Collega la tua tessera"
       intro={conAccesso
-        ? <>Inserisci il numero stampato sulla tessera. Deve essere quella registrata in negozio con <strong>{email}</strong>.</>
+        ? <>Inserisci il numero stampato sulla tessera. Deve essere quella registrata in negozio con <strong>{email}</strong>. Se in negozio non hai lasciato un&apos;email, o ne hai lasciata un&apos;altra, tocca il pulsante qui sotto: alla cassa colleghiamo la tessera e aggiorniamo la tua email.</>
         : "Inserisci il numero stampato sulla tessera e l'email che hai lasciato in negozio."}
       errore={param(q.errore)}
     >
