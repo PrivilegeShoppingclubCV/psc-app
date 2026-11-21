@@ -18,6 +18,18 @@ export async function aggiungiOperatoreFoto(form: FormData) {
   redirect(conEsito(PAGINA, error ? { errore: messaggioDb(error) } : { ok: `${email} ora può generare le foto.` }));
 }
 
+export async function impostaCostoFoto(form: FormData) {
+  const { supabase } = await richiediAdmin();
+  const costo = Number(testo(form, "costo").replace(",", "."));
+  if (!Number.isFinite(costo) || costo < 0 || costo > 10) redirect(conEsito(PAGINA, { errore: "Scrivi un costo tra 0 e 10 €, es. 0,04." }));
+  const { error } = await supabase
+    .from("impostazioni")
+    .update({ valore: Math.round(costo * 1000) / 1000 })
+    .eq("chiave", "foto_costo_generazione_eur");
+  revalidatePath(PAGINA);
+  redirect(conEsito(PAGINA, error ? { errore: messaggioDb(error) } : { ok: "Costo aggiornato: vale per le prossime generazioni." }));
+}
+
 export async function attivaOperatoreFoto(form: FormData) {
   const { supabase } = await richiediAdmin();
   const attivo = testo(form, "attivo") === "1";

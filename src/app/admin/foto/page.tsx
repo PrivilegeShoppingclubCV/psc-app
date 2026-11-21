@@ -5,7 +5,7 @@ import { Esito } from "@/components/admin/Esito";
 import { dataBreve, dataOra } from "@/lib/admin/form";
 import { richiediAdmin } from "@/lib/admin/sessione";
 import { formatEuro } from "@/lib/format";
-import { aggiungiOperatoreFoto, attivaOperatoreFoto } from "./azioni";
+import { aggiungiOperatoreFoto, attivaOperatoreFoto, impostaCostoFoto } from "./azioni";
 
 export const metadata: Metadata = { title: "Foto prodotto" };
 
@@ -47,14 +47,16 @@ export default async function FotoProdotto({ searchParams }: { searchParams: Pro
   const { supabase } = await richiediAdmin();
   const da = inizioPeriodo(periodo);
 
-  const [operatori, riepilogo, ultime, mancanti, conFoto] = await Promise.all([
+  const [operatori, riepilogo, ultime, mancanti, conFoto, costo] = await Promise.all([
     supabase.from("foto_operatori").select("id, email, nome, attivo, creato_il").order("attivo", { ascending: false }).order("email"),
     supabase.rpc("admin_foto_riepilogo", { p_da: da }),
     supabase.from("foto_generazioni").select("id, email, ean, creata_il, durata_ms, esito, errore, sovrascritta, sul_sito, modello")
       .order("creata_il", { ascending: false }).limit(50),
     supabase.from("prodotti").select("id", { count: "exact", head: true }).gt("disponibilita", 0).eq("nascosto", false).is("immagine_path", null),
     supabase.from("prodotti").select("id", { count: "exact", head: true }).gt("disponibilita", 0).eq("nascosto", false).not("immagine_path", "is", null),
+    supabase.from("impostazioni").select("valore").eq("chiave", "foto_costo_generazione_eur").maybeSingle(),
   ]);
+  const costoUnitario = Number(costo.data?.valore ?? 0.04);
   const righe = (riepilogo.data ?? []) as Riga[];
   const tot = righe.reduce(
     (a, r) => ({ generate: a.generate + Number(r.generate), sovrascritte: a.sovrascritte + Number(r.sovrascritte), errori: a.errori + Number(r.errori), costo: a.costo + Number(r.costo_eur) }),
@@ -79,7 +81,7 @@ export default async function FotoProdotto({ searchParams }: { searchParams: Pro
           <strong>{conFoto.count ?? 0}</strong> con foto · <strong>{mancanti.count ?? 0}</strong> ancora senza foto
         </p>
         <p className="t-caption">
-          Contano i prodotti disponibili e non nascosti. Le foto fatte con lo strumento si collegano da Prodotti → «Prendi foto dal sito».
+          Contano i prodotti disponibili e non nascosti. Le foto caricate sul sito dallo strumento si collegano da sole al prodotto.
         </p>
       </section>
 
@@ -97,13 +99,16 @@ export default async function FotoProdotto({ searchParams }: { searchParams: Pro
           </nav>
         </div>
         <p className="t-body">
-          {tot.generate} foto generate, di cui {tot.sovrascritte} sovrascritte · {tot.errori} errori · costo stimato {formatEuro(tot.costo)}
+          <strong>{tot.generate}</strong> generazioni, di cui {tot.sovrascritte} sovrascritte · {tot.errori} errori · spesa stimata <strong>{formatEuro(tot.costo)}</strong>
+        </p>
+        <p className="t-caption">
+          Conta ogni foto generata, anche quelle scartate, rifatte o mai caricate sul sito. Gli errori non si pagano.
         </p>
         {righe.length ? (
           <div className="admin-table-wrap">
             <table className="admin-table">
               <thead>
-                <tr><th>Persona</th><th className="num">Generate</th><th className="num">Sovrascritte</th><th className="num">Sul sito</th><th className="num">Errori</th><th className="num">Tempo medio</th><th className="num">Costo</th><th>Ultima</th></tr>
+                <tr><th>Persona</th><th className="num">Generate</th><th className="num">Sovrascritte</th><th className="num">Sul sito</th><th className="num">Errori</th><th className="num">Tempo medio</th><th className="num">Spesa stimata</th><th>Ultima</th></tr>
               </thead>
               <tbody>
                 {righe.map((r) => (
@@ -124,6 +129,19 @@ export default async function FotoProdotto({ searchParams }: { searchParams: Pro
         ) : (
           <p className="t-caption">Nessuna foto generata in questo periodo.</p>
         )}
+      </section>
+
+      <section className="admin-card">
+        <h2 className="t-title">Costo per generazione</h2>
+        <p className="t-caption">
+          Ora {formatEuro(costoUnitario)} a foto. Se cambia, scrivi il nuovo costo: vale dalle prossime generazioni, quelle già fatte restano col costo di allora.
+        </p>
+        <form action={impostaCostoFoto} className="admin-form">
+          <div className="admin-grid">
+            <Campo id="costo" label="Costo di una foto (€)" inputMode="decimal" defaultValue={String(costoUnitario).replace(".", ",")} required />
+          </div>
+          <div className="admin-azioni"><button type="submit" className="psc-btn psc-btn--secondary">Salva costo</button></div>
+        </form>
       </section>
 
       <section className="admin-card">
