@@ -81,6 +81,7 @@ export default async function Soci({ searchParams }: { searchParams: Promise<Rec
           <h1 className="t-display-l">Soci</h1>
         </div>
         <div className="admin-azioni">
+          {doppioni && <a href="/admin/soci/doppioni/csv" className="psc-btn psc-btn--secondary">Scarica CSV dei doppioni</a>}
           <Link href="/admin/soci/da-completare" className="psc-btn psc-btn--secondary">Clienti da completare</Link>
           <Link href="/admin/soci/nuovo" className="psc-btn psc-btn--primary">Nuovo socio con tessera fisica</Link>
         </div>
