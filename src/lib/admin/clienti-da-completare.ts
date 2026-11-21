@@ -1,8 +1,8 @@
 import type { richiediAdmin } from "./sessione";
 
 export type ClienteDaCompletare = {
-  id_readypro: string | null; cognome: string; nome: string; email: string; cellulare: string | null;
-  tessera: string | null; iscritto_il: string; manca: string; telefono_app: string | null;
+  id_readypro: string | null; cognome: string; nome: string; email: string | null; cellulare: string | null;
+  tessera: string | null; iscritto_il: string; manca: string; telefono_app: string | null; email_app: string | null;
 };
 
 /** La data da cui partire: AAAA-MM-GG valida, altrimenti il 7 dicembre 2023 (apertura del negozio). */

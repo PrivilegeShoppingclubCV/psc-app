@@ -27,6 +27,8 @@ export interface Socio {
   attesaGenitore: "iscrizione" | "punti_offerte" | null;
   /** false = le vendite non danno punti (minorenne senza ok del genitore). */
   puntiAttivi: boolean;
+  /** Iscritto dall'app con il cellulare di una tessera fatta in negozio senza email: si uniscono in negozio. */
+  daUnire: boolean;
 }
 
 export interface TesseraSocio {

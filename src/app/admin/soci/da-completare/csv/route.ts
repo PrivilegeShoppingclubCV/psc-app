@@ -11,9 +11,9 @@ export async function GET(request: NextRequest) {
   const { clienti, error } = await clientiDaCompletare(supabase, dal);
   if (error) return new Response(error.message, { status: 500 });
   const righe = [
-    ["ID ReadyPro", "Cognome", "Nome", "Email", "Cellulare", "Tessera", "Iscritto il", "Manca", "Cellulare in app"],
+    ["ID ReadyPro", "Cognome", "Nome", "Email", "Cellulare", "Tessera", "Iscritto il", "Manca", "Cellulare in app", "Email in app"],
     ...clienti.map((c) => [c.id_readypro, c.cognome, c.nome, c.email, c.cellulare, c.tessera,
-      c.iscritto_il.split("-").reverse().join("/"), c.manca, c.telefono_app]),
+      c.iscritto_il.split("-").reverse().join("/"), c.manca, c.telefono_app, c.email_app]),
   ];
   return new Response("﻿" + righe.map((r) => r.map(cella).join(";")).join("\r\n"), {
     headers: {

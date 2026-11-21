@@ -23,7 +23,12 @@ export default async function Home() {
 
       <section className="section" aria-label="Saldo punti e tessera">
         <SaldoPunti saldo={saldo} premi={premi} />
-        {socio.inAttivazione && (
+        {socio.daUnire ? (
+          <p className="notice">
+            Risulta già una tessera fatta in negozio con il tuo cellulare. Alla prossima visita mostrala alla cassa insieme a questa
+            app: uniamo le due tessere e qui trovi anche i punti che hai già. Fino ad allora in cassa usa la tessera che hai.
+          </p>
+        ) : socio.inAttivazione && (
           <p className="psc-hint">Tessera appena creata: la stiamo registrando nelle casse dei negozi, di solito in pochi minuti.</p>
         )}
         <ApriTessera socio={socio} />

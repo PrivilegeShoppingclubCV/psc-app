@@ -116,8 +116,25 @@ export async function mandaLink(supabase: Supabase, email: string, dopo: Dopo, p
   redirect(`/verifica?${new URLSearchParams({ email, dopo })}`);
 }
 
+/**
+ * Registra nel pannello un collegamento o un'iscrizione non riusciti, con il
+ * motivo. Se il registro non risponde si va avanti lo stesso.
+ */
+async function registraFallito(supabase: Supabase, tipo: "collegamento" | "iscrizione", campi: {
+  numero?: string; messaggio: string; dati?: Record<string, string>;
+}) {
+  const { error } = await supabase.rpc("registra_tentativo_fallito", {
+    p_tipo: tipo,
+    p_numero_tessera: campi.numero ?? null,
+    p_messaggio: campi.messaggio,
+    p_dati: campi.dati ?? null,
+  });
+  if (error) console.error("registro tentativi", error.code ?? error.message);
+}
+
 export async function eseguiCollega(supabase: Supabase, numero: string): Promise<string> {
   const { error } = await supabase.rpc("collega_tessera", { p_numero_tessera: numero });
+  if (error) await registraFallito(supabase, "collegamento", { numero, messaggio: error.message });
   return error ? conErrore("/collega-tessera", error.message, { tessera: numero }) : "/home";
 }
 
@@ -136,6 +153,12 @@ export async function eseguiIscrizione(supabase: Supabase, a: Extract<Attesa, { 
     p_citta: a.citta || null,
     p_indirizzo: a.indirizzo || null,
   });
+  if (error) {
+    await registraFallito(supabase, "iscrizione", {
+      messaggio: error.message,
+      dati: { nome: a.nome, cognome: a.cognome, telefono: a.telefono },
+    });
+  }
   // Già socio con questa email (es. tessera fatta in negozio): niente seconda scheda,
   // si collega quella che ha.
   if (error?.hint === "gia_socio_email") return conErrore("/collega-tessera", error.message);

@@ -136,3 +136,25 @@ export async function unisciSoci(form: FormData) {
   revalidatePath("/admin/soci");
   redirect(conEsito(pagina, error ? { errore: messaggioDb(error) } : { ok: `Scheda della tessera ${codice} unita a questa.` }));
 }
+
+// Scheda nata dall'app con il cellulare di una scheda senza email (vedi
+// "da_unire_con"): si tiene quella con la tessera fisica.
+export async function unisciDaApp(form: FormData) {
+  const { supabase } = await richiediAdmin();
+  const tieni = testo(form, "tieni");
+  const { error } = await supabase.rpc("admin_unisci_soci", { p_tieni: tieni, p_togli: testo(form, "togli") });
+  revalidatePath("/admin/soci");
+  redirect(conEsito(`/admin/soci/${error ? testo(form, "pagina") : tieni}`, error
+    ? { errore: messaggioDb(error) }
+    : { ok: "Schede unite: ora l'app mostra la tessera fisica e i punti, e ReadyPro riceve l'email con il prossimo invio." }));
+}
+
+export async function annullaUnione(form: FormData) {
+  const { supabase } = await richiediAdmin();
+  const pagina = `/admin/soci/${testo(form, "pagina")}`;
+  const { error } = await supabase.rpc("admin_annulla_unione", { p_socio_id: testo(form, "id") });
+  revalidatePath(pagina);
+  redirect(conEsito(pagina, error
+    ? { errore: messaggioDb(error) }
+    : { ok: "Fatto: le due schede restano separate e la tessera digitale va a ReadyPro con il prossimo invio." }));
+}

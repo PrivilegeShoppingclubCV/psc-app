@@ -15,6 +15,7 @@ export const socio: Socio = {
   tessere: [{ codice: "004718", tipo: "fisica", inAttivazione: false }],
   attesaGenitore: null,
   puntiAttivi: true,
+  daUnire: false,
 };
 
 export const recapiti: Recapiti = { telefono: "3331234567", nascita: "", indirizzo: "", cap: "00053", citta: "Civitavecchia", negozioPreferitoId: null };
