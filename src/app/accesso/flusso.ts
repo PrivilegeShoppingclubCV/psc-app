@@ -119,6 +119,9 @@ export async function eseguiIscrizione(supabase: Supabase, a: Extract<Attesa, { 
     p_cap: a.cap || null,
     p_citta: a.citta || null,
   });
+  // Già socio con questa email (es. tessera fatta in negozio): niente seconda scheda,
+  // si collega quella che ha.
+  if (error?.hint === "gia_socio_email") return conErrore("/collega-tessera", error.message);
   return error ? conErrore("/iscriviti", error.message, campiIscrizione(a)) : "/home";
 }
 
