@@ -19,11 +19,23 @@ const FILTRI = [
   { value: "doppioni", label: "Possibili doppioni" },
 ];
 
+// Colonne ordinabili: chiave nell'indirizzo → colonne della vista, nell'ordine.
+const ORDINI: Record<string, { label: string; colonne: string[]; num?: boolean }> = {
+  tessera: { label: "Tessere", colonne: ["fisica", "digitale"] },
+  socio: { label: "Socio", colonne: ["cognome", "nome"] },
+  livello: { label: "Livello", colonne: ["livello", "cognome"] },
+  app: { label: "App", colonne: ["user_id", "cognome"] },
+  iscritto: { label: "Iscritto", colonne: ["iscritto_il", "cognome"] },
+  punti: { label: "Punti", colonne: ["saldo", "cognome"], num: true },
+};
+
 export default async function Soci({ searchParams }: { searchParams: Promise<Record<string, string | string[] | undefined>> }) {
   const q = await searchParams;
   const cerca = param(q.q);
   const filtro = param(q.filtro);
   const pagina = Math.max(1, Number(param(q.pagina)) || 1);
+  const ordina = param(q.ordina) in ORDINI ? param(q.ordina) : "socio";
+  const discendente = param(q.verso) === "giu";
   const { supabase } = await richiediAdmin();
 
   // Possibili doppioni: schede con stessa email, stesso cellulare o stesso nome.
@@ -37,9 +49,12 @@ export default async function Soci({ searchParams }: { searchParams: Promise<Rec
 
   let query = supabase
     .from("soci_con_tessere")
-    .select("id, fisica, digitale, nome, cognome, email, telefono, livello, stato, in_attivazione, origine, user_id, iscritto_il", { count: "exact" })
-    .order("cognome", { nullsFirst: false })
-    .order("nome");
+    .select("id, fisica, digitale, nome, cognome, email, telefono, livello, stato, in_attivazione, origine, user_id, iscritto_il, saldo", { count: "exact" });
+  // La prima colonna segue il verso scelto, le altre servono solo a spareggiare.
+  ORDINI[ordina].colonne.forEach((c, i) => {
+    query = query.order(c, { ascending: i === 0 ? !discendente : true, nullsFirst: false });
+  });
+  query = query.order("id");
   if (!doppioni) query = query.range((pagina - 1) * PER_PAGINA, pagina * PER_PAGINA - 1);
   // Ogni parola deve comparire in una tessera, nome, cognome, email o telefono. Via i caratteri che hanno un senso nei filtri.
   for (const parola of cerca.replace(/[,()*%\\]/g, " ").split(/\s+/).filter(Boolean)) {
@@ -61,15 +76,28 @@ export default async function Soci({ searchParams }: { searchParams: Promise<Rec
       })
     : (soci ?? []).map((s) => ({ s, gruppo: null as string | null, chiave: s.id }));
 
-  const ids = (soci ?? []).map((s) => s.id);
-  const { data: saldi } = ids.length
-    ? await supabase.from("saldi_punti").select("socio_id, saldo").in("socio_id", ids)
-    : { data: [] };
-  const saldo = new Map((saldi ?? []).map((s) => [s.socio_id, s.saldo]));
-
   const link = (p: Record<string, string | number>) => {
-    const u = new URLSearchParams(Object.entries({ q: cerca, filtro, ...p }).filter(([k, v]) => v !== "" && !(k === "pagina" && Number(v) === 1)).map(([k, v]) => [k, String(v)]));
+    const tutto = { q: cerca, filtro, ordina, verso: discendente ? "giu" : "", ...p };
+    const u = new URLSearchParams(Object.entries(tutto)
+      .filter(([k, v]) => v !== "" && !(k === "pagina" && Number(v) === 1) && !(k === "ordina" && v === "socio"))
+      .map(([k, v]) => [k, String(v)]));
     return `/admin/soci${u.size ? `?${u}` : ""}`;
+  };
+  // Clic sull'intestazione: la stessa colonna inverte il verso, un'altra parte dal crescente
+  // (i punti e la data di iscrizione partono dal più alto / più recente).
+  const intestazione = (chiave: string) => {
+    const o = ORDINI[chiave];
+    const attiva = !doppioni && ordina === chiave;
+    const giu = attiva ? !discendente : chiave === "punti" || chiave === "iscritto";
+    const classe = o.num ? "num" : undefined;
+    if (doppioni) return <th key={chiave} className={classe}>{o.label}</th>;
+    return (
+      <th key={chiave} className={classe} aria-sort={attiva ? (discendente ? "descending" : "ascending") : undefined}>
+        <Link href={link({ ordina: chiave, verso: giu ? "giu" : "", pagina: 1 })} className="admin-ordina">
+          {o.label}{attiva ? (discendente ? " ↓" : " ↑") : ""}
+        </Link>
+      </th>
+    );
   };
   const pagine = Math.max(1, Math.ceil((count ?? 0) / PER_PAGINA));
 
@@ -94,6 +122,8 @@ export default async function Soci({ searchParams }: { searchParams: Promise<Rec
           <input id="q" name="q" type="search" className="psc-field__input" defaultValue={cerca} placeholder="Tessera, nome, cognome, email o telefono" />
         </div>
         {filtro && <input type="hidden" name="filtro" value={filtro} />}
+        {ordina !== "socio" && <input type="hidden" name="ordina" value={ordina} />}
+        {discendente && <input type="hidden" name="verso" value="giu" />}
         <button type="submit" className="psc-btn psc-btn--primary">Cerca</button>
       </form>
 
@@ -113,7 +143,7 @@ export default async function Soci({ searchParams }: { searchParams: Promise<Rec
         <div className="admin-table-wrap">
           <table className="admin-table">
             <thead>
-              <tr><th>Tessere</th><th>Socio</th><th>Livello</th><th>App</th><th>Iscritto</th><th className="num">Punti</th></tr>
+              <tr>{Object.keys(ORDINI).map(intestazione)}</tr>
             </thead>
             <tbody>
               {righe.map(({ s, gruppo, chiave }) => (
@@ -138,7 +168,7 @@ export default async function Soci({ searchParams }: { searchParams: Promise<Rec
                       : s.user_id ? <span className="psc-badge psc-badge--success">Collegata</span> : <span className="min">No</span>}
                   </td>
                   <td className="min">{dataBreve(s.iscritto_il)}</td>
-                  <td className="num">{formatPunti(saldo.get(s.id) ?? 0)}</td>
+                  <td className="num">{formatPunti(s.saldo ?? 0)}</td>
                 </tr>
                 </Fragment>
               ))}
