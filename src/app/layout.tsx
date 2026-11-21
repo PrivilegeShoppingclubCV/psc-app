@@ -9,7 +9,7 @@ export const metadata: Metadata = {
   title: { default: "Privilege Shopping Club", template: "%s · Privilege Shopping Club" },
   description: "La tessera, i punti e le offerte riservate ai soci Privilege Shopping Club.",
   applicationName: "Privilege",
-  appleWebApp: { capable: true, title: "Privilege", statusBarStyle: "default" },
+  appleWebApp: { capable: true, title: "Privilege", statusBarStyle: "black-translucent" },
   icons: {
     icon: [{ url: "/icons/icon-192.png", sizes: "192x192", type: "image/png" }],
     apple: [{ url: "/icons/apple-touch-icon.png", sizes: "180x180" }],

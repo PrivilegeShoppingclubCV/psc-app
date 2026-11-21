@@ -1,8 +1,13 @@
+import type { Viewport } from "next";
 import Link from "next/link";
 import { redirect } from "next/navigation";
 import { BarraInstalla } from "@/components/InstallaApp";
 import { param } from "@/components/AuthPage";
 import { getSessione } from "@/lib/dati";
+
+// La pagina di benvenuto è tutta verde: anche la barra in alto del telefono
+// (ora, batteria) prende il verde invece del bianco del resto dell'app.
+export const viewport: Viewport = { themeColor: "#113f2d" };
 
 export default async function Benvenuto({ searchParams }: { searchParams: Promise<Record<string, string | string[] | undefined>> }) {
   // Se l'indirizzo dell'app non è tra i Redirect URLs di Supabase, il link
