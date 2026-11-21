@@ -35,8 +35,19 @@ export async function verifica(form: FormData) {
   const token = testo(form, "codice").replace(/\s/g, "");
   if (!token) redirect(conErrore("/verifica", "Inserisci il codice ricevuto via email.", { email, dopo }));
 
-  const { error } = await supabase.auth.verifyOtp({ email, token, type: "email" });
-  if (error) redirect(conErrore("/verifica", messaggioAuth(error), { email, dopo }));
+  let { error } = await supabase.auth.verifyOtp({ email, token, type: "email" });
+  // Iscrizione nuova: alcuni progetti Supabase accettano il codice di "Confirm signup"
+  // solo come tipo signup. Un tentativo fallito non consuma il codice.
+  if (error) ({ error } = await supabase.auth.verifyOtp({ email, token, type: "signup" }));
+  if (error) {
+    // Il codice si usa una volta sola: se il modulo è partito due volte (sesta cifra
+    // e poi Invio o "Entra"), il secondo invio fallisce ma il primo ha già fatto
+    // entrare. In quel caso si va avanti come se fosse andato bene.
+    const user = await utenteCorrente(supabase);
+    if (user?.email?.toLowerCase() === email) redirect(await completaAccesso(supabase, dopo));
+    console.error("verifica codice", email.replace(/^(.).*@/, "$1***@"), error.code ?? error.message);
+    redirect(conErrore("/verifica", messaggioAuth(error), { email, dopo }));
+  }
   redirect(await completaAccesso(supabase, dopo));
 }
 

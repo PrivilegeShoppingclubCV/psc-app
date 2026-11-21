@@ -1,6 +1,7 @@
 "use client";
 
-import { useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
+import { useFormStatus } from "react-dom";
 
 const CIFRE = 6;
 
@@ -14,8 +15,23 @@ export function CampoCodice({ name = "codice" }: { name?: string }) {
   const [cifre, setCifre] = useState<string[]>(() => Array(CIFRE).fill(""));
   const caselle = useRef<(HTMLInputElement | null)[]>([]);
   const nascosto = useRef<HTMLInputElement>(null);
+  // Il codice vale una volta sola: il modulo parte una volta sola (sesta cifra,
+  // Invio o "Entra"), finché non si cambia una cifra.
+  const inviato = useRef(false);
+
+  useEffect(() => {
+    const form = nascosto.current?.form;
+    if (!form) return;
+    const unaVolta = (e: SubmitEvent) => {
+      if (inviato.current) e.preventDefault();
+      else inviato.current = true;
+    };
+    form.addEventListener("submit", unaVolta);
+    return () => form.removeEventListener("submit", unaVolta);
+  }, []);
 
   const imposta = (nuove: string[], fuoco: number) => {
+    inviato.current = false;
     setCifre(nuove);
     caselle.current[Math.min(fuoco, CIFRE - 1)]?.focus();
     if (nuove.every(Boolean) && nascosto.current) {
@@ -54,6 +70,7 @@ export function CampoCodice({ name = "codice" }: { name?: string }) {
             onChange={(e) => {
               const v = e.currentTarget.value;
               if (v === "") {
+                inviato.current = false;
                 const nuove = [...cifre];
                 nuove[i] = "";
                 setCifre(nuove);
@@ -68,6 +85,7 @@ export function CampoCodice({ name = "codice" }: { name?: string }) {
             }}
             onKeyDown={(e) => {
               if (e.key === "Backspace" && !c && i > 0) {
+                inviato.current = false;
                 const nuove = [...cifre];
                 nuove[i - 1] = "";
                 setCifre(nuove);
@@ -80,5 +98,15 @@ export function CampoCodice({ name = "codice" }: { name?: string }) {
       </div>
       <input ref={nascosto} type="hidden" name={name} value={cifre.join("")} />
     </div>
+  );
+}
+
+/** Tasto "Entra": mentre il codice viene controllato è spento e lo dice. */
+export function TastoEntra() {
+  const { pending } = useFormStatus();
+  return (
+    <button type="submit" className="psc-btn psc-btn--primary psc-btn--block" disabled={pending} aria-busy={pending}>
+      {pending ? "Controllo il codice…" : "Entra"}
+    </button>
   );
 }
