@@ -512,3 +512,143 @@ end;
 $$;
 revoke execute on function public.admin_annulla_unione(uuid) from public, anon;
 grant execute on function public.admin_annulla_unione(uuid) to authenticated;
+
+-- ---------------------------------------------------------------------------
+-- 5. Registro dei tentativi non riusciti: collegamento della tessera e
+--    iscrizione. Il personale vede chi ci ha provato e perché non è andata,
+--    per aiutarlo o sistemare i dati in ReadyPro.
+--
+-- La funzione che fallisce annulla tutto quello che ha scritto, quindi il
+-- registro lo scrive l'app subito dopo l'errore, con una chiamata a parte.
+-- Per il collegamento il motivo lo ricalcola il database (non si fida di
+-- quello che manda l'app); per l'iscrizione si salva il messaggio d'errore.
+-- ---------------------------------------------------------------------------
+
+create table public.tentativi_falliti (
+  id            bigint generated always as identity primary key,
+  creato_il     timestamptz not null default now(),
+  tipo          text not null check (tipo in ('collegamento', 'iscrizione')),
+  user_id       uuid references auth.users (id) on delete set null,
+  email         text,
+  numero_tessera text,
+  motivo        text not null,
+  socio_id      uuid references public.soci (id) on delete set null,
+  dati          jsonb not null default '{}'
+);
+comment on table public.tentativi_falliti is 'Collegamenti di tessera e iscrizioni dall''app non riusciti, con il motivo. Si tengono 7 giorni.';
+create index tentativi_falliti_creato_idx on public.tentativi_falliti (creato_il desc);
+create index tentativi_falliti_user_idx on public.tentativi_falliti (user_id, creato_il);
+
+alter table public.tentativi_falliti enable row level security;
+create policy "tentativi falliti: admin" on public.tentativi_falliti
+  for select to authenticated using (public.is_admin());
+grant select on public.tentativi_falliti to authenticated;
+
+create function public.registra_tentativo_fallito(
+  p_tipo           text,
+  p_numero_tessera text default null,
+  p_messaggio      text default null,
+  p_dati           jsonb default null
+)
+returns void
+language plpgsql
+security definer
+set search_path = ''
+as $$
+declare
+  v_email    text := lower(auth.jwt() ->> 'email');
+  v_digitato text;
+  v_motivo   text;
+  v_socio    uuid;
+  v_t        record;
+begin
+  if auth.uid() is null or p_tipo not in ('collegamento', 'iscrizione') then
+    return;
+  end if;
+  -- Il registro tiene solo gli ultimi 7 giorni.
+  delete from public.tentativi_falliti where creato_il < now() - interval '7 days';
+  -- Non si riempie il registro: al massimo 20 righe al giorno per account.
+  if (select count(*) from public.tentativi_falliti
+      where user_id = auth.uid() and creato_il > now() - interval '1 day') >= 20 then
+    return;
+  end if;
+
+  if p_tipo = 'collegamento' then
+    v_digitato := interno.pulisci_codice(regexp_replace(coalesce(p_numero_tessera, ''), '[-.]', '', 'g'));
+    select t.stato as stato_tessera, s.id, s.stato, s.user_id, s.email into v_t
+    from public.tessere t
+    join public.soci s on s.id = t.socio_id
+    where v_digitato <> '' and interno.stesso_numero_tessera(t.codice, v_digitato)
+    order by (t.codice = v_digitato) desc, (t.stato = 'attiva') desc, (lower(btrim(s.email)) = v_email) desc
+    limit 1;
+    v_socio := v_t.id;
+    v_motivo := case
+      when exists (select 1 from public.soci where user_id = auth.uid()) then 'Account già collegato a una tessera'
+      when v_t.id is null then 'Numero tessera inesistente'
+      when v_t.stato_tessera <> 'attiva' then 'Tessera bloccata'
+      when v_t.stato <> 'attivo' then 'Socio non attivo'
+      when v_t.user_id = auth.uid() then 'Già collegata a questo account'
+      when v_t.user_id is not null then 'Tessera già collegata a un altro account'
+      when nullif(btrim(v_t.email), '') is null then 'La scheda non ha un''email'
+      when lower(btrim(v_t.email)) <> v_email then 'Email diversa da quella della scheda'
+      else coalesce(left(p_messaggio, 300), 'Altro')
+    end;
+    if v_motivo = 'Già collegata a questo account' then
+      return;
+    end if;
+  else
+    v_motivo := coalesce(left(nullif(btrim(p_messaggio), ''), 300), 'Errore sconosciuto');
+    -- La scheda che ha già quell'email o quel cellulare, se c'è.
+    select id into v_socio
+    from public.soci
+    where stato <> 'cessato'
+      and (lower(btrim(email)) = v_email
+           or interno.chiave_telefono(telefono) = interno.chiave_telefono(p_dati ->> 'telefono'))
+    order by (lower(btrim(email)) = v_email) desc
+    limit 1;
+  end if;
+
+  insert into public.tentativi_falliti (tipo, user_id, email, numero_tessera, motivo, socio_id, dati)
+  values (p_tipo, auth.uid(), v_email, nullif(v_digitato, ''), v_motivo, v_socio,
+          -- Solo i campi utili per richiamare la persona, accorciati.
+          coalesce((select jsonb_object_agg(k, left(v, 100))
+                    from jsonb_each_text(coalesce(p_dati, '{}')) as e(k, v)
+                    where k in ('nome', 'cognome', 'telefono')), '{}'));
+end;
+$$;
+revoke execute on function public.registra_tentativo_fallito(text, text, text, jsonb) from public, anon;
+grant execute on function public.registra_tentativo_fallito(text, text, text, jsonb) to authenticated;
+
+-- Pannello: ricerca negli ultimi 7 giorni (email, numero tessera, nome,
+-- cognome, cellulare o motivo).
+create function public.admin_tentativi_falliti(p_cerca text default null, p_tipo text default null)
+returns table (
+  id bigint, creato_il timestamptz, tipo text, email text, numero_tessera text, motivo text,
+  socio_id uuid, socio text, nome text, cognome text, telefono text, ora_collegato boolean
+)
+language plpgsql
+stable
+security definer
+set search_path = ''
+as $$
+declare
+  v_cerca text := '%' || lower(btrim(coalesce(p_cerca, ''))) || '%';
+begin
+  perform interno.richiedi_admin();
+  return query
+  select f.id, f.creato_il, f.tipo, f.email, f.numero_tessera, f.motivo,
+    f.socio_id, concat_ws(' ', s.nome, s.cognome),
+    f.dati ->> 'nome', f.dati ->> 'cognome', f.dati ->> 'telefono',
+    exists (select 1 from public.soci a where a.user_id = f.user_id)
+  from public.tentativi_falliti f
+  left join public.soci s on s.id = f.socio_id
+  where f.creato_il >= now() - interval '7 days'
+    and (p_tipo is null or f.tipo = p_tipo)
+    and (v_cerca = '%%' or lower(concat_ws(' ', f.email, f.numero_tessera, f.motivo, s.nome, s.cognome,
+                                           f.dati ->> 'nome', f.dati ->> 'cognome', f.dati ->> 'telefono')) like v_cerca)
+  order by f.creato_il desc
+  limit 500;
+end;
+$$;
+revoke execute on function public.admin_tentativi_falliti(text, text) from public, anon;
+grant execute on function public.admin_tentativi_falliti(text, text) to authenticated;
