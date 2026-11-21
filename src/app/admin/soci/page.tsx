@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import Link from "next/link";
+import { Fragment } from "react";
 import { param } from "@/components/AuthPage";
 import { Esito } from "@/components/admin/Esito";
 import { dataBreve } from "@/lib/admin/form";
@@ -15,6 +16,7 @@ const FILTRI = [
   { value: "senza-app", label: "Senza app" },
   { value: "attesa", label: "In attesa della cassa" },
   { value: "sospesi", label: "Sospesi o cessati" },
+  { value: "doppioni", label: "Possibili doppioni" },
 ];
 
 export default async function Soci({ searchParams }: { searchParams: Promise<Record<string, string | string[] | undefined>> }) {
@@ -24,12 +26,21 @@ export default async function Soci({ searchParams }: { searchParams: Promise<Rec
   const pagina = Math.max(1, Number(param(q.pagina)) || 1);
   const { supabase } = await richiediAdmin();
 
+  // Possibili doppioni: schede con stessa email, stesso cellulare o stesso nome.
+  const doppioni = filtro === "doppioni";
+  const { data: gruppi, error: erroreDoppioni } = doppioni
+    ? await supabase.rpc("admin_possibili_doppioni")
+    : { data: null, error: null };
+  // Al massimo 200 righe alla volta (l'elenco delle schede va nell'indirizzo della richiesta).
+  const tuttiDoppioni = (gruppi ?? []) as { gruppo: string; motivo: string; socio_id: string }[];
+  const righeDoppioni = tuttiDoppioni.slice(0, 200);
+
   let query = supabase
     .from("soci_con_tessere")
     .select("id, fisica, digitale, nome, cognome, email, telefono, livello, stato, in_attivazione, origine, user_id, iscritto_il", { count: "exact" })
     .order("cognome", { nullsFirst: false })
-    .order("nome")
-    .range((pagina - 1) * PER_PAGINA, pagina * PER_PAGINA - 1);
+    .order("nome");
+  if (!doppioni) query = query.range((pagina - 1) * PER_PAGINA, pagina * PER_PAGINA - 1);
   // Ogni parola deve comparire in una tessera, nome, cognome, email o telefono. Via i caratteri che hanno un senso nei filtri.
   for (const parola of cerca.replace(/[,()*%\\]/g, " ").split(/\s+/).filter(Boolean)) {
     query = query.or(["codici", "nome", "cognome", "email", "telefono"].map((c) => `${c}.ilike.%${parola}%`).join(","));
@@ -38,7 +49,17 @@ export default async function Soci({ searchParams }: { searchParams: Promise<Rec
   if (filtro === "senza-app") query = query.is("user_id", null);
   if (filtro === "attesa") query = query.eq("in_attivazione", true);
   if (filtro === "sospesi") query = query.neq("stato", "attivo");
+  if (doppioni) query = query.in("id", [...new Set(righeDoppioni.map((r) => r.socio_id))]);
   const { data: soci, count, error } = await query;
+  const perId = new Map((soci ?? []).map((s) => [s.id, s]));
+  // Nella vista dei doppioni le schede si mostrano a gruppi (una scheda può stare in più gruppi).
+  const righe = doppioni
+    ? righeDoppioni.flatMap((r, i) => {
+        const s = perId.get(r.socio_id);
+        const nuovo = i === 0 || righeDoppioni[i - 1].gruppo !== r.gruppo;
+        return s ? [{ s, gruppo: nuovo ? `${r.motivo}: ${r.gruppo.slice(r.gruppo.indexOf(":") + 1)}` : null, chiave: `${r.gruppo}-${r.socio_id}` }] : [];
+      })
+    : (soci ?? []).map((s) => ({ s, gruppo: null as string | null, chiave: s.id }));
 
   const ids = (soci ?? []).map((s) => s.id);
   const { data: saldi } = ids.length
@@ -61,7 +82,7 @@ export default async function Soci({ searchParams }: { searchParams: Promise<Rec
         </div>
         <Link href="/admin/soci/nuovo" className="psc-btn psc-btn--primary">Nuovo socio con tessera fisica</Link>
       </div>
-      <Esito q={error ? { errore: error.message } : q} />
+      <Esito q={error || erroreDoppioni ? { errore: (error ?? erroreDoppioni)!.message } : q} />
 
       <form className="admin-cerca" action="/admin/soci">
         <div className="psc-field">
@@ -78,7 +99,11 @@ export default async function Soci({ searchParams }: { searchParams: Promise<Rec
         ))}
       </nav>
 
-      <p className="t-caption">{count ?? 0} soci{cerca ? ` per «${cerca}»` : ""}</p>
+      <p className="t-caption">
+        {count ?? 0} soci{cerca ? ` per «${cerca}»` : ""}
+        {doppioni && tuttiDoppioni.length > righeDoppioni.length && ` (mostrati i primi gruppi: unisci questi e ricarica per vedere gli altri)`}
+        {doppioni && " che si somigliano: apri la scheda da tenere e usa «Unisci un doppione» con la tessera dell'altra."}
+      </p>
 
       {soci?.length ? (
         <div className="admin-table-wrap">
@@ -87,8 +112,10 @@ export default async function Soci({ searchParams }: { searchParams: Promise<Rec
               <tr><th>Tessere</th><th>Socio</th><th>Livello</th><th>App</th><th>Iscritto</th><th className="num">Punti</th></tr>
             </thead>
             <tbody>
-              {soci.map((s) => (
-                <tr key={s.id}>
+              {righe.map(({ s, gruppo, chiave }) => (
+                <Fragment key={chiave}>
+                {gruppo && <tr className="admin-gruppo"><th colSpan={6}>{gruppo}</th></tr>}
+                <tr>
                   <td>
                     <Link href={`/admin/soci/${s.id}`}>{s.fisica ?? s.digitale ?? "Nessuna"}</Link>
                     {s.fisica && s.digitale && <div className="t-caption">{s.digitale}</div>}
@@ -109,6 +136,7 @@ export default async function Soci({ searchParams }: { searchParams: Promise<Rec
                   <td className="min">{dataBreve(s.iscritto_il)}</td>
                   <td className="num">{formatPunti(saldo.get(s.id) ?? 0)}</td>
                 </tr>
+                </Fragment>
               ))}
             </tbody>
           </table>
@@ -117,7 +145,7 @@ export default async function Soci({ searchParams }: { searchParams: Promise<Rec
         <p className="admin-vuoto">Nessun socio trovato.</p>
       )}
 
-      {pagine > 1 && (
+      {!doppioni && pagine > 1 && (
         <div className="admin-pagine">
           {pagina > 1 && <Link href={link({ pagina: pagina - 1 })} className="psc-btn psc-btn--secondary admin-btn--small">Precedenti</Link>}
           <span className="t-caption">Pagina {pagina} di {pagine}</span>
