@@ -8,6 +8,7 @@ import { dataBreve, dataOra } from "@/lib/admin/form";
 import { richiediAdmin } from "@/lib/admin/sessione";
 import { formatPunti, formatTessera } from "@/lib/format";
 import { assegnaTesseraFisica, bloccaTessera, collegaConCodice, registraPunti, salvaSocio, scollegaAccount, unisciSoci } from "../azioni";
+import { CampoData } from "@/components/CampoData";
 
 export const metadata: Metadata = { title: "Socio" };
 
@@ -74,7 +75,7 @@ export default async function SchedaSocio({ params, searchParams }: {
             <Campo id="cognome" label="Cognome" defaultValue={s.cognome ?? ""} />
             <Campo id="email" label="Email" type="email" defaultValue={s.email ?? ""} help="Con questa email il socio collega da solo la tessera all'app." />
             <Campo id="telefono" label="Telefono" type="tel" defaultValue={s.telefono ?? ""} />
-            <Campo id="data_nascita" label="Data di nascita" type="date" defaultValue={s.data_nascita ?? ""} />
+            <CampoData id="data_nascita" label="Data di nascita" defaultValue={s.data_nascita ?? ""} />
             <Campo id="cap" label="CAP" defaultValue={s.cap ?? ""} />
             <Campo id="citta" label="Città" defaultValue={s.citta ?? ""} />
             <Scelta id="livello" label="Livello" defaultValue={s.livello} opzioni={(livelli.data ?? []).map((l) => ({ value: l.codice, label: l.nome }))} />

@@ -3,6 +3,7 @@ import { Conferma } from "@/components/admin/Conferma";
 import { ImmagineInput } from "@/components/admin/ImmagineInput";
 import { giorno, urlBucket } from "@/lib/admin/form";
 import { eliminaOfferta, salvaOfferta } from "./azioni";
+import { CampoData } from "@/components/CampoData";
 
 export interface OffertaDb {
   id: string;
@@ -58,8 +59,8 @@ export function ModuloOfferta({ offerta, negozi, negoziScelti, livelli }: {
         <section className="admin-card">
           <h2 className="t-title">Quando e per chi</h2>
           <div className="admin-grid">
-            <Campo id="valida_dal" label="Valida dal" type="date" defaultValue={giorno(o?.valida_dal ?? null)} help="Vuoto = da subito." />
-            <Campo id="valida_al" label="Valida fino al" type="date" defaultValue={giorno(o?.valida_al ?? null, true)} help="Compreso. Vuoto = senza scadenza." />
+            <CampoData id="valida_dal" label="Valida dal" defaultValue={giorno(o?.valida_dal ?? null)} help="Vuoto = da subito." />
+            <CampoData id="valida_al" label="Valida fino al" defaultValue={giorno(o?.valida_al ?? null, true)} help="Compreso. Vuoto = senza scadenza." />
             <Scelta
               id="livello_minimo"
               label="Livello minimo"
