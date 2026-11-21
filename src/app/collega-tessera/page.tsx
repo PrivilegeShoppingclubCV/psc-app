@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { redirect } from "next/navigation";
 import { AuthPage, Campo, param } from "@/components/AuthPage";
+import { CampoTessera } from "@/components/CampoTessera";
 import { getSessione } from "@/lib/dati";
 import { collegaTessera } from "../accesso/azioni";
 
@@ -24,7 +25,7 @@ export default async function CollegaTessera({ searchParams }: { searchParams: P
       errore={param(q.errore)}
     >
       <form action={collegaTessera}>
-        <Campo id="tessera" label="Numero tessera" inputMode="numeric" autoComplete="off" placeholder="004718" required={configurato} defaultValue={param(q.tessera)} help="Lo trovi sul retro della tessera, sotto il codice a barre.." />
+        <CampoTessera id="tessera" label="Numero tessera" required={configurato} defaultValue={param(q.tessera)} help="Lo trovi sul retro della tessera, sotto il codice a barre. Scrivi solo le cifre dopo gli zeri (es. 4169): gli zeri li aggiungiamo noi. Oppure scansionalo con la fotocamera." />
         {!conAccesso && <Campo id="email" label="Email" type="email" autoComplete="email" required={configurato} defaultValue={param(q.email)} />}
         <button type="submit" className="psc-btn psc-btn--primary psc-btn--block">Continua</button>
       </form>
