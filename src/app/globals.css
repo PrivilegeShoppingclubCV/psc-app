@@ -43,7 +43,8 @@ button { font: inherit; }
   display: flex; flex-direction: column; gap: var(--space-8);
 }
 .app-header { display: flex; align-items: center; justify-content: space-between; gap: var(--space-3); min-height: var(--space-12); }
-.app-header .logo--crown { width: 40px; color: var(--ink); }
+/* Corona con la scritta Privilege Shopping Club, come nella pagina di benvenuto. */
+.app-header .logo--lockup { width: 92px; color: var(--ink); }
 .app-main { display: flex; flex-direction: column; gap: var(--space-8); }
 .page-head { display: flex; flex-direction: column; gap: var(--space-2); }
 .section { display: flex; flex-direction: column; gap: var(--space-4); }
@@ -92,14 +93,40 @@ button { font: inherit; }
 .welcome .psc-btn--secondary { color: var(--bianco); border-color: rgba(255, 255, 255, 0.6); }
 .welcome .psc-btn--secondary:hover { background: rgba(255, 255, 255, 0.08); border-color: var(--bianco); }
 .welcome .psc-btn--ghost { color: var(--bianco); }
-.welcome .installa-grande { max-width: 320px; gap: var(--space-2); }
-.welcome .installa-grande svg { width: 18px; height: 18px; }
+.welcome__actions .psc-btn { text-align: center; }
+.welcome__avviso { margin: 0 0 var(--space-2); text-align: center; font-size: 15px; line-height: 22px; overflow-wrap: anywhere; }
+
+/* Barra "Installa l'app" fissa in cima al benvenuto. */
+.barra-installa {
+  position: fixed; top: 0; left: 0; right: 0; z-index: 20;
+  display: flex; align-items: center; gap: var(--space-3);
+  padding: calc(var(--safe-top) + var(--space-2)) var(--space-4) var(--space-2) var(--space-2);
+  background: var(--bianco); color: var(--verde-800); box-shadow: 0 2px 12px rgba(9, 29, 16, 0.25);
+}
+.barra-installa__spazio { height: 40px; flex: none; }
+.barra-installa__chiudi { flex: none; width: 36px; height: 36px; display: grid; place-items: center; background: none; border: 0; color: var(--verde-700); cursor: pointer; }
+.barra-installa__chiudi svg { width: 18px; height: 18px; }
+.barra-installa__icona { flex: none; width: 40px; height: 40px; border-radius: 10px; }
+.barra-installa__testo { flex: 1; margin: 0; font-size: 14px; line-height: 18px; }
+.barra-installa__tasto {
+  flex: none; padding: var(--space-2) var(--space-4); border: 0; border-radius: 999px;
+  background: var(--verde-700); color: var(--bianco); font: inherit; font-size: 14px; font-weight: 600; text-decoration: none; cursor: pointer;
+}
+.barra-installa__tasto:hover { background: var(--verde-800); }
+.barra-installa button:focus-visible, .barra-installa a:focus-visible { outline: 2px solid var(--verde-700); outline-offset: 2px; }
 .welcome .psc-btn:focus-visible { outline-color: var(--oro-300); }
 
 /* ---------- Pagine di accesso ---------- */
 .auth { max-width: 480px; margin: 0 auto; min-height: 100dvh; padding: calc(var(--safe-top) + var(--space-4)) var(--space-4) calc(var(--safe-bottom) + var(--space-8)); display: flex; flex-direction: column; gap: var(--space-8); }
 .auth form { display: flex; flex-direction: column; gap: var(--space-4); }
 .auth .psc-field { max-width: none; }
+/* Sei caselle del codice ricevuto via email. */
+.codice-caselle { display: grid; grid-template-columns: repeat(6, minmax(0, 1fr)); gap: var(--space-2); }
+.codice-casella {
+  width: 100%; height: 56px; padding: 0; text-align: center; font: inherit; font-size: 24px; font-weight: 600; font-variant-numeric: tabular-nums;
+  border: 1px solid var(--line-strong); border-radius: var(--radius-sm); background: var(--surface); color: var(--ink);
+}
+.codice-casella:focus { outline: 2px solid var(--focus); outline-offset: 1px; border-color: var(--verde-700); }
 .auth .codice-alternativo summary { cursor: pointer; color: var(--ink-muted); font-size: 15px; line-height: 22px; text-align: center; text-decoration: underline; list-style: none; }
 .auth .codice-alternativo summary::-webkit-details-marker { display: none; }
 .auth .codice-alternativo[open] summary { margin-bottom: var(--space-4); }
@@ -173,3 +200,5 @@ button { font: inherit; }
   border: 2px solid var(--bianco); border-radius: var(--radius-sm); box-shadow: 0 0 0 999px rgba(9, 29, 16, 0.35); pointer-events: none;
 }
 .scansiona-testo { max-width: 420px; text-align: center; }
+/* Dentro il benvenuto i tasti principali sono bianchi: nella finestra bianca tornano verdi. */
+.welcome .installa-dialog .psc-btn--primary { background: var(--verde-700); color: var(--bianco); }

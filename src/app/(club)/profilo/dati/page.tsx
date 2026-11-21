@@ -16,7 +16,7 @@ export default async function ModificaDati({ searchParams }: { searchParams: Pro
   const r = await getRecapiti(socio.id);
   const errore = param(q.errore);
   // Dopo un errore il modulo mostra quello che il socio aveva scritto.
-  const valore = (k: "telefono" | "nascita" | "cap" | "citta") => (errore ? param(q[k]) : r[k]);
+  const valore = (k: "telefono" | "nascita" | "indirizzo" | "cap" | "citta") => (errore ? param(q[k]) : r[k]);
 
   return (
     <>
@@ -28,9 +28,10 @@ export default async function ModificaDati({ searchParams }: { searchParams: Pro
 
       <form action={salvaRecapiti} className="modulo">
         <Campo id="telefono" label="Cellulare" type="tel" autoComplete="tel" inputMode="tel" required defaultValue={valore("telefono")} />
-        <CampoData id="nascita" label="Data di nascita (facoltativa)" autoComplete="bday" max={oggi()} defaultValue={valore("nascita")} />
-        <Campo id="cap" label="CAP (facoltativo)" autoComplete="postal-code" inputMode="numeric" pattern="[0-9]{5}" maxLength={5} defaultValue={valore("cap")} />
-        <Campo id="citta" label="Città (facoltativa)" autoComplete="address-level2" maxLength={80} defaultValue={valore("citta")} />
+        <CampoData id="nascita" label="Data di nascita" autoComplete="bday" max={oggi()} required defaultValue={valore("nascita")} />
+        <Campo id="indirizzo" label="Indirizzo" autoComplete="street-address" maxLength={120} required defaultValue={valore("indirizzo")} help="Via e numero civico." />
+        <Campo id="cap" label="CAP" autoComplete="postal-code" inputMode="numeric" pattern="[0-9]{5}" maxLength={5} required defaultValue={valore("cap")} />
+        <Campo id="citta" label="Città" autoComplete="address-level2" maxLength={80} required defaultValue={valore("citta")} />
         <p className="t-caption">Per cambiare nome, cognome o email chiedi in negozio.</p>
         <button type="submit" className="psc-btn psc-btn--primary psc-btn--block">Salva</button>
       </form>

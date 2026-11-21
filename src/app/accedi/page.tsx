@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import Link from "next/link";
 import { redirect } from "next/navigation";
 import { AuthPage, Campo, param } from "@/components/AuthPage";
 import { getSessione } from "@/lib/dati";
@@ -17,7 +18,7 @@ export default async function Accedi({ searchParams }: { searchParams: Promise<R
     <AuthPage
       eyebrow={admin ? "Pannello admin" : "Accedi"}
       titolo={admin ? "Accedi al pannello" : "Accedi al club"}
-      intro="Ti mandiamo un link via email: niente password da ricordare."
+      intro="Ti mandiamo un codice di 6 cifre via email: niente password da ricordare."
       errore={param(q.errore)}
     >
       <form action={accedi}>
@@ -25,6 +26,7 @@ export default async function Accedi({ searchParams }: { searchParams: Promise<R
         <Campo id="email" label="Email" type="email" autoComplete="email" required={configurato} defaultValue={param(q.email)} />
         <button type="submit" className="psc-btn psc-btn--primary psc-btn--block">Continua</button>
       </form>
+      {!admin && <Link href="/?registrati=1" className="psc-btn psc-btn--ghost">Prima volta sull&apos;app? Registrati!</Link>}
     </AuthPage>
   );
 }

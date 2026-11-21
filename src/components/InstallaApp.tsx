@@ -1,12 +1,14 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
-import { installaAndroid, useInstallazione } from "@/lib/installa";
+import { installaAndroid, linkChrome, useInstallazione, type Installazione } from "@/lib/installa";
 import { IconChiudi, IconInstalla } from "./Icons";
 
-// Banner "Installa l'app" in Home e tasto "Installa" nell'intestazione.
+// Banner "Installa l'app" in Home, tasto "Installa" nell'intestazione e barra
+// fissa nella pagina di benvenuto.
 // - Android/Chrome (e Edge desktop): il pulsante apre l'installazione del browser.
 // - iPhone/iPad: si spiega come aggiungerla dal tasto Condividi di Safari.
+// - Samsung Internet: si propone di aprire la pagina in Chrome.
 // - Altri telefoni: si spiega come farlo dal menu del browser.
 // Nessuno dei due compare se l'app è già aperta dalla schermata Home.
 // Il banner si può chiudere per sempre; il tasto in alto resta, così chi
@@ -48,52 +50,115 @@ export function InstallaApp() {
           <p className="installa__testo">La apri con un tocco, come le altre app, e la tessera è sempre a portata di mano.</p>
           <button type="button" className="psc-btn psc-btn--primary psc-btn--block" onClick={installaAndroid}>Installa l&apos;app</button>
         </>
-      ) : tipo === "ios" ? (
-        <PassiIOS />
       ) : (
-        <PassiMenu />
+        <Passi tipo={tipo} />
       )}
     </aside>
   );
 }
 
-/**
- * Tasto "Installa l'app": piccolo nell'intestazione delle pagine del club,
- * grande nella pagina di benvenuto (la prima che si vede aprendo l'app).
- */
-export function TastoInstalla({ grande = false }: { grande?: boolean }) {
+/** Tasto "Installa" piccolo nell'intestazione delle pagine del club. */
+export function TastoInstalla() {
   const tipo = useInstallazione();
   const dialog = useRef<HTMLDialogElement>(null);
 
   if (tipo === "nessuna") return null;
 
-  const premi = () => (tipo === "android" ? installaAndroid() : dialog.current?.showModal());
-
   return (
     <>
-      <button type="button" className={grande ? "psc-btn psc-btn--secondary psc-btn--block installa-grande" : "installa-tasto"} onClick={premi}>
+      <button type="button" className="installa-tasto" onClick={() => premiInstalla(tipo, dialog.current)}>
         <IconInstalla />
-        Installa l&apos;app
+        Installa
       </button>
-      {tipo !== "android" && (
-        <dialog
-          ref={dialog}
-          className="installa-dialog"
-          aria-labelledby="installa-dialog-titolo"
-          onClick={(e) => e.target === e.currentTarget && dialog.current?.close()}
-        >
-          <div className="installa installa--dialog">
-            <button type="button" className="installa__chiudi" onClick={() => dialog.current?.close()} aria-label="Chiudi">
-              <IconChiudi />
-            </button>
-            <h2 id="installa-dialog-titolo" className="installa__titolo">Metti l&apos;app sulla schermata Home</h2>
-            {tipo === "ios" ? <PassiIOS /> : <PassiMenu />}
-          </div>
-        </dialog>
-      )}
+      <FinestraPassi tipo={tipo} ref={dialog} />
     </>
   );
 }
+
+const CHIAVE_BARRA = "psc_barra_installa_chiusa";
+
+/**
+ * Barra fissa in cima alla pagina di benvenuto: icona dell'app, invito,
+ * tasto "Installa" e X per chiuderla. Chiusa una volta, non torna più
+ * su quel telefono.
+ */
+export function BarraInstalla() {
+  const tipo = useInstallazione();
+  const dialog = useRef<HTMLDialogElement>(null);
+  const [chiusa, setChiusa] = useState(true);
+
+  useEffect(() => {
+    try {
+      setChiusa(localStorage.getItem(CHIAVE_BARRA) === "1");
+    } catch {
+      setChiusa(false);
+    }
+  }, []);
+
+  if (tipo === "nessuna" || chiusa) return null;
+
+  const chiudi = () => {
+    try {
+      localStorage.setItem(CHIAVE_BARRA, "1");
+    } catch {}
+    setChiusa(true);
+  };
+
+  return (
+    <>
+      {/* Occupa lo spazio della barra, così non copre il logo. */}
+      <div className="barra-installa__spazio" aria-hidden="true" />
+      <aside className="barra-installa" aria-label="Installa l'app">
+        <button type="button" className="barra-installa__chiudi" onClick={chiudi} aria-label="Chiudi e non mostrare più">
+          <IconChiudi />
+        </button>
+        {/* eslint-disable-next-line @next/next/no-img-element */}
+        <img src="/icons/icon-192.png" alt="" width={40} height={40} className="barra-installa__icona" />
+        <p className="barra-installa__testo">Installa l&apos;app per averla sempre con te</p>
+        <button type="button" className="barra-installa__tasto" onClick={() => premiInstalla(tipo, dialog.current)}>Installa</button>
+      </aside>
+      <FinestraPassi tipo={tipo} ref={dialog} />
+    </>
+  );
+}
+
+function premiInstalla(tipo: Installazione, dialog: HTMLDialogElement | null) {
+  if (tipo === "android") installaAndroid();
+  else dialog?.showModal();
+}
+
+/** Finestra con i passi per installare, dove il browser non lo fa da solo. */
+function FinestraPassi({ tipo, ref }: { tipo: Installazione; ref: React.Ref<HTMLDialogElement> }) {
+  if (tipo === "android" || tipo === "nessuna") return null;
+  const chiudi = (e: React.MouseEvent<HTMLElement>) => e.currentTarget.closest("dialog")?.close();
+  return (
+    <dialog
+      ref={ref}
+      className="installa-dialog"
+      aria-labelledby="installa-dialog-titolo"
+      onClick={(e) => e.target === e.currentTarget && e.currentTarget.close()}
+    >
+      <div className="installa installa--dialog">
+        <button type="button" className="installa__chiudi" onClick={chiudi} aria-label="Chiudi">
+          <IconChiudi />
+        </button>
+        <h2 id="installa-dialog-titolo" className="installa__titolo">Metti l&apos;app sulla schermata Home</h2>
+        <Passi tipo={tipo} />
+      </div>
+    </dialog>
+  );
+}
+
+const Passi = ({ tipo }: { tipo: Installazione }) =>
+  tipo === "ios" ? <PassiIOS /> : tipo === "samsung" ? <PassiSamsung /> : <PassiMenu />;
+
+// Samsung Internet: l'installazione da qui viene bloccata da Play Protect.
+const PassiSamsung = () => (
+  <>
+    <p className="installa__testo">Da Samsung Internet l&apos;installazione può essere bloccata dal telefono. Apri la pagina in Chrome e installala da lì.</p>
+    <a href={linkChrome()} className="psc-btn psc-btn--primary psc-btn--block">Apri in Chrome</a>
+  </>
+);
 
 const PassiIOS = () => (
   <ol className="installa__passi">
@@ -105,7 +170,7 @@ const PassiIOS = () => (
 
 const PassiMenu = () => (
   <ol className="installa__passi">
-    <li>Tocca il menu del browser <IconMenu /> (in alto a destra, o in basso su Samsung Internet).</li>
+    <li>Tocca il menu del browser <IconMenu /> in alto a destra.</li>
     <li>Scegli <strong>Installa app</strong> oppure <strong>Aggiungi a schermata Home</strong>.</li>
     <li>Conferma con <strong>Installa</strong> o <strong>Aggiungi</strong>.</li>
   </ol>

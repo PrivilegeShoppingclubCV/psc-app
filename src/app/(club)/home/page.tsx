@@ -4,14 +4,17 @@ import { InstallaApp } from "@/components/InstallaApp";
 import { PageHead } from "@/components/PageHead";
 import { SaldoPunti } from "@/components/SaldoPunti";
 import { ApriTessera } from "@/components/TesseraFullscreen";
-import { getPremi, getSaldo } from "@/lib/dati";
+import { getPremi, getRecapiti, getSaldo } from "@/lib/dati";
 import { getSocio } from "@/lib/socio";
 
 export const metadata: Metadata = { title: "Home" };
 
 export default async function Home() {
   const socio = await getSocio();
-  const [saldo, premi] = await Promise.all([getSaldo(socio.id), getPremi()]);
+  const [saldo, premi, recapiti] = await Promise.all([getSaldo(socio.id), getPremi(), getRecapiti(socio.id)]);
+  // I soci fatti in negozio possono non avere questi dati: si chiede di completarli,
+  // senza bloccare nulla.
+  const datiMancanti = !recapiti.nascita || !recapiti.indirizzo || !recapiti.cap || !recapiti.citta;
 
   return (
     <>
@@ -24,6 +27,15 @@ export default async function Home() {
         )}
         <ApriTessera socio={socio} />
       </section>
+
+      {datiMancanti && (
+        <section className="section" aria-label="Completa i tuoi dati">
+          <p className="notice">
+            Mancano alcuni tuoi dati (data di nascita, indirizzo, CAP o città).{" "}
+            <Link href="/profilo/dati">Completali ora</Link>
+          </p>
+        </section>
+      )}
 
       <InstallaApp />
 

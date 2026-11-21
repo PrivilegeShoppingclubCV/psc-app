@@ -3,6 +3,7 @@
 // Azioni dei moduli di accesso. La logica condivisa con /auth/callback è in flusso.ts.
 
 import { redirect } from "next/navigation";
+import { maggiorenneDal } from "@/components/AuthPage";
 import { getSupabase } from "@/lib/dati";
 import {
   campiIscrizione,
@@ -24,7 +25,7 @@ export async function accedi(form: FormData) {
   if (!supabase) redirect("/home");
   const email = testo(form, "email").toLowerCase();
   if (!email) redirect(conErrore("/accedi", "Inserisci la tua email."));
-  await mandaLink(supabase, email, leggiDopo(form.get("dopo")), "/accedi");
+  await mandaLink(supabase, email, leggiDopo(form.get("dopo")), "/accedi", true);
 }
 
 export async function verifica(form: FormData) {
@@ -66,6 +67,7 @@ export async function iscriviti(form: FormData) {
     cognome: testo(form, "cognome"),
     telefono: testo(form, "telefono"),
     nascita: testo(form, "nascita"),
+    indirizzo: testo(form, "indirizzo"),
     cap: testo(form, "cap"),
     citta: testo(form, "citta"),
     invito: testo(form, "invito"),
@@ -74,6 +76,12 @@ export async function iscriviti(form: FormData) {
   const campi = campiIscrizione(attesa);
   if (!attesa.nome || !attesa.cognome) redirect(conErrore("/iscriviti", "Nome e cognome sono obbligatori.", campi));
   if (!attesa.telefono) redirect(conErrore("/iscriviti", "Il numero di telefono è obbligatorio.", campi));
+  // Gli stessi controlli li rifà il database: qui servono per avvisare prima di mandare l'email.
+  if (!attesa.nascita) redirect(conErrore("/iscriviti", "La data di nascita è obbligatoria.", campi));
+  if (attesa.nascita > maggiorenneDal()) redirect(conErrore("/iscriviti", "Per iscriverti al club devi avere almeno 18 anni.", campi));
+  if (!attesa.indirizzo) redirect(conErrore("/iscriviti", "L'indirizzo è obbligatorio.", campi));
+  if (!/^\d{5}$/.test(attesa.cap)) redirect(conErrore("/iscriviti", "Il CAP è obbligatorio ed è fatto di 5 cifre.", campi));
+  if (!attesa.citta) redirect(conErrore("/iscriviti", "La città è obbligatoria.", campi));
   if (form.get("privacy") !== "on") redirect(conErrore("/iscriviti", "Per iscriverti conferma di aver letto l'informativa privacy.", campi));
 
   if (await utenteCorrente(supabase)) redirect(await eseguiIscrizione(supabase, attesa));

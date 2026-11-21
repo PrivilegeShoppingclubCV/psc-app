@@ -21,6 +21,7 @@ export async function salvaSocio(form: FormData) {
     email: testoONull(form, "email")?.toLowerCase() ?? null,
     telefono: testoONull(form, "telefono"),
     data_nascita: dataNascita || null,
+    indirizzo: testoONull(form, "indirizzo"),
     cap: testoONull(form, "cap"),
     citta: testoONull(form, "citta"),
     livello: testo(form, "livello") || "classic",

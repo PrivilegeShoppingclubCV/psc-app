@@ -1,4 +1,5 @@
-// Accesso con link via email (magic link), collegamento della tessera, iscrizione, uscita.
+// Accesso con codice di 6 cifre via email, collegamento della tessera, iscrizione, uscita.
+// (Dal 2026-11-21 l'email non ha più il link: /auth/callback resta solo per le email vecchie.)
 //
 // L'email si verifica sempre prima di toccare la tessera: chi compila "Ho già la
 // tessera" o "Voglio iscrivermi" senza aver fatto l'accesso riceve un link, e i
@@ -27,6 +28,7 @@ export type Attesa =
       cognome: string;
       telefono: string;
       nascita: string;
+      indirizzo: string;
       cap: string;
       citta: string;
       invito: string;
@@ -40,6 +42,7 @@ export const campiIscrizione = (a: Extract<Attesa, { tipo: "iscriviti" }>) => ({
   cognome: a.cognome ?? "",
   telefono: a.telefono ?? "",
   nascita: a.nascita ?? "",
+  indirizzo: a.indirizzo ?? "",
   cap: a.cap ?? "",
   citta: a.citta ?? "",
   invito: a.invito ?? "",
@@ -57,7 +60,7 @@ export function messaggioAuth(e: { message: string; code?: string; status?: numb
   if (e.status === 429 || e.code === "over_email_send_rate_limit" || e.code === "over_request_rate_limit")
     return "Sono state chieste troppe email di accesso: riprova tra qualche minuto.";
   if (e.code === "otp_expired" || e.code === "invalid_credentials" || /expired|invalid/i.test(e.message))
-    return "Link o codice scaduto: chiedi una nuova email e usa l'ultima che ricevi.";
+    return "Codice sbagliato o scaduto: controlla le cifre oppure chiedi un nuovo codice e usa l'ultimo che ricevi.";
   if (e.code === "email_address_invalid" || /email/i.test(e.message)) return "Controlla l'indirizzo email.";
   return "Qualcosa non ha funzionato. Riprova tra poco.";
 }
@@ -89,13 +92,26 @@ export async function utenteCorrente(supabase: Supabase) {
   return user;
 }
 
-export async function mandaLink(supabase: Supabase, email: string, dopo: Dopo, pagina: string): Promise<never> {
+/** Supabase risponde così quando l'email non ha un account e non se ne crea uno. */
+const senzaAccount = (e: { message: string; code?: string }) =>
+  e.code === "otp_disabled" || e.code === "user_not_found" || /signups? not allowed/i.test(e.message);
+
+/**
+ * Manda il link di accesso. Con `soloSeEsiste` (pagina "Accedi") non crea
+ * account nuovi: chi non si è mai registrato torna al benvenuto, sulla scelta
+ * "Ho già la tessera" / "Non ho una tessera".
+ */
+export async function mandaLink(supabase: Supabase, email: string, dopo: Dopo, pagina: string, soloSeEsiste = false): Promise<never> {
   const h = await headers();
   const origine = h.get("origin") ?? `https://${h.get("host")}`;
   const { error } = await supabase.auth.signInWithOtp({
     email,
-    options: { emailRedirectTo: `${origine}/auth/callback?dopo=${dopo}` },
+    options: { emailRedirectTo: `${origine}/auth/callback?dopo=${dopo}`, shouldCreateUser: !soloSeEsiste },
   });
+  if (error && soloSeEsiste && senzaAccount(error)) {
+    if (dopo === "admin") redirect(conErrore(pagina, "Questa email non ha un account.", { email, dopo }));
+    redirect(`/?${new URLSearchParams({ registrati: "1", email })}`);
+  }
   if (error) redirect(conErrore(pagina, messaggioAuth(error), { email }));
   redirect(`/verifica?${new URLSearchParams({ email, dopo })}`);
 }
@@ -118,6 +134,7 @@ export async function eseguiIscrizione(supabase: Supabase, a: Extract<Attesa, { 
     p_data_nascita: a.nascita || null,
     p_cap: a.cap || null,
     p_citta: a.citta || null,
+    p_indirizzo: a.indirizzo || null,
   });
   // Già socio con questa email (es. tessera fatta in negozio): niente seconda scheda,
   // si collega quella che ha.
