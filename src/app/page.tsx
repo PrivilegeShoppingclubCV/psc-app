@@ -44,8 +44,8 @@ export default async function Benvenuto({ searchParams }: { searchParams: Promis
         </div>
       ) : (
         <div className="welcome__actions">
-          <Link href="/accedi" className="psc-btn psc-btn--primary psc-btn--block">Accedi</Link>
-          <Link href="/?registrati=1" className="psc-btn psc-btn--secondary psc-btn--block" scroll={false}>Prima volta sull&apos;app? Registrati!</Link>
+          <Link href="/?registrati=1" className="psc-btn psc-btn--primary psc-btn--block" scroll={false}>Prima volta sull&apos;app? Registrati!</Link>
+          <Link href="/accedi" className="psc-btn psc-btn--secondary psc-btn--block">Accedi</Link>
         </div>
       )}
     </main>
