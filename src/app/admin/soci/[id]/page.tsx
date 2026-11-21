@@ -4,7 +4,7 @@ import { notFound } from "next/navigation";
 import { Campo, Scelta } from "@/components/admin/Campi";
 import { Conferma } from "@/components/admin/Conferma";
 import { Esito } from "@/components/admin/Esito";
-import { dataBreve, dataOra } from "@/lib/admin/form";
+import { dataBreve, dataMovimento } from "@/lib/admin/form";
 import { richiediAdmin } from "@/lib/admin/sessione";
 import { formatPunti, formatTessera } from "@/lib/format";
 import { assegnaTesseraFisica, bloccaTessera, collegaConCodice, registraPunti, salvaSocio, scollegaAccount, unisciSoci } from "../azioni";
@@ -246,7 +246,7 @@ export default async function SchedaSocio({ params, searchParams }: {
               <tbody>
                 {movimenti.data.map((m) => (
                   <tr key={m.id}>
-                    <td className="min">{dataOra(m.data_movimento)}</td>
+                    <td className="min">{dataMovimento(m.data_movimento)}</td>
                     <td>{TIPI[m.tipo] ?? m.tipo}</td>
                     <td>{m.descrizione}</td>
                     <td className="min">{(m.negozi as unknown as { nome: string } | null)?.nome ?? "—"}</td>
