@@ -43,8 +43,11 @@ export async function verifica(form: FormData) {
 export async function collegaTessera(form: FormData) {
   const supabase = await getSupabase();
   if (!supabase) redirect("/home");
-  const numero = testo(form, "tessera");
+  // Il campo manda già 12 cifre; qui si completa comunque chi ne ha scritte meno.
+  const scritto = testo(form, "tessera").replace(/\s/g, "");
+  const numero = /^\d{1,12}$/.test(scritto) ? scritto.padStart(12, "0") : scritto;
   if (!numero) redirect(conErrore("/collega-tessera", "Inserisci il numero della tessera."));
+  if (!/^\d{12}$/.test(numero)) redirect(conErrore("/collega-tessera", "Il numero della tessera ha 12 cifre: controlla di averlo scritto bene.", { tessera: numero }));
 
   if (await utenteCorrente(supabase)) redirect(await eseguiCollega(supabase, numero));
 

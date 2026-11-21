@@ -48,9 +48,32 @@ export function numeroDaCodice({ rawValue, format }: Rilevato) {
   return v;
 }
 
-/** Campo "numero tessera" con il bottone per leggere il codice a barre con la fotocamera. */
-export function CampoTessera({ id, label, help, ...input }: { id: string; label: string; help?: string } & React.InputHTMLAttributes<HTMLInputElement>) {
+/** Le tessere hanno sempre 12 cifre, con gli zeri davanti. */
+export const CIFRE_TESSERA = 12;
+
+/**
+ * Da quello che scrive (o incolla) il socio alle sole cifre "significative":
+ * niente spazi, lettere o zeri iniziali, al massimo 12 cifre.
+ */
+export function cifreSignificative(valore: string) {
+  const tutte = valore.replace(/\D/g, "");
+  const c = tutte.replace(/^0+/, "");
+  // Solo se senza zeri restano più di 12 cifre: "0000000004169" (uno zero in più)
+  // è un EAN-13 valido per caso, ma il numero giusto è 4169.
+  if (c.length > CIFRE_TESSERA && tutte.length === 13 && ean13Valido(tutte)) return tutte.slice(0, CIFRE_TESSERA).replace(/^0+/, "");
+  return c.slice(0, CIFRE_TESSERA);
+}
+
+/**
+ * Campo "numero tessera": il socio scrive solo le cifre dopo gli zeri (es. 4169) e
+ * vede comparire sotto il numero completo a 12 cifre (000000004169), che è quello
+ * inviato. C'è anche il bottone per leggere il codice a barre con la fotocamera.
+ */
+export function CampoTessera({ id, label, help, defaultValue, required }: { id: string; label: string; help?: string; defaultValue?: string; required?: boolean }) {
   const campo = useRef<HTMLInputElement>(null);
+  const [cifre, setCifre] = useState(() => cifreSignificative(String(defaultValue ?? "")));
+  const completo = cifre ? cifre.padStart(CIFRE_TESSERA, "0") : "";
+  const zeri = CIFRE_TESSERA - cifre.length;
   const dialog = useRef<HTMLDialogElement>(null);
   const video = useRef<HTMLVideoElement>(null);
   const flusso = useRef<MediaStream | null>(null);
@@ -95,7 +118,7 @@ export function CampoTessera({ id, label, help, ...input }: { id: string; label:
             const [primo] = await rilevatore.detect(v);
             const numero = primo && numeroDaCodice(primo);
             if (numero && attivo.current) {
-              if (campo.current) campo.current.value = numero;
+              setCifre(cifreSignificative(numero));
               navigator.vibrate?.(80);
               chiudi();
               campo.current?.focus();
@@ -125,7 +148,31 @@ export function CampoTessera({ id, label, help, ...input }: { id: string; label:
   return (
     <div className="psc-field">
       <label className="psc-field__label" htmlFor={id}>{label}</label>
-      <input ref={campo} id={id} name={id} className="psc-field__input" aria-describedby={help ? `${id}-help` : undefined} {...input} />
+      <input
+        ref={campo}
+        id={id}
+        className="psc-field__input"
+        inputMode="numeric"
+        autoComplete="off"
+        placeholder="es. 4169"
+        required={required}
+        pattern="[1-9][0-9]{0,11}"
+        title="Scrivi le cifre della tessera dopo gli zeri iniziali."
+        aria-describedby={`${id}-numero${help ? ` ${id}-help` : ""}`}
+        value={cifre}
+        onChange={(e) => setCifre(cifreSignificative(e.target.value))}
+      />
+      {/* Il numero inviato è sempre quello completo, con gli zeri. */}
+      <input type="hidden" name={id} value={completo} />
+      <p id={`${id}-numero`} className="tessera-numero" aria-live="polite">
+        {completo ? (
+          <>
+            La tua tessera: <span className="tessera-numero__cifre"><span className="tessera-numero__zeri">{"0".repeat(zeri)}</span>{cifre}</span>
+          </>
+        ) : (
+          <>Il numero completo ha {CIFRE_TESSERA} cifre: gli zeri iniziali li aggiungiamo noi.</>
+        )}
+      </p>
       {help && <span id={`${id}-help`} className="psc-field__help">{help}</span>}
       {puoScansionare && (
         <button type="button" className="psc-btn psc-btn--secondary scansiona-btn" onClick={apri}>

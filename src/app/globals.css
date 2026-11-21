@@ -109,6 +109,11 @@ button { font: inherit; }
 .back-link { display: inline-flex; align-items: center; gap: var(--space-1); min-height: var(--space-12); text-decoration: none; color: var(--ink-muted); }
 .back-link svg { width: 20px; height: 20px; }
 
+/* Numero tessera completo sotto il campo di /collega-tessera */
+.tessera-numero { margin: 0; font-size: 15px; line-height: 22px; color: var(--ink-muted); }
+.tessera-numero__cifre { font-variant-numeric: tabular-nums; letter-spacing: 1px; font-weight: 600; color: var(--ink); }
+.tessera-numero__zeri { color: var(--ink-muted); font-weight: 400; }
+
 /* ---------- Tessera a schermo intero ---------- */
 .tessera-overlay {
   position: fixed; inset: 0; width: 100%; height: 100%; max-width: none; max-height: none; margin: 0; border: 0;
