@@ -80,7 +80,10 @@ export default async function Soci({ searchParams }: { searchParams: Promise<Rec
           <p className="t-eyebrow">Club</p>
           <h1 className="t-display-l">Soci</h1>
         </div>
-        <Link href="/admin/soci/nuovo" className="psc-btn psc-btn--primary">Nuovo socio con tessera fisica</Link>
+        <div className="admin-azioni">
+          <Link href="/admin/soci/da-completare" className="psc-btn psc-btn--secondary">Clienti da completare</Link>
+          <Link href="/admin/soci/nuovo" className="psc-btn psc-btn--primary">Nuovo socio con tessera fisica</Link>
+        </div>
       </div>
       <Esito q={error || erroreDoppioni ? { errore: (error ?? erroreDoppioni)!.message } : q} />
 
