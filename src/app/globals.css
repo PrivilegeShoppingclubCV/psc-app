@@ -79,6 +79,13 @@ button { font: inherit; }
 .notice--errore { background: var(--danger-surface); color: var(--danger); font-size: 15px; line-height: 22px; }
 
 /* ---------- Benvenuto ---------- */
+/* Dietro la pagina di benvenuto (sotto la barra del telefono e quando si
+   trascina oltre il bordo) c'è il verde, non il bianco dell'app. */
+html:has(.welcome), html:has(.welcome) body { background: var(--verde-700); }
+/* App installata su iPhone: la barra del telefono è trasparente (scritte
+   bianche), quindi sotto c'è sempre una fascia verde. Nel browser è alta 0. */
+body::before { content: ""; position: fixed; top: 0; left: 0; right: 0; height: var(--safe-top); background: var(--verde-700); z-index: 30; pointer-events: none; }
+html:has(.welcome) body::before { display: none; }
 .welcome {
   min-height: 100dvh; display: flex; flex-direction: column; justify-content: space-between; gap: var(--space-8);
   padding: calc(var(--safe-top) + var(--space-12)) var(--space-6) calc(var(--safe-bottom) + var(--space-8));
