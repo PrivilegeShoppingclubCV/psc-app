@@ -81,6 +81,7 @@ export function prossimoPremio(premi: Premio[], saldo: number): Premio | undefin
 export interface Recapiti {
   telefono: string;
   nascita: string;
+  indirizzo: string;
   cap: string;
   citta: string;
   negozioPreferitoId: string | null;

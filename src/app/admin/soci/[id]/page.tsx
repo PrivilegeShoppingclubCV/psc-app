@@ -76,6 +76,7 @@ export default async function SchedaSocio({ params, searchParams }: {
             <Campo id="email" label="Email" type="email" defaultValue={s.email ?? ""} help="Con questa email il socio collega da solo la tessera all'app." />
             <Campo id="telefono" label="Telefono" type="tel" defaultValue={s.telefono ?? ""} />
             <CampoData id="data_nascita" label="Data di nascita" defaultValue={s.data_nascita ?? ""} />
+            <Campo id="indirizzo" label="Indirizzo" defaultValue={s.indirizzo ?? ""} />
             <Campo id="cap" label="CAP" defaultValue={s.cap ?? ""} />
             <Campo id="citta" label="Città" defaultValue={s.citta ?? ""} />
             <Scelta id="livello" label="Livello" defaultValue={s.livello} opzioni={(livelli.data ?? []).map((l) => ({ value: l.codice, label: l.nome }))} />

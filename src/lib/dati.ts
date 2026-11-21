@@ -106,13 +106,14 @@ export async function getRecapiti(socioId: string): Promise<Recapiti> {
   if (!supabase) return mock.recapiti;
   const { data, error } = await supabase
     .from("soci")
-    .select("telefono, data_nascita, cap, citta, negozio_preferito_id")
+    .select("telefono, data_nascita, indirizzo, cap, citta, negozio_preferito_id")
     .eq("id", socioId)
     .single();
   if (error) throw error;
   return {
     telefono: data.telefono ?? "",
     nascita: data.data_nascita ?? "",
+    indirizzo: data.indirizzo ?? "",
     cap: data.cap ?? "",
     citta: data.citta ?? "",
     negozioPreferitoId: data.negozio_preferito_id,

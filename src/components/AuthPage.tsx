@@ -50,5 +50,15 @@ export function Spunta({ id, children, ...input }: { id: string; children: React
 /** La data di oggi come AAAA-MM-GG, per il massimo dei campi data. */
 export const oggi = () => new Date().toISOString().slice(0, 10);
 
+/** Ultima data di nascita (AAAA-MM-GG) di chi oggi ha almeno 18 anni. */
+export function maggiorenneDal() {
+  const d = new Date();
+  // Chi è nato il 29 febbraio compie gli anni il 1° marzo negli anni non bisestili.
+  const anno = d.getFullYear() - 18;
+  const data = new Date(Date.UTC(anno, d.getMonth(), d.getDate()));
+  if (data.getUTCMonth() !== d.getMonth()) data.setUTCDate(0);
+  return data.toISOString().slice(0, 10);
+}
+
 /** Legge un parametro della query string come testo (Next li passa come string | string[]). */
 export const param = (v: string | string[] | undefined) => (Array.isArray(v) ? v[0] : v) ?? "";

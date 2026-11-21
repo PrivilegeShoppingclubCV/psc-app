@@ -12,7 +12,7 @@ export async function salvaRecapiti(form: FormData) {
   const { socio } = await getSessione();
   if (!socio) redirect("/collega-tessera");
 
-  const campi = { telefono: testo(form, "telefono"), nascita: testo(form, "nascita"), cap: testo(form, "cap"), citta: testo(form, "citta") };
+  const campi = { telefono: testo(form, "telefono"), nascita: testo(form, "nascita"), indirizzo: testo(form, "indirizzo"), cap: testo(form, "cap"), citta: testo(form, "citta") };
   if (!campi.telefono) redirect(conErrore("/profilo/dati", "Il numero di telefono è obbligatorio.", campi));
 
   // Il negozio preferito non è in questo modulo: si tiene quello che c'è.
@@ -23,6 +23,7 @@ export async function salvaRecapiti(form: FormData) {
     p_cap: campi.cap || null,
     p_citta: campi.citta || null,
     p_negozio_preferito_id: negozioPreferitoId,
+    p_indirizzo: campi.indirizzo || null,
   });
   if (error) redirect(conErrore("/profilo/dati", error.message, campi));
   revalidatePath("/profilo");

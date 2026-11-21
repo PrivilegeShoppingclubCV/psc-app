@@ -18,6 +18,8 @@ const COLONNE = [
   // ReadyPro ha un campo solo per il nome ("Ragione sociale oppure cognome e nome")
   // e in anagrafica lo scrive "COGNOME NOME".
   "ragione_sociale",
+  // Dal 2026-11-21: via e numero civico.
+  "indirizzo",
 ];
 
 const ragioneSociale = (r: Record<string, unknown>) =>

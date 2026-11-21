@@ -92,8 +92,27 @@ button { font: inherit; }
 .welcome .psc-btn--secondary { color: var(--bianco); border-color: rgba(255, 255, 255, 0.6); }
 .welcome .psc-btn--secondary:hover { background: rgba(255, 255, 255, 0.08); border-color: var(--bianco); }
 .welcome .psc-btn--ghost { color: var(--bianco); }
-.welcome .installa-grande { max-width: 320px; gap: var(--space-2); }
-.welcome .installa-grande svg { width: 18px; height: 18px; }
+.welcome__actions .psc-btn { text-align: center; }
+.welcome__avviso { margin: 0 0 var(--space-2); text-align: center; font-size: 15px; line-height: 22px; overflow-wrap: anywhere; }
+
+/* Barra "Installa l'app" fissa in cima al benvenuto. */
+.barra-installa {
+  position: fixed; top: 0; left: 0; right: 0; z-index: 20;
+  display: flex; align-items: center; gap: var(--space-3);
+  padding: calc(var(--safe-top) + var(--space-2)) var(--space-4) var(--space-2) var(--space-2);
+  background: var(--bianco); color: var(--verde-800); box-shadow: 0 2px 12px rgba(9, 29, 16, 0.25);
+}
+.barra-installa__spazio { height: 40px; flex: none; }
+.barra-installa__chiudi { flex: none; width: 36px; height: 36px; display: grid; place-items: center; background: none; border: 0; color: var(--verde-700); cursor: pointer; }
+.barra-installa__chiudi svg { width: 18px; height: 18px; }
+.barra-installa__icona { flex: none; width: 40px; height: 40px; border-radius: 10px; }
+.barra-installa__testo { flex: 1; margin: 0; font-size: 14px; line-height: 18px; }
+.barra-installa__tasto {
+  flex: none; padding: var(--space-2) var(--space-4); border: 0; border-radius: 999px;
+  background: var(--verde-700); color: var(--bianco); font: inherit; font-size: 14px; font-weight: 600; text-decoration: none; cursor: pointer;
+}
+.barra-installa__tasto:hover { background: var(--verde-800); }
+.barra-installa button:focus-visible, .barra-installa a:focus-visible { outline: 2px solid var(--verde-700); outline-offset: 2px; }
 .welcome .psc-btn:focus-visible { outline-color: var(--oro-300); }
 
 /* ---------- Pagine di accesso ---------- */
@@ -173,3 +192,5 @@ button { font: inherit; }
   border: 2px solid var(--bianco); border-radius: var(--radius-sm); box-shadow: 0 0 0 999px rgba(9, 29, 16, 0.35); pointer-events: none;
 }
 .scansiona-testo { max-width: 420px; text-align: center; }
+/* Dentro il benvenuto i tasti principali sono bianchi: nella finestra bianca tornano verdi. */
+.welcome .installa-dialog .psc-btn--primary { background: var(--verde-700); color: var(--bianco); }
