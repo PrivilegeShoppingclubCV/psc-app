@@ -56,6 +56,7 @@ export function Importa() {
           In Excel seleziona le righe dei prodotti, meglio con la riga dei titoli, copia e incolla qui. Le colonne che non servono
           (giorni dall&apos;ultimo invio, percentuale ricalcolata, …) vengono ignorate; il valore fermo lo ricalcola l&apos;app.
           I prodotti si riconoscono dal codice EAN: reincollare aggiorna pezzi e prezzi senza toccare le foto.
+          L&apos;ultima colonna, dopo la categoria, è la data di arrivo nel gestionale: serve per «Ultimi arrivi».
         </p>
         <textarea
           className="psc-field__input admin-textarea admin-incolla"

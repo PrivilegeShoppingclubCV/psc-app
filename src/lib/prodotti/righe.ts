@@ -21,6 +21,8 @@ export interface RigaProdotto {
   tipo_6: string | null;
   tipo_7: string | null;
   categoria: string | null;
+  /** Data di arrivo nel gestionale: l'ultima colonna, dopo la categoria. */
+  arrivato_il: string | null;
 }
 
 export interface Lettura {
@@ -32,11 +34,11 @@ export interface Lettura {
 }
 
 type Campo = "ean" | "sku" | "marca" | "descrizione" | "colore" | "taglia" | "disponibilita" | "prezzo_listino"
-  | "prezzo_soci" | "iva" | "note1" | "note2" | "tipo_6" | "tipo_7" | "categoria";
+  | "prezzo_soci" | "iva" | "note1" | "note2" | "tipo_6" | "tipo_7" | "categoria" | "arrivo";
 
 // Ordine delle colonne del foglio di Daniele; ReadyPro è uguale ma senza "Valore fermo" (posizione 7).
 const COLONNE_EXCEL: (Campo | null)[] = ["ean", "marca", "sku", "descrizione", "colore", "taglia", "disponibilita", null,
-  "prezzo_listino", "prezzo_soci", null, "iva", "note1", "note2", "tipo_6", "tipo_7", "categoria"];
+  "prezzo_listino", "prezzo_soci", null, "iva", "note1", "note2", "tipo_6", "tipo_7", "categoria", "arrivo"];
 const COLONNE_READYPRO = COLONNE_EXCEL.filter((_, i) => i !== 7);
 
 const norm = (s: string) => s.toLowerCase().normalize("NFD").replace(/[̀-ͯ]/g, "").replace(/[^a-z0-9]+/g, " ").trim();
@@ -59,6 +61,7 @@ function campoDaTitolo(titolo: string): Campo | null {
   if (t === "tipo 6") return "tipo_6";
   if (t === "tipo 7") return "tipo_7";
   if (t.startsWith("categoria")) return "categoria";
+  if (t.includes("arriv") || t.includes("carico") || t.includes("inserim") || t.includes("creazione") || t === "data") return "arrivo";
   return null;
 }
 
@@ -116,7 +119,10 @@ export function leggiRighe(testo: string): Lettura {
   } else {
     // Senza titoli: nel foglio con il valore fermo la decima colonna è il prezzo
     // tesserati, in ReadyPro è la percentuale di sconto.
-    const readypro = dati.slice(0, 20).some((l) => (l.celle[9] ?? "").includes("%"));
+    // Se manca il simbolo %, lo riconosce dalla categoria ("Negozio/Gioielli/…"),
+    // che in ReadyPro è la sedicesima colonna e nel foglio la diciassettesima.
+    const readypro = dati.slice(0, 20).some((l) => (l.celle[9] ?? "").includes("%"))
+      || dati.slice(0, 20).some((l) => /\p{L}\/\p{L}/u.test(l.celle[15] ?? ""));
     colonne = readypro ? COLONNE_READYPRO : COLONNE_EXCEL;
     formato = readypro ? "readypro" : "excel";
   }
@@ -167,6 +173,7 @@ export function leggiRighe(testo: string): Lettura {
       tipo_6: testoONull("tipo_6"),
       tipo_7: testoONull("tipo_7"),
       categoria: testoONull("categoria"),
+      arrivato_il: v.arrivo ? leggiData(v.arrivo) : null,
     };
     // Lo stesso EAN due volte: vale l'ultima riga.
     const prima = perEan.get(ean);
