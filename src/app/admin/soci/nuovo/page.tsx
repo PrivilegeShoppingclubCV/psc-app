@@ -5,6 +5,7 @@ import { Campo, Interruttore, Scelta } from "@/components/admin/Campi";
 import { Esito } from "@/components/admin/Esito";
 import { richiediAdmin } from "@/lib/admin/sessione";
 import { nuovoSocioFisica } from "../azioni";
+import { CampoData } from "@/components/CampoData";
 
 export const metadata: Metadata = { title: "Nuovo socio con tessera fisica" };
 
@@ -36,7 +37,7 @@ export default async function NuovoSocio({ searchParams }: { searchParams: Promi
           <Campo id="cognome" label="Cognome" required defaultValue={param(q.cognome)} />
           <Campo id="telefono" label="Telefono" type="tel" defaultValue={param(q.telefono)} />
           <Campo id="email" label="Email" type="email" defaultValue={param(q.email)} help="Facoltativa. Se c'è, il socio collega l'app da solo." />
-          <Campo id="data_nascita" label="Data di nascita" type="date" defaultValue={param(q.data_nascita)} />
+          <CampoData id="data_nascita" label="Data di nascita" defaultValue={param(q.data_nascita)} />
           <Scelta id="negozio_id" label="Negozio" defaultValue={param(q.negozio_id)}
             opzioni={[{ value: "", label: "—" }, ...(negozi ?? []).map((n) => ({ value: n.id, label: n.nome }))]} />
         </div>

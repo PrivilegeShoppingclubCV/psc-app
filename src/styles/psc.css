@@ -67,8 +67,10 @@ body { background: var(--surface); color: var(--ink); font-family: var(--font-te
   border-radius: var(--radius-md); background: var(--surface); border: 1px solid var(--line);
   padding: var(--space-4); display: flex; flex-direction: column; align-items: center; gap: var(--space-2);
 }
-.psc-barcode-box { background: #ffffff; border-radius: var(--radius-sm); padding: var(--space-3) var(--space-4); width: 100%; box-sizing: border-box; }
-.psc-barcode { display: block; width: 100%; height: 72px; fill: #000000; }
+/* Il bianco attorno alle barre è dentro l'immagine (vedi Barcode.tsx), così la modalità scura
+   forzata di alcuni telefoni non lo scurisce: niente padding qui. */
+.psc-barcode-box { background: #ffffff; border-radius: var(--radius-sm); overflow: hidden; width: 100%; box-sizing: border-box; color-scheme: only light; }
+.psc-barcode { display: block; width: 100%; height: 96px; background: #ffffff; }
 .psc-code { font-family: var(--font-text); font-size: 15px; line-height: 20px; font-weight: 500; letter-spacing: .08em; font-variant-numeric: tabular-nums; color: var(--ink); }
 .psc-hint { font-size: 13px; line-height: 18px; color: var(--ink-muted); text-align: center; margin: 0; }
 
@@ -134,3 +136,17 @@ body { background: var(--surface); color: var(--ink); font-family: var(--font-te
 .psc-tab--card .psc-tab__fab svg { width: 22px; height: 22px; }
 
 @media (prefers-reduced-motion: reduce) { .psc-btn { transition: none; } }
+
+/* Campo data: testo GG/MM/AAAA + icona calendario con il selettore nativo trasparente sopra. */
+.campo-data { position: relative; }
+.campo-data .psc-field__input { width: 100%; box-sizing: border-box; padding-right: 52px; }
+.campo-data__calendario {
+  position: absolute; top: 0; right: 0; bottom: 0; width: 48px;
+  display: flex; align-items: center; justify-content: center; color: var(--ink-muted);
+}
+.campo-data__calendario svg { width: 22px; height: 22px; pointer-events: none; }
+.campo-data__calendario input {
+  position: absolute; inset: 0; width: 100%; height: 100%; margin: 0; padding: 0;
+  opacity: 0; cursor: pointer; border: 0; -webkit-appearance: none; appearance: none;
+}
+.campo-data__calendario input::-webkit-calendar-picker-indicator { position: absolute; inset: 0; width: 100%; height: 100%; margin: 0; cursor: pointer; }

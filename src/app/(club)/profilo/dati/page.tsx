@@ -6,6 +6,7 @@ import { PageHead } from "@/components/PageHead";
 import { getRecapiti } from "@/lib/dati";
 import { getSocio } from "@/lib/socio";
 import { salvaRecapiti } from "../azioni";
+import { CampoData } from "@/components/CampoData";
 
 export const metadata: Metadata = { title: "I tuoi dati" };
 
@@ -27,7 +28,7 @@ export default async function ModificaDati({ searchParams }: { searchParams: Pro
 
       <form action={salvaRecapiti} className="modulo">
         <Campo id="telefono" label="Cellulare" type="tel" autoComplete="tel" inputMode="tel" required defaultValue={valore("telefono")} />
-        <Campo id="nascita" label="Data di nascita (facoltativa)" type="date" autoComplete="bday" max={oggi()} defaultValue={valore("nascita")} />
+        <CampoData id="nascita" label="Data di nascita (facoltativa)" autoComplete="bday" max={oggi()} defaultValue={valore("nascita")} />
         <Campo id="cap" label="CAP (facoltativo)" autoComplete="postal-code" inputMode="numeric" pattern="[0-9]{5}" maxLength={5} defaultValue={valore("cap")} />
         <Campo id="citta" label="Città (facoltativa)" autoComplete="address-level2" maxLength={80} defaultValue={valore("citta")} />
         <p className="t-caption">Per cambiare nome, cognome o email chiedi in negozio.</p>
