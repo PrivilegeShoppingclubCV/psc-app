@@ -202,3 +202,7 @@ button { font: inherit; }
 .scansiona-testo { max-width: 420px; text-align: center; }
 /* Dentro il benvenuto i tasti principali sono bianchi: nella finestra bianca tornano verdi. */
 .welcome .installa-dialog .psc-btn--primary { background: var(--verde-700); color: var(--bianco); }
+
+/* Link per il genitore (soci minorenni). */
+.link-genitore { display: flex; flex-direction: column; gap: var(--space-3); }
+.link-genitore__url { display: block; margin-top: var(--space-1); overflow-wrap: anywhere; font-family: var(--font-text); }

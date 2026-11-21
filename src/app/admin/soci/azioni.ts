@@ -5,7 +5,7 @@ import { redirect } from "next/navigation";
 import { conEsito, intero, messaggioDb, spunta, testo, testoONull } from "@/lib/admin/form";
 import { richiediAdmin } from "@/lib/admin/sessione";
 
-const STATI = ["attivo", "sospeso", "cessato"];
+const STATI = ["attivo", "sospeso", "cessato", "in_attesa"];
 
 export async function salvaSocio(form: FormData) {
   const { supabase } = await richiediAdmin();

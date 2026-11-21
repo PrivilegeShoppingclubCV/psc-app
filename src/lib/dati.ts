@@ -30,6 +30,23 @@ const DESCRIZIONI: Record<string, string> = {
   scadenza: "Punti scaduti",
 };
 
+/** 18 anni compiuti (o data di nascita non indicata: soci importati). */
+function maggiorenne(nascita: string | null) {
+  if (!nascita) return true;
+  const n = new Date(nascita);
+  const oggi = new Date();
+  const eta = oggi.getFullYear() - n.getFullYear() - (oggi < new Date(oggi.getFullYear(), n.getMonth(), n.getDate()) ? 1 : 0);
+  return eta >= 18;
+}
+
+// I soci importati dal negozio hanno i punti già accesi: a loro non si chiede nulla.
+function attesaGenitore(s: { stato: string; data_nascita: string | null; punti_attivi: boolean; autorizzazioni_genitore: { approvato_il: string | null }[] | null }): Socio["attesaGenitore"] {
+  if (s.stato === "in_attesa") return "iscrizione";
+  if (maggiorenne(s.data_nascita) || s.punti_attivi) return null;
+  const approvato = (s.autorizzazioni_genitore ?? []).some((a) => a.approvato_il);
+  return approvato ? null : "punti_offerte";
+}
+
 export const getSessione = cache(async (): Promise<Sessione> => {
   const supabase = await getSupabase();
   if (!supabase) return { configurato: false, email: mock.socio.email, socio: { ...mock.socio, id: "mock" } };
@@ -39,9 +56,9 @@ export const getSessione = cache(async (): Promise<Sessione> => {
 
   const { data, error } = await supabase
     .from("soci")
-    .select("id, nome, cognome, email, iscritto_il, codice_invito, livelli(nome), tessere(codice, tipo, stato_cassa)")
+    .select("id, nome, cognome, email, iscritto_il, codice_invito, stato, data_nascita, punti_attivi, livelli(nome), tessere(codice, tipo, stato_cassa), autorizzazioni_genitore(approvato_il)")
     .eq("user_id", user.id)
-    .eq("stato", "attivo")
+    .in("stato", ["attivo", "in_attesa"])
     .eq("tessere.stato", "attiva")
     .maybeSingle();
   if (error) throw error;
@@ -67,6 +84,8 @@ export const getSessione = cache(async (): Promise<Sessione> => {
       inAttivazione: daMostrare?.inAttivazione ?? false,
       tessere,
       livello: (data.livelli as unknown as { nome: string } | null)?.nome ?? "Classic",
+      attesaGenitore: attesaGenitore(data),
+      puntiAttivi: data.punti_attivi || maggiorenne(data.data_nascita),
     },
   };
 });

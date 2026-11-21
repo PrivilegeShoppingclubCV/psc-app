@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { InstallaApp } from "@/components/InstallaApp";
+import { LinkGenitore } from "@/components/LinkGenitore";
 import { PageHead } from "@/components/PageHead";
 import { SaldoPunti } from "@/components/SaldoPunti";
 import { ApriTessera } from "@/components/TesseraFullscreen";
@@ -27,6 +28,19 @@ export default async function Home() {
         )}
         <ApriTessera socio={socio} />
       </section>
+
+      {socio.attesaGenitore === "punti_offerte" && (
+        <section className="section" aria-labelledby="genitore">
+          <div className="installa">
+            <h2 id="genitore" className="installa__titolo">Attiva punti e offerte</h2>
+            <p className="installa__testo">
+              La tua tessera funziona già. Per accumulare punti sugli acquisti e ricevere le offerte serve l&apos;ok di un genitore:
+              mandagli il link e fagli approvare.
+            </p>
+            <LinkGenitore nome={socio.nome} />
+          </div>
+        </section>
+      )}
 
       {datiMancanti && (
         <section className="section" aria-label="Completa i tuoi dati">
