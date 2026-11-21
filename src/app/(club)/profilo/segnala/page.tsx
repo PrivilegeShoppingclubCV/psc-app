@@ -46,7 +46,7 @@ export default async function Segnala({ searchParams }: { searchParams: Promise<
           <textarea id="messaggio" name="messaggio" className="psc-field__input" rows={5} minLength={3} maxLength={1000} required
             defaultValue={param(q.messaggio)} placeholder="Es. La mia email giusta è mario.rossi@esempio.it" />
         </div>
-        <p className="t-caption">Nome, cognome, cellulare e indirizzo li puoi anche <Link href="/profilo/dati">correggere da solo</Link>.</p>
+        <p className="t-caption">Cellulare, data di nascita e indirizzo li puoi anche <Link href="/profilo/dati">correggere da solo</Link>.</p>
         <button type="submit" className="psc-btn psc-btn--primary psc-btn--block">Invia la segnalazione</button>
       </form>
     </>
