@@ -25,7 +25,7 @@ export default async function CollegaTessera({ searchParams }: { searchParams: P
       errore={param(q.errore)}
     >
       <form action={collegaTessera}>
-        <CampoTessera id="tessera" label="Numero tessera" required={configurato} defaultValue={param(q.tessera)} help="Lo trovi sul retro della tessera, sotto il codice a barre. Scrivi solo le cifre dopo gli zeri (es. 4169): gli zeri li aggiungiamo noi. Oppure scansionalo con la fotocamera." />
+        <CampoTessera id="tessera" label="Numero tessera" required={configurato} defaultValue={param(q.tessera)} help="Lo trovi sul retro della tessera, sotto il codice a barre. Puoi scriverlo con o senza gli zeri iniziali (es. 4169): il numero completo compare qui sopra. Oppure scansionalo con la fotocamera." />
         {!conAccesso && <Campo id="email" label="Email" type="email" autoComplete="email" required={configurato} defaultValue={param(q.email)} />}
         <button type="submit" className="psc-btn psc-btn--primary psc-btn--block">Continua</button>
       </form>

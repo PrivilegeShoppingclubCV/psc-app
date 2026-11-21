@@ -65,13 +65,17 @@ export function cifreSignificative(valore: string) {
 }
 
 /**
- * Campo "numero tessera": il socio scrive solo le cifre dopo gli zeri (es. 4169) e
- * vede comparire sotto il numero completo a 12 cifre (000000004169), che è quello
+ * Campo "numero tessera": il socio può scrivere 4169, 04169 o 000000004169 (gli
+ * zeri che scrive restano nel campo) e vede comparire sotto il numero completo a
+ * 12 cifre (000000004169), che è quello
  * inviato. C'è anche il bottone per leggere il codice a barre con la fotocamera.
  */
 export function CampoTessera({ id, label, help, defaultValue, required }: { id: string; label: string; help?: string; defaultValue?: string; required?: boolean }) {
   const campo = useRef<HTMLInputElement>(null);
-  const [cifre, setCifre] = useState(() => cifreSignificative(String(defaultValue ?? "")));
+  // Quello che si vede nel campo: solo cifre, zeri compresi.
+  const [scritto, setScritto] = useState(() => String(defaultValue ?? "").replace(/\D/g, ""));
+  const cifre = cifreSignificative(scritto);
+  const troppe = scritto.replace(/^0+/, "").length > CIFRE_TESSERA && cifre.length === CIFRE_TESSERA && !(scritto.length === 13 && ean13Valido(scritto));
   const completo = cifre ? cifre.padStart(CIFRE_TESSERA, "0") : "";
   const zeri = CIFRE_TESSERA - cifre.length;
   const dialog = useRef<HTMLDialogElement>(null);
@@ -118,7 +122,8 @@ export function CampoTessera({ id, label, help, defaultValue, required }: { id: 
             const [primo] = await rilevatore.detect(v);
             const numero = primo && numeroDaCodice(primo);
             if (numero && attivo.current) {
-              setCifre(cifreSignificative(numero));
+              setScritto(numero.replace(/\D/g, ""));
+              campo.current?.setCustomValidity("");
               navigator.vibrate?.(80);
               chiudi();
               campo.current?.focus();
@@ -156,16 +161,25 @@ export function CampoTessera({ id, label, help, defaultValue, required }: { id: 
         autoComplete="off"
         placeholder="es. 4169"
         required={required}
-        pattern="[1-9][0-9]{0,11}"
-        title="Scrivi le cifre della tessera dopo gli zeri iniziali."
         aria-describedby={`${id}-numero${help ? ` ${id}-help` : ""}`}
-        value={cifre}
-        onChange={(e) => setCifre(cifreSignificative(e.target.value))}
+        maxLength={20}
+        value={scritto}
+        onChange={(e) => {
+          const v = e.target.value.replace(/\D/g, "").slice(0, 20);
+          setScritto(v);
+          const n = cifreSignificative(v);
+          e.target.setCustomValidity(
+            v && !n ? "Il numero della tessera non può essere solo zeri."
+            : v.replace(/^0+/, "").length > CIFRE_TESSERA && !(v.length === 13 && ean13Valido(v)) ? "Il numero della tessera ha al massimo 12 cifre." : "",
+          );
+        }}
       />
       {/* Il numero inviato è sempre quello completo, con gli zeri. */}
       <input type="hidden" name={id} value={completo} />
       <p id={`${id}-numero`} className="tessera-numero" aria-live="polite">
-        {completo ? (
+        {troppe ? (
+          <>Troppe cifre: il numero della tessera ne ha {CIFRE_TESSERA}.</>
+        ) : completo ? (
           <>
             La tua tessera: <span className="tessera-numero__cifre"><span className="tessera-numero__zeri">{"0".repeat(zeri)}</span>{cifre}</span>
           </>
