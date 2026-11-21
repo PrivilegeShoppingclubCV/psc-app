@@ -1,14 +1,24 @@
 /* Pannello admin: pensato per il computer, usabile anche da telefono. */
 
-.admin { min-height: 100dvh; display: grid; grid-template-columns: minmax(0, 1fr); background: var(--surface); }
+/* Testi del pannello un po' più spessi dell'app: si leggono meglio a schermo. */
+.admin { font-weight: 500; min-height: 100dvh; display: grid; grid-template-columns: minmax(0, 1fr); background: var(--surface); }
 .admin-side { display: flex; flex-direction: column; gap: var(--space-4); padding: var(--space-4); border-bottom: 1px solid var(--line); background: var(--surface-alt); }
 .admin-side__brand { display: flex; align-items: center; gap: var(--space-3); text-decoration: none; color: var(--ink); }
 .admin-side__brand .logo--wordmark { width: 120px; }
 .admin-nav { display: flex; gap: var(--space-1); overflow-x: auto; margin: 0 calc(-1 * var(--space-4)); padding: 0 var(--space-4); }
 .admin-nav a { flex: none; padding: var(--space-2) var(--space-3); border-radius: var(--radius-sm); color: var(--ink-muted); text-decoration: none; white-space: nowrap; }
 .admin-nav a:hover { background: var(--surface-tint); color: var(--ink); }
-.admin-nav a.is-active { background: var(--surface-brand); color: var(--ink-on-brand); font-weight: 600; }
+.admin-nav a.is-active { background: var(--surface-brand); color: var(--ink-on-brand); font-weight: 700; }
 .admin-nav a:focus-visible { outline: 2px solid var(--focus); outline-offset: 2px; }
+.admin-nav__gruppo { display: flex; align-items: center; gap: var(--space-1); flex: none; }
+.admin-nav__gruppo + .admin-nav__gruppo { padding-left: var(--space-2); margin-left: var(--space-1); border-left: 1px solid var(--line); }
+.admin-nav__voci { display: flex; align-items: center; gap: var(--space-1); }
+.admin-nav__voci[hidden] { display: none; }
+.admin-nav__titolo { flex: none; display: inline-flex; align-items: center; justify-content: space-between; gap: var(--space-2); padding: var(--space-2) var(--space-1); border: 0; border-radius: var(--radius-sm); background: none; font: inherit; font-size: 11px; font-weight: 700; letter-spacing: .08em; text-transform: uppercase; color: var(--ink-muted); white-space: nowrap; cursor: pointer; }
+.admin-nav__titolo:hover { color: var(--ink); }
+.admin-nav__titolo:focus-visible { outline: 2px solid var(--focus); outline-offset: 2px; }
+.admin-nav__freccia { width: 6px; height: 6px; border-right: 1.5px solid currentColor; border-bottom: 1.5px solid currentColor; transform: rotate(45deg) translateY(-2px); transition: transform .15s; }
+.admin-nav__titolo[aria-expanded="false"] .admin-nav__freccia { transform: rotate(-45deg); }
 .admin-side__utente { display: flex; align-items: center; justify-content: space-between; gap: var(--space-2); min-width: 0; }
 .admin-side__utente .t-caption { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .admin-main { padding: var(--space-6) var(--space-4) var(--space-12); display: flex; flex-direction: column; gap: var(--space-6); min-width: 0; max-width: 1100px; }
@@ -16,7 +26,11 @@
 @media (min-width: 900px) {
   .admin { grid-template-columns: 240px minmax(0, 1fr); }
   .admin-side { position: sticky; top: 0; height: 100dvh; border-bottom: 0; border-right: 1px solid var(--line); padding: var(--space-6) var(--space-4); }
-  .admin-side .admin-nav { flex-direction: column; margin: 0; padding: 0; overflow: visible; }
+  .admin-side .admin-nav { flex-direction: column; gap: var(--space-3); margin: 0; padding: 0; overflow: visible; }
+  .admin-side .admin-nav__gruppo { flex-direction: column; align-items: stretch; }
+  .admin-side .admin-nav__gruppo + .admin-nav__gruppo { padding-left: 0; margin-left: 0; border-left: 0; }
+  .admin-side .admin-nav__voci { flex-direction: column; align-items: stretch; }
+  .admin-side .admin-nav__titolo { padding: var(--space-1) var(--space-3); }
   .admin-side__utente { flex-direction: column; align-items: flex-start; gap: var(--space-1); margin-top: auto; }
   .admin-side__utente .psc-btn--ghost { padding: 0; min-height: 0; }
   .admin-main { padding: var(--space-8) var(--space-8) var(--space-12); }
@@ -34,7 +48,7 @@
 .admin-stats { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: var(--space-4); }
 .admin-stat { border: 1px solid var(--line); border-radius: var(--radius-md); padding: var(--space-4); display: flex; flex-direction: column; gap: var(--space-1); text-decoration: none; color: var(--ink); }
 a.admin-stat:hover { border-color: var(--ink); }
-.admin-stat__valore { font-family: var(--font-display); font-size: 36px; line-height: 40px; font-weight: 300; font-variant-numeric: lining-nums tabular-nums; }
+.admin-stat__valore { font-family: var(--font-display); font-size: 36px; line-height: 40px; font-weight: 400; font-variant-numeric: lining-nums tabular-nums; }
 .admin-cols { display: grid; grid-template-columns: 1fr; gap: var(--space-6); }
 @media (min-width: 1100px) { .admin-cols { grid-template-columns: 3fr 2fr; align-items: start; } }
 
@@ -46,7 +60,7 @@ a.admin-stat:hover { border-color: var(--ink); }
 .admin-table tr:last-child td { border-bottom: 0; }
 .admin-table .admin-gruppo th { background: var(--surface-tint); color: var(--ink); text-transform: none; letter-spacing: 0; font-size: 13px; white-space: normal; }
 .admin-table tbody tr:hover { background: var(--surface-tint); }
-.admin-table a { font-weight: 500; text-decoration: none; }
+.admin-table a { font-weight: 600; text-decoration: none; }
 .admin-table a:hover { text-decoration: underline; }
 .admin-table .num { text-align: right; font-variant-numeric: tabular-nums; white-space: nowrap; }
 .admin-table .min { color: var(--ink-muted); white-space: nowrap; }
@@ -60,7 +74,7 @@ a.admin-stat:hover { border-color: var(--ink); }
 .admin-field--wide { grid-column: 1 / -1; max-width: none; }
 .admin-textarea { min-height: 96px; padding: var(--space-3); resize: vertical; }
 .admin-form fieldset { border: 0; margin: 0; padding: 0; display: flex; flex-direction: column; gap: var(--space-3); }
-.admin-form legend { font-weight: 600; margin-bottom: var(--space-3); padding: 0; }
+.admin-form legend { font-weight: 700; margin-bottom: var(--space-3); padding: 0; }
 .admin-spunta__help { display: block; }
 .admin-checks { display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: var(--space-2) var(--space-4); }
 .admin-azioni { display: flex; flex-wrap: wrap; gap: var(--space-3); align-items: center; }

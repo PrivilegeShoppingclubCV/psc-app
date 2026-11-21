@@ -26,7 +26,7 @@ export const sansumi = localFont({
 // Jost: testo corrente.
 export const jost = Jost({
   subsets: ["latin"],
-  weight: ["400", "500", "600"],
+  weight: ["400", "500", "600", "700"],
   variable: "--font-jost",
   display: "swap",
 });
