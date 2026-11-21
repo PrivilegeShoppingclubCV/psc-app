@@ -1,5 +1,6 @@
 import type { Offerta } from "@/lib/tipi";
 import { formatData, formatEuro } from "@/lib/format";
+import { FotoOfferta } from "./FotoOfferta";
 
 /** Card di un'offerta: dello staff o un prodotto del magazzino. */
 export function OffertaCard({ o }: { o: Offerta }) {
@@ -8,8 +9,8 @@ export function OffertaCard({ o }: { o: Offerta }) {
     <article className="psc-product">
       <div className="psc-product__media">
         {o.immagineUrl ? (
-          // Immagini dai bucket pubblici "offerte" e "prodotti" di Supabase Storage.
-          <img src={o.immagineUrl} alt="" loading="lazy" />
+          // Immagini da Supabase Storage o da link esterni: toccandole si aprono in grande.
+          <FotoOfferta src={o.immagineUrl} nome={o.nome} />
         ) : (
           <div className="media-placeholder"><span className="logo logo--crown" /></div>
         )}
