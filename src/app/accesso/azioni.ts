@@ -3,7 +3,6 @@
 // Azioni dei moduli di accesso. La logica condivisa con /auth/callback è in flusso.ts.
 
 import { redirect } from "next/navigation";
-import { maggiorenneDal } from "@/components/AuthPage";
 import { getSupabase } from "@/lib/dati";
 import {
   campiIscrizione,
@@ -78,7 +77,6 @@ export async function iscriviti(form: FormData) {
   if (!attesa.telefono) redirect(conErrore("/iscriviti", "Il numero di telefono è obbligatorio.", campi));
   // Gli stessi controlli li rifà il database: qui servono per avvisare prima di mandare l'email.
   if (!attesa.nascita) redirect(conErrore("/iscriviti", "La data di nascita è obbligatoria.", campi));
-  if (attesa.nascita > maggiorenneDal()) redirect(conErrore("/iscriviti", "Per iscriverti al club devi avere almeno 18 anni.", campi));
   if (!attesa.indirizzo) redirect(conErrore("/iscriviti", "L'indirizzo è obbligatorio.", campi));
   if (!/^\d{5}$/.test(attesa.cap)) redirect(conErrore("/iscriviti", "Il CAP è obbligatorio ed è fatto di 5 cifre.", campi));
   if (!attesa.citta) redirect(conErrore("/iscriviti", "La città è obbligatoria.", campi));

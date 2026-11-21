@@ -13,6 +13,8 @@ export const socio: Socio = {
   codiceInvito: "GIULIA-7K2",
   inAttivazione: false,
   tessere: [{ codice: "004718", tipo: "fisica", inAttivazione: false }],
+  attesaGenitore: null,
+  puntiAttivi: true,
 };
 
 export const recapiti: Recapiti = { telefono: "3331234567", nascita: "", indirizzo: "", cap: "00053", citta: "Civitavecchia", negozioPreferitoId: null };

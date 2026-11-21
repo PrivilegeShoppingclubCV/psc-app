@@ -25,7 +25,7 @@ export default async function SchedaSocio({ params, searchParams }: {
 }) {
   const [{ id }, q] = await Promise.all([params, searchParams]);
   const { supabase } = await richiediAdmin();
-  const [socio, tessere, saldo, movimenti, consensi, invitati, invitatoDa, livelli, negozi, premi] = await Promise.all([
+  const [socio, tessere, saldo, movimenti, consensi, invitati, invitatoDa, livelli, negozi, premi, genitore] = await Promise.all([
     supabase.from("soci").select("*").eq("id", id).maybeSingle(),
     supabase.from("tessere").select("id, codice, tipo, stato, stato_cassa, consegnata_il, bloccata_il, motivo_blocco").eq("socio_id", id).order("creato_il"),
     supabase.from("saldi_punti").select("saldo").eq("socio_id", id).maybeSingle(),
@@ -36,6 +36,8 @@ export default async function SchedaSocio({ params, searchParams }: {
     supabase.from("livelli").select("codice, nome").order("ordine"),
     supabase.from("negozi").select("id, nome").order("ordine").order("nome"),
     supabase.from("premi").select("id, nome, soglia_punti").eq("attivo", true).order("soglia_punti"),
+    supabase.from("autorizzazioni_genitore").select("id, approvato_il, genitore_nome, genitore_cognome, genitore_email, approva_iscrizione, approva_punti, approva_marketing")
+      .eq("socio_id", id).not("approvato_il", "is", null).order("approvato_il", { ascending: false }),
   ]);
   const s = socio.data;
   if (!s) notFound();
@@ -81,7 +83,7 @@ export default async function SchedaSocio({ params, searchParams }: {
             <Campo id="citta" label="Città" defaultValue={s.citta ?? ""} />
             <Scelta id="livello" label="Livello" defaultValue={s.livello} opzioni={(livelli.data ?? []).map((l) => ({ value: l.codice, label: l.nome }))} />
             <Scelta id="stato" label="Stato" defaultValue={s.stato} help="Sospeso o cessato: la tessera sparisce dall'app."
-              opzioni={[{ value: "attivo", label: "Attivo" }, { value: "sospeso", label: "Sospeso" }, { value: "cessato", label: "Cessato" }]} />
+              opzioni={[{ value: "attivo", label: "Attivo" }, { value: "sospeso", label: "Sospeso" }, { value: "cessato", label: "Cessato" }, { value: "in_attesa", label: "In attesa del genitore (minore di 14 anni)" }]} />
             <Scelta id="negozio_preferito_id" label="Negozio preferito" defaultValue={s.negozio_preferito_id ?? ""} opzioni={opzioniNegozi} />
           </div>
           <div className="admin-azioni">
@@ -128,6 +130,20 @@ export default async function SchedaSocio({ params, searchParams }: {
               </dl>
             ) : <p className="t-caption">Nessun consenso registrato.</p>}
           </section>
+
+          {(!!genitore.data?.length || s.stato === "in_attesa" || !s.punti_attivi) && (
+            <section className="admin-card">
+              <h2 className="t-title">Consenso del genitore</h2>
+              {s.stato === "in_attesa" && <p className="t-caption">Minore di 14 anni: la tessera si attiva quando un genitore approva dal link mandato dall&apos;app.</p>}
+              {!s.punti_attivi && <p className="t-caption">Raccolta punti spenta: le vendite non danno punti finché un genitore non approva (o fino ai 18 anni).</p>}
+              {genitore.data?.map((g) => (
+                <p key={g.id}>
+                  {g.genitore_nome} {g.genitore_cognome} ({g.genitore_email}), {dataBreve(g.approvato_il!)}:{" "}
+                  {[g.approva_iscrizione && "iscrizione", g.approva_punti && "punti", g.approva_marketing && "offerte"].filter(Boolean).join(", ") || "nessuna approvazione"}
+                </p>
+              ))}
+            </section>
+          )}
 
           {!!invitati.data?.length && (
             <section className="admin-card">

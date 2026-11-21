@@ -18,6 +18,15 @@ export interface Socio {
    * quella di plastica, poi la fisica, che nel telefono si vede con il suo codice.
    */
   tessere: TesseraSocio[];
+  /**
+   * Minorenne (iscritto in app) che aspetta l'ok di un genitore:
+   * - "iscrizione": sotto i 14 anni, la tessera non è ancora attiva;
+   * - "punti_offerte": da 14 a 17 anni, punti e offerte restano spenti;
+   * - null: niente da approvare (adulto, o il genitore ha già risposto).
+   */
+  attesaGenitore: "iscrizione" | "punti_offerte" | null;
+  /** false = le vendite non danno punti (minorenne senza ok del genitore). */
+  puntiAttivi: boolean;
 }
 
 export interface TesseraSocio {
