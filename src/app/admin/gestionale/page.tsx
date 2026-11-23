@@ -14,7 +14,7 @@ export default async function Gestionale({ searchParams }: { searchParams: Promi
   const { supabase } = await richiediAdmin();
   const [chiavi, impostazioni, importi, attesa] = await Promise.all([
     supabase.from("gestionale_chiavi").select("id, nome, prefisso, creata_il, ultimo_uso, revocata_il").order("creata_il", { ascending: false }),
-    supabase.from("impostazioni").select("chiave, valore").in("chiave", ["gestionale_mappatura_soci", "gestionale_mappatura_vendite", "euro_per_punto", "punti_dal"]),
+    supabase.from("impostazioni").select("chiave, valore").in("chiave", ["gestionale_mappatura_soci", "gestionale_mappatura_vendite", "gestionale_mappatura_righe", "euro_per_punto", "punti_dal"]),
     supabase.from("import_batch").select("id, tipo, nome_file, stato, righe_totali, righe_ok, righe_saltate, righe_errore, note, creato_il").order("creato_il", { ascending: false }).limit(20),
     supabase.from("tessere_in_attesa_cassa").select("id", { count: "exact", head: true }),
   ]);
@@ -111,6 +111,13 @@ export default async function Gestionale({ searchParams }: { searchParams: Promi
         </form>
       </Mappatura>
 
+      <Mappatura
+        tipo="righe"
+        titolo="Colonne del CSV righe scontrini (prodotti)"
+        campi="numero_documento e descrizione (obbligatori), quantita, importo (totale della riga, scontato e IVA compresa), id_riga (id univoco della riga: senza, si usa numero + testo), codice, ordine. Vuota = l'app riconosce le colonne dal nome."
+        valore={valore("gestionale_mappatura_righe")}
+      />
+
       <section className="admin-card">
         <h2 className="t-title">Ultimi import</h2>
         {importi.data?.length ? (
@@ -139,7 +146,7 @@ export default async function Gestionale({ searchParams }: { searchParams: Promi
 }
 
 function Mappatura({ tipo, titolo, campi, valore, daElaborare, children }: {
-  tipo: "soci" | "vendite";
+  tipo: "soci" | "vendite" | "righe";
   titolo: string;
   campi: string;
   valore: unknown;

@@ -26,10 +26,13 @@ export async function revocaChiave(form: FormData) {
 const FILE = {
   soci: { chiave: "gestionale_mappatura_soci", importa: "importa_soci", richiesti: ["numero_tessera"] },
   vendite: { chiave: "gestionale_mappatura_vendite", importa: "importa_movimenti_punti", richiesti: ["numero_tessera", "importo|punti"] },
+  // Le righe non passano da un import da elaborare: si salvano appena arrivano.
+  righe: { chiave: "gestionale_mappatura_righe", importa: null, richiesti: [] },
 } as const;
 
 function tipoFile(form: FormData) {
-  return testo(form, "tipo") === "vendite" ? FILE.vendite : FILE.soci;
+  const t = testo(form, "tipo");
+  return t === "vendite" ? FILE.vendite : t === "righe" ? FILE.righe : FILE.soci;
 }
 
 const mancanti = (m: Record<string, string>, richiesti: readonly string[]) =>
@@ -59,6 +62,7 @@ export async function salvaMappatura(form: FormData) {
 export async function elaboraImport(form: FormData) {
   const { supabase } = await richiediAdmin();
   const file = tipoFile(form);
+  if (!file.importa) redirect("/admin/gestionale");
   const id = testo(form, "id");
   const { data: mappa } = await supabase.from("impostazioni").select("valore").eq("chiave", file.chiave).maybeSingle();
   const mappatura = (mappa?.valore ?? {}) as Record<string, string>;
