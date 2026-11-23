@@ -51,6 +51,9 @@ export const club: TestiClub = {
     punti: "{punti} 积分",
     cortesia: "仅供参考的副本，不作为税务凭证。",
     dataOra: "{data} {ora}",
+    caricaAltri: "加载更多",
+    caricamento: "正在加载…",
+    erroreCarica: "无法加载更多小票，请重试。",
   },
   buono: {
     titoloPagina: "奖品兑换券",

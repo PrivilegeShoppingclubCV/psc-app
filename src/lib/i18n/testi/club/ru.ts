@@ -50,6 +50,9 @@ export const club: TestiClub = {
     punti: "{punti} баллов",
     cortesia: "Информационная копия, не является фискальным документом.",
     dataOra: "{data}, {ora}",
+    caricaAltri: "Показать ещё",
+    caricamento: "Загрузка…",
+    erroreCarica: "Не удалось загрузить другие чеки. Попробуйте ещё раз.",
   },
   buono: {
     titoloPagina: "Купон на подарок",

@@ -131,20 +131,36 @@ export async function getMovimenti(socioId: string): Promise<MovimentoPunti[]> {
 }
 
 /** Scontrini degli ultimi 30 giorni (i più vecchi il database li cancella ogni notte). */
-export async function getScontrini(socioId: string): Promise<Scontrino[]> {
+/** Quanti scontrini si caricano alla volta nella pagina del socio. */
+export const SCONTRINI_PER_VOLTA = 10;
+
+/**
+ * Scontrini del socio degli ultimi 30 giorni, i più recenti prima, a gruppi di
+ * SCONTRINI_PER_VOLTA. "dopo" è l'ultimo già mostrato: si leggono solo i successivi.
+ */
+export async function getScontrini(socioId: string, dopo?: { data: string; id: string }): Promise<{ scontrini: Scontrino[]; altri: boolean }> {
   const supabase = await getSupabase();
-  if (!supabase) return mock.scontrini;
+  if (!supabase) {
+    const da = dopo ? mock.scontrini.findIndex((s) => s.id === dopo.id) + 1 : 0;
+    return { scontrini: mock.scontrini.slice(da, da + SCONTRINI_PER_VOLTA), altri: mock.scontrini.length > da + SCONTRINI_PER_VOLTA };
+  }
   const dal = new Date(Date.now() - 31 * 24 * 60 * 60 * 1000).toISOString();
-  const { data, error } = await supabase
+  let query = supabase
     .from("scontrini")
     .select(COLONNE_SCONTRINO)
     .eq("socio_id", socioId)
     .gte("data_scontrino", dal)
     .order("data_scontrino", { ascending: false })
-    .order("numero_documento", { ascending: false })
-    .limit(200);
+    .order("id", { ascending: false })
+    .limit(SCONTRINI_PER_VOLTA + 1);
+  if (dopo) {
+    const d = new Date(dopo.data).toISOString();
+    if (!/^[0-9a-f-]{36}$/i.test(dopo.id)) return { scontrini: [], altri: false };
+    query = query.or(`data_scontrino.lt.${d},and(data_scontrino.eq.${d},id.lt.${dopo.id})`);
+  }
+  const { data, error } = await query;
   if (error) throw error;
-  return conRighe(supabase, data);
+  return { scontrini: await conRighe(supabase, data.slice(0, SCONTRINI_PER_VOLTA)), altri: data.length > SCONTRINI_PER_VOLTA };
 }
 
 type RigaDb = { id: string; numero_documento: string; data_scontrino: string; totale: number | string; punti: number; righe: unknown; cassa: string | null; negozi: unknown };

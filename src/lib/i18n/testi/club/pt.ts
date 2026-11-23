@@ -50,6 +50,9 @@ export const club: TestiClub = {
     punti: "{punti} pontos",
     cortesia: "Cópia de cortesia, não válida como documento fiscal.",
     dataOra: "{data}, {ora}",
+    caricaAltri: "Carregar mais",
+    caricamento: "A carregar…",
+    erroreCarica: "Não foi possível carregar mais talões. Tente novamente.",
   },
   buono: {
     titoloPagina: "Vale de prémio",

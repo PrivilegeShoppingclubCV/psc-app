@@ -1,4 +1,4 @@
-import { forma, ricco } from "@/lib/i18n";
+import { forma, ricco } from "@/lib/i18n/forma";
 import type { formati } from "@/lib/i18n/formati";
 import type { TestiClub } from "@/lib/i18n/testi";
 import type { Scontrino } from "@/lib/tipi";

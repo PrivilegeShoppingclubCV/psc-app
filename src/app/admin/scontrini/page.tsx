@@ -8,6 +8,8 @@ import { formatEuro, formatPunti } from "@/lib/format";
 
 export const metadata: Metadata = { title: "Scontrini" };
 
+const PER_PAGINA = 25;
+
 type Riga = {
   id: string; numero_documento: string; data_scontrino: string; totale: number; punti: number; cassa: string | null;
   negozi: { nome: string } | null; soci: { id: string; nome: string | null; cognome: string | null } | null;
@@ -17,13 +19,19 @@ type Riga = {
 export default async function ScontriniAdmin({ searchParams }: { searchParams: Promise<Record<string, string | string[] | undefined>> }) {
   const q = await searchParams;
   const cerca = param(q.q).trim();
+  const pagina = Math.max(1, Number(param(q.pagina)) || 1);
   const { supabase } = await richiediAdmin();
   let query = supabase.from("scontrini")
     .select("id, numero_documento, data_scontrino, totale, punti, cassa, negozi(nome), soci(id, nome, cognome)")
-    .order("data_scontrino", { ascending: false }).order("numero_documento", { ascending: false }).limit(200);
+    .order("data_scontrino", { ascending: false }).order("id", { ascending: false })
+    .range((pagina - 1) * PER_PAGINA, pagina * PER_PAGINA);
   if (cerca) query = query.ilike("numero_documento", `%${cerca.replace(/[,()*%\\]/g, "")}%`);
   const { data, error } = await query;
-  const scontrini = (data ?? []) as unknown as Riga[];
+  const tutti = (data ?? []) as unknown as Riga[];
+  // Uno in più per sapere se c'è una pagina dopo, senza contare tutta la tabella.
+  const scontrini = tutti.slice(0, PER_PAGINA);
+  const successivi = tutti.length > PER_PAGINA;
+  const link = (p: number) => `/admin/scontrini?${new URLSearchParams({ ...(cerca ? { q: cerca } : {}), ...(p > 1 ? { pagina: String(p) } : {}) })}`;
   const { data: conProdotti } = scontrini.length
     ? await supabase.from("scontrini").select("numero_documento, numero_norm").in("id", scontrini.map((s) => s.id))
     : { data: [] };
@@ -81,6 +89,14 @@ export default async function ScontriniAdmin({ searchParams }: { searchParams: P
         <p className="admin-vuoto">
           Nessuno scontrino{cerca ? ` con «${cerca}»` : " negli ultimi 30 giorni"}. Arrivano con l&apos;invio delle vendite da ReadyPro, solo per gli acquisti fatti con la tessera.
         </p>
+      )}
+
+      {(pagina > 1 || successivi) && (
+        <div className="admin-pagine">
+          {pagina > 1 && <Link href={link(pagina - 1)} className="psc-btn psc-btn--secondary admin-btn--small">Precedenti</Link>}
+          <span className="t-caption">Pagina {pagina}</span>
+          {successivi && <Link href={link(pagina + 1)} className="psc-btn psc-btn--secondary admin-btn--small">Successivi</Link>}
+        </div>
       )}
     </>
   );

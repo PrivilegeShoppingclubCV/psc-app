@@ -50,6 +50,9 @@ export const club: TestiClub = {
     punti: "{punti} points",
     cortesia: "Courtesy copy, not valid as a tax receipt.",
     dataOra: "{data}, {ora}",
+    caricaAltri: "Load more",
+    caricamento: "Loading…",
+    erroreCarica: "Couldn't load more receipts. Please try again.",
   },
   buono: {
     titoloPagina: "Reward voucher",
