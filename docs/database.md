@@ -34,6 +34,7 @@ Da lì in poi il pannello `/admin` è aperto a quell'account, e gli altri admin 
 | `codici_collegamento` | Codici di 6 caratteri, validi 15 minuti, che l'app mostra a chi deve farsi collegare la tessera in negozio. |
 | `livelli` | Classic, Gold, … Il livello è un campo del socio; la regola per passare di livello è da decidere. |
 | `movimenti_punti` | Registro dei punti, in sola aggiunta: saldo iniziale dall'import, acquisti, riscatti, bonus, rettifiche. Il saldo è la somma (vista `saldi_punti`). Un riscatto non può portare il saldo sotto zero. |
+| `scontrini` | Scontrini virtuali che il socio vede in app (Punti → I tuoi scontrini): uno per N.Doc., ricavati da ogni file vendite elaborato (trigger su `import_batch`), anche sotto il primo punto. Si cancellano dopo `impostazioni.scontrini_giorni` (30) ogni notte con pg_cron e a ogni invio; i `movimenti_punti` restano. `righe` (articoli) è vuota finché ReadyPro manda solo la testata; la mappatura vendite può avere `tipo_documento`. |
 | `premi` | Catalogo punti (buoni da 10, 15, 30 €). |
 | `offerte`, `offerte_negozi` | Offerte con prezzo soci/listino o etichetta ("-30%"), periodo di validità, bozza/pubblicata, solo tesserati, livello minimo, negozi in cui valgono (nessuno = tutti). |
 | `prodotti` | Magazzino incollato dall'Excel di ReadyPro, uno per codice EAN: pezzi, prezzi, scadenze, categoria, foto. `valore_fermo` = pezzi × prezzo tesserati, calcolato dal database. |

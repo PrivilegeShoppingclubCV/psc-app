@@ -52,6 +52,24 @@ export interface MovimentoPunti {
   punti: number;
 }
 
+export interface RigaScontrino {
+  descrizione: string;
+  quantita?: number;
+  importo: number;
+}
+
+/** Scontrino virtuale: arriva da ReadyPro e resta in app 30 giorni. */
+export interface Scontrino {
+  id: string;
+  numero: string;
+  data: string;
+  totale: number;
+  negozio?: string;
+  punti: number;
+  /** Vuoto finché ReadyPro manda solo la testata dello scontrino. */
+  righe: RigaScontrino[];
+}
+
 export interface Premio {
   id: string;
   nome: string;
