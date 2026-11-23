@@ -6,7 +6,7 @@ import { Conferma } from "@/components/admin/Conferma";
 import { Esito } from "@/components/admin/Esito";
 import { dataBreve, dataMovimento } from "@/lib/admin/form";
 import { richiediAdmin } from "@/lib/admin/sessione";
-import { formatPunti, formatTessera } from "@/lib/format";
+import { formatEuro, formatPunti, formatTessera } from "@/lib/format";
 import { annullaUnione, assegnaTesseraFisica, bloccaTessera, collegaConCodice, registraPunti, salvaSocio, scollegaAccount, unisciDaApp, unisciSoci } from "../azioni";
 import { CampoData } from "@/components/CampoData";
 
@@ -41,6 +41,14 @@ export default async function SchedaSocio({ params, searchParams }: {
   ]);
   const s = socio.data;
   if (!s) notFound();
+  // Scontrini degli ultimi 30 giorni, con chi li ha battuti (solo per l'amministrazione).
+  const { data: scontrini } = await supabase.from("scontrini")
+    .select("numero_documento, data_scontrino, totale, punti, cassa, negozi(nome)")
+    .eq("socio_id", id).order("data_scontrino", { ascending: false }).limit(100);
+  const { data: operatori } = scontrini?.length
+    ? await supabase.from("scontrini_operatori").select("numero_documento, operatore").in("numero_documento", scontrini.map((x) => x.numero_documento))
+    : { data: [] };
+  const operatoreDi = new Map((operatori ?? []).map((o) => [o.numero_documento, o.operatore]));
   // Iscritti dall'app con il cellulare di una scheda senza email: da unire in negozio.
   const { data: daUnire } = await supabase.from("soci").select("id, nome, cognome, email, da_unire_con")
     .or(`id.eq.${s.da_unire_con ?? "00000000-0000-0000-0000-000000000000"},da_unire_con.eq.${s.id}`);
@@ -308,6 +316,30 @@ export default async function SchedaSocio({ params, searchParams }: {
             </table>
           </div>
         ) : <p className="admin-vuoto">Nessun movimento.</p>}
+      </section>
+
+      <section className="admin-card">
+        <h2 className="t-title">Scontrini (ultimi 30 giorni)</h2>
+        <p className="t-caption">Quelli che il socio vede in app. L&apos;operatore che ha battuto lo scontrino lo vede solo l&apos;amministrazione.</p>
+        {scontrini?.length ? (
+          <div className="admin-table-wrap">
+            <table className="admin-table">
+              <thead><tr><th>Data</th><th>N. doc.</th><th>Negozio</th><th>Operatore</th><th className="num">Totale</th><th className="num">Punti</th></tr></thead>
+              <tbody>
+                {scontrini.map((x) => (
+                  <tr key={x.numero_documento}>
+                    <td className="min">{dataMovimento(x.data_scontrino)}</td>
+                    <td className="min">{x.numero_documento}</td>
+                    <td className="min">{(x.negozi as unknown as { nome: string } | null)?.nome ?? x.cassa ?? "—"}</td>
+                    <td className="min">{operatoreDi.get(x.numero_documento) ?? "—"}</td>
+                    <td className="num">{formatEuro(Number(x.totale))}</td>
+                    <td className="num">{formatPunti(x.punti)}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        ) : <p className="admin-vuoto">Nessuno scontrino negli ultimi 30 giorni.</p>}
       </section>
     </>
   );
