@@ -3,41 +3,21 @@
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import { conEsito, intero, messaggioDb, spunta, testo, testoONull } from "@/lib/admin/form";
+import { campiScheda, STATI_SOCIO } from "@/lib/admin/scheda";
 import { richiediAdmin } from "@/lib/admin/sessione";
 
-const STATI = ["attivo", "sospeso", "cessato", "in_attesa"];
 
 export async function salvaSocio(form: FormData) {
   const { supabase } = await richiediAdmin();
   const id = testo(form, "id");
   const pagina = `/admin/soci/${id}`;
   const stato = testo(form, "stato");
-  const dataNascita = testo(form, "data_nascita");
-  if (!STATI.includes(stato)) redirect(conEsito(pagina, { errore: "Stato non valido." }));
-
-  // L'email passa da admin_cambia_email: se il socio ha l'app cambia anche
-  // l'email con cui accede, e l'import da ReadyPro non rimette quella vecchia.
-  const email = testoONull(form, "email")?.toLowerCase() ?? null;
-  const { data: prima } = await supabase.from("soci").select("email").eq("id", id).maybeSingle();
-  if (email !== (prima?.email?.trim().toLowerCase() ?? null)) {
-    const { error: errEmail } = await supabase.rpc("admin_cambia_email", { p_socio_id: id, p_email: email });
-    if (errEmail) redirect(conEsito(pagina, { errore: messaggioDb(errEmail) }));
-  }
-
-  const { error } = await supabase.from("soci").update({
-    nome: testoONull(form, "nome"),
-    cognome: testoONull(form, "cognome"),
-    telefono: testoONull(form, "telefono"),
-    data_nascita: dataNascita || null,
-    indirizzo: testoONull(form, "indirizzo"),
-    cap: testoONull(form, "cap"),
-    citta: testoONull(form, "citta"),
-    livello: testo(form, "livello") || "classic",
-    stato,
-    negozio_preferito_id: testo(form, "negozio_preferito_id") || null,
-  }).eq("id", id);
+  if (!STATI_SOCIO.includes(stato)) redirect(conEsito(pagina, { errore: "Stato non valido." }));
+  // Stessa funzione della scheda degli operatori (/cassa): l'email passa da
+  // admin_cambia_email e i dati cambiati ripartono per ReadyPro con il prossimo invio.
+  const { error } = await supabase.rpc("staff_aggiorna_socio", campiScheda(form, id, stato));
   revalidatePath(pagina);
-  redirect(conEsito(pagina, error ? { errore: messaggioDb(error) } : { ok: "Scheda salvata." }));
+  redirect(conEsito(pagina, error ? { errore: messaggioDb(error) } : { ok: "Scheda salvata: ReadyPro riceve le modifiche con il prossimo invio." }));
 }
 
 const TIPI_MANUALI = ["bonus", "rettifica", "acquisto", "storno"];

@@ -1,13 +1,13 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
-import { Campo, Scelta } from "@/components/admin/Campi";
+import { Campo } from "@/components/admin/Campi";
 import { Conferma } from "@/components/admin/Conferma";
 import { Esito } from "@/components/admin/Esito";
-import { CampoData } from "@/components/CampoData";
-import { dataBreve } from "@/lib/admin/form";
-import { formatPunti, formatTessera } from "@/lib/format";
-import { assegnaTesseraCassa, bloccaTesseraCassa, salvaSocioCassa } from "../../azioni";
+import { ModuloScheda } from "@/components/admin/ModuloScheda";
+import { dataBreve, dataMovimento } from "@/lib/admin/form";
+import { formatEuro, formatPunti, formatTessera } from "@/lib/format";
+import { annullaUnioneCassa, assegnaTesseraCassa, bloccaTesseraCassa, salvaSocioCassa, unisciDaAppCassa, unisciSociCassa } from "../../azioni";
 import { richiediStaff } from "../../sessione";
 import { TestaCassa } from "../../Testa";
 import "../../../admin/admin.css";
@@ -23,13 +23,22 @@ type Scheda = {
   data_nascita: string | null; indirizzo: string | null; cap: string | null; citta: string | null;
   negozio_preferito_id: string | null; livello: string; stato: string; origine: string; iscritto_il: string;
   ha_app: boolean; saldo: number; tessere: Tessera[];
+  movimenti: { id: string; data_movimento: string; tipo: string; descrizione: string | null; punti: number; fonte: string; negozio: string | null }[];
+  scontrini: { numero_documento: string; data_scontrino: string; totale: number; punti: number; negozio: string | null }[];
+  da_unire: { id: string; nome: string | null; cognome: string | null; email: string | null; da_unire_con: string | null }[];
+};
+
+const TIPI: Record<string, string> = {
+  saldo_iniziale: "Saldo iniziale", acquisto: "Acquisto", riscatto: "Riscatto", bonus: "Bonus",
+  invito: "Invito", rettifica: "Rettifica", storno: "Storno", scadenza: "Scadenza",
 };
 
 const STATI_TESSERA: Record<string, string> = { attiva: "Attiva", bloccata: "Bloccata", da_consegnare: "Da consegnare" };
 
 /**
- * Scheda del socio per l'operatore: dati anagrafici modificabili, tessere e saldo.
- * Punti, livello, stato, consensi e unione dei doppioni restano nel pannello admin.
+ * Scheda del socio per l'operatore: come quella del pannello admin (dati, tessere,
+ * unione dei doppioni), con punti e scontrini in sola lettura. Niente aggiunta di
+ * punti, riscatto di premi, consensi, inviti né operatore dello scontrino.
  */
 export default async function SocioCassa({ params, searchParams }: {
   params: Promise<{ id: string }>;
@@ -38,9 +47,10 @@ export default async function SocioCassa({ params, searchParams }: {
   const [{ id }, q] = await Promise.all([params, searchParams]);
   const accesso = await richiediStaff();
   if (!/^[0-9a-f-]{36}$/i.test(id)) notFound();
-  const [{ data }, { data: negozi }] = await Promise.all([
+  const [{ data }, { data: negozi }, { data: livelli }] = await Promise.all([
     accesso.supabase.rpc("personale_scheda_socio", { p_id: id }),
     accesso.supabase.from("negozi").select("id, nome").eq("attivo", true).order("ordine").order("nome"),
+    accesso.supabase.from("livelli").select("codice, nome").order("ordine"),
   ]);
   const s = data as Scheda | null;
   if (!s) notFound();
@@ -69,34 +79,38 @@ export default async function SocioCassa({ params, searchParams }: {
       </div>
       <Esito q={q} />
 
-      <form action={salvaSocioCassa} className="admin-card admin-form">
-        <input type="hidden" name="id" value={s.id} />
-        <h2 className="t-title">Dati del socio</h2>
-        <div className="admin-grid">
-          <Campo id="nome" label="Nome" required defaultValue={s.nome ?? ""} />
-          <Campo id="cognome" label="Cognome" required defaultValue={s.cognome ?? ""} />
-          {s.ha_app ? (
-            <>
-              <input type="hidden" name="email" value={s.email ?? ""} />
-              <Campo id="email_app" label="Email" type="email" value={s.email ?? ""} readOnly
-                help="Il socio entra nell'app con questa email: per cambiarla chiedi all'amministrazione." />
-            </>
-          ) : (
-            <Campo id="email" label="Email" type="email" defaultValue={s.email ?? ""} help="Con questa email il socio collega da solo la tessera all'app." />
-          )}
-          <Campo id="telefono" label="Telefono" type="tel" defaultValue={s.telefono ?? ""} />
-          <CampoData id="data_nascita" label="Data di nascita" defaultValue={s.data_nascita ?? ""} />
-          <Campo id="indirizzo" label="Indirizzo" defaultValue={s.indirizzo ?? ""} />
-          <Campo id="cap" label="CAP" defaultValue={s.cap ?? ""} />
-          <Campo id="citta" label="Città" defaultValue={s.citta ?? ""} />
-          <Scelta id="negozio_preferito_id" label="Negozio preferito" defaultValue={s.negozio_preferito_id ?? ""}
-            opzioni={[{ value: "", label: "Nessuno" }, ...(negozi ?? []).map((n) => ({ value: n.id, label: n.nome }))]} />
-        </div>
-        <p className="t-caption">Le correzioni valgono nell&apos;app: falle anche in ReadyPro.</p>
-        <div className="admin-azioni">
-          <button type="submit" className="psc-btn psc-btn--primary">Salva</button>
-        </div>
-      </form>
+      {s.da_unire.map((altra) => {
+        // "app" è la scheda nata dall'app, "vecchia" quella con la tessera di ReadyPro.
+        const app = altra.da_unire_con === s.id ? altra.id : s.id;
+        const vecchia = altra.da_unire_con === s.id ? s.id : altra.id;
+        const chi = <Link href={`/cassa/soci/${altra.id}`}>{[altra.nome, altra.cognome].filter(Boolean).join(" ") || altra.email || "Senza nome"}</Link>;
+        return (
+          <section key={altra.id} className="admin-card">
+            <h2 className="t-title">Probabile doppione da unire</h2>
+            <p className="t-body">
+              {app === s.id
+                ? <>Questa scheda è nata dall&apos;app con lo stesso cellulare di {chi}, che in negozio non aveva lasciato un&apos;email. </>
+                : <>{chi} si è iscritto dall&apos;app con lo stesso cellulare di questa scheda, che non ha un&apos;email. </>}
+              Chiedi conferma al cliente. Finché non decidi, la tessera digitale dell&apos;app non va a ReadyPro.
+            </p>
+            <div className="admin-azioni">
+              <form action={unisciDaAppCassa}>
+                <input type="hidden" name="tieni" value={vecchia} />
+                <input type="hidden" name="togli" value={app} />
+                <input type="hidden" name="pagina" value={s.id} />
+                <Conferma messaggio="Unire le due schede? Resta la tessera fisica, con i punti di tutte e due. L'operazione non si annulla.">È la stessa persona: unisci</Conferma>
+              </form>
+              <form action={annullaUnioneCassa}>
+                <input type="hidden" name="id" value={app} />
+                <input type="hidden" name="pagina" value={s.id} />
+                <button type="submit" className="psc-btn psc-btn--secondary">Non è la stessa persona</button>
+              </form>
+            </div>
+          </section>
+        );
+      })}
+
+      <ModuloScheda azione={salvaSocioCassa} socio={s} haApp={s.ha_app} livelli={livelli ?? []} negozi={negozi ?? []} />
 
       <section className="admin-card">
         <h2 className="t-title">Tessere</h2>
@@ -134,18 +148,75 @@ export default async function SocioCassa({ params, searchParams }: {
           </div>
         ) : <p className="admin-vuoto">Nessuna tessera.</p>}
 
-        <form action={assegnaTesseraCassa} className="admin-form">
-          <input type="hidden" name="socio_id" value={s.id} />
-          <h3 className="t-eyebrow">{fisica ? "Sostituisci la tessera fisica" : "Consegna una tessera fisica"}</h3>
-          {!fisica && digitale && (
-            <p className="t-caption">La fisica prende il posto della digitale {digitale.codice}: nell&apos;app il socio vedrà il codice della plastica.</p>
-          )}
-          <div className="admin-grid">
-            <Campo id="codice_fisica" label="Codice della tessera" autoComplete="off" required inputMode="numeric" help="Scansiona il codice a barre o scrivilo con gli zeri iniziali." />
-            {fisica && <Campo id="motivo" label="Perché la sostituisci" required placeholder="Persa, rovinata…" help={`La ${fisica.codice} verrà bloccata.`} />}
+        <div className="admin-cols">
+          <form action={assegnaTesseraCassa} className="admin-form">
+            <input type="hidden" name="socio_id" value={s.id} />
+            <h3 className="t-eyebrow">{fisica ? "Sostituisci la tessera fisica" : "Consegna una tessera fisica"}</h3>
+            {!fisica && digitale && (
+              <p className="t-caption">La fisica prende il posto della digitale {digitale.codice}: nell&apos;app il socio vedrà il codice della plastica.</p>
+            )}
+            <div className="admin-grid">
+              <Campo id="codice_fisica" label="Codice della tessera" autoComplete="off" required inputMode="numeric" help="Scansiona il codice a barre o scrivilo con gli zeri iniziali." />
+              {fisica && <Campo id="motivo" label="Perché la sostituisci" required placeholder="Persa, rovinata…" help={`La ${fisica.codice} verrà bloccata.`} />}
+            </div>
+            <div className="admin-azioni"><button type="submit" className="psc-btn psc-btn--primary">{fisica ? "Sostituisci" : "Consegna"}</button></div>
+          </form>
+          <form action={unisciSociCassa} className="admin-form">
+            <input type="hidden" name="socio_id" value={s.id} />
+            <h3 className="t-eyebrow">Unisci un doppione</h3>
+            <Campo id="codice_altro" label="Una tessera dell'altra scheda" autoComplete="off" required
+              help="Se la stessa persona ha due schede (es. tessera fatta in negozio e iscrizione dall'app), punti, consensi e tessere dell'altra passano qui e l'altra scheda sparisce. Se una ha la fisica e l'altra la digitale, resta la fisica." />
+            <div className="admin-azioni">
+              <Conferma messaggio="Unire l'altra scheda a questa? L'operazione non si annulla.">Unisci a questa scheda</Conferma>
+            </div>
+          </form>
+        </div>
+      </section>
+      <section className="admin-card">
+        <h2 className="t-title">Punti</h2>
+        <p className="t-caption">Solo da consultare: i punti li aggiunge o li toglie l&apos;amministrazione.</p>
+        {s.movimenti.length ? (
+          <div className="admin-table-wrap">
+            <table className="admin-table">
+              <thead><tr><th>Data</th><th>Tipo</th><th>Descrizione</th><th>Negozio</th><th>Fonte</th><th className="num">Punti</th></tr></thead>
+              <tbody>
+                {s.movimenti.map((m) => (
+                  <tr key={m.id}>
+                    <td className="min">{dataMovimento(m.data_movimento)}</td>
+                    <td>{TIPI[m.tipo] ?? m.tipo}</td>
+                    <td>{m.descrizione}</td>
+                    <td className="min">{m.negozio ?? "—"}</td>
+                    <td className="min">{m.fonte}</td>
+                    <td className="num">{m.punti > 0 ? "+" : ""}{formatPunti(m.punti)}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
           </div>
-          <div className="admin-azioni"><button type="submit" className="psc-btn psc-btn--primary">{fisica ? "Sostituisci" : "Consegna"}</button></div>
-        </form>
+        ) : <p className="admin-vuoto">Nessun movimento.</p>}
+      </section>
+
+      <section className="admin-card">
+        <h2 className="t-title">Scontrini (ultimi 30 giorni)</h2>
+        <p className="t-caption">Quelli che il socio vede in app.</p>
+        {s.scontrini.length ? (
+          <div className="admin-table-wrap">
+            <table className="admin-table">
+              <thead><tr><th>Data</th><th>N. doc.</th><th>Negozio</th><th className="num">Totale</th><th className="num">Punti</th></tr></thead>
+              <tbody>
+                {s.scontrini.map((x) => (
+                  <tr key={x.numero_documento}>
+                    <td className="min">{dataMovimento(x.data_scontrino)}</td>
+                    <td className="min">{x.numero_documento}</td>
+                    <td className="min">{x.negozio ?? "—"}</td>
+                    <td className="num">{formatEuro(Number(x.totale))}</td>
+                    <td className="num">{formatPunti(x.punti)}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        ) : <p className="admin-vuoto">Nessuno scontrino negli ultimi 30 giorni.</p>}
       </section>
     </main>
   );

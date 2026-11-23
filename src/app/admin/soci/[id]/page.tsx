@@ -4,11 +4,11 @@ import { notFound } from "next/navigation";
 import { Campo, Scelta } from "@/components/admin/Campi";
 import { Conferma } from "@/components/admin/Conferma";
 import { Esito } from "@/components/admin/Esito";
+import { ModuloScheda } from "@/components/admin/ModuloScheda";
 import { dataBreve, dataMovimento } from "@/lib/admin/form";
 import { richiediAdmin } from "@/lib/admin/sessione";
 import { formatEuro, formatPunti, formatTessera } from "@/lib/format";
 import { annullaUnione, assegnaTesseraFisica, bloccaTessera, collegaConCodice, registraPunti, salvaSocio, scollegaAccount, unisciDaApp, unisciSoci } from "../azioni";
-import { CampoData } from "@/components/CampoData";
 
 export const metadata: Metadata = { title: "Socio" };
 
@@ -109,29 +109,7 @@ export default async function SchedaSocio({ params, searchParams }: {
       })}
 
       <div className="admin-cols">
-        <form action={salvaSocio} className="admin-card admin-form">
-          <input type="hidden" name="id" value={s.id} />
-          <h2 className="t-title">Scheda</h2>
-          <div className="admin-grid">
-            <Campo id="nome" label="Nome" defaultValue={s.nome ?? ""} />
-            <Campo id="cognome" label="Cognome" defaultValue={s.cognome ?? ""} />
-            <Campo id="email" label="Email" type="email" defaultValue={s.email ?? ""} help={s.user_id
-              ? "Il socio accede all'app con questa email: se la correggi, da subito entra con quella nuova (nessuna conferma da fare). Correggila anche in ReadyPro."
-              : "Con questa email il socio collega da solo la tessera all'app. Correggila anche in ReadyPro."} />
-            <Campo id="telefono" label="Telefono" type="tel" defaultValue={s.telefono ?? ""} />
-            <CampoData id="data_nascita" label="Data di nascita" defaultValue={s.data_nascita ?? ""} />
-            <Campo id="indirizzo" label="Indirizzo" defaultValue={s.indirizzo ?? ""} />
-            <Campo id="cap" label="CAP" defaultValue={s.cap ?? ""} />
-            <Campo id="citta" label="Città" defaultValue={s.citta ?? ""} />
-            <Scelta id="livello" label="Livello" defaultValue={s.livello} opzioni={(livelli.data ?? []).map((l) => ({ value: l.codice, label: l.nome }))} />
-            <Scelta id="stato" label="Stato" defaultValue={s.stato} help="Sospeso o cessato: la tessera sparisce dall'app."
-              opzioni={[{ value: "attivo", label: "Attivo" }, { value: "sospeso", label: "Sospeso" }, { value: "cessato", label: "Cessato" }, { value: "in_attesa", label: "In attesa del genitore (minore di 14 anni)" }]} />
-            <Scelta id="negozio_preferito_id" label="Negozio preferito" defaultValue={s.negozio_preferito_id ?? ""} opzioni={opzioniNegozi} />
-          </div>
-          <div className="admin-azioni">
-            <button type="submit" className="psc-btn psc-btn--primary">Salva scheda</button>
-          </div>
-        </form>
+        <ModuloScheda azione={salvaSocio} socio={s} haApp={!!s.user_id} livelli={livelli.data ?? []} negozi={negozi.data ?? []} />
 
         <div className="psc-stack">
           <section className="admin-card">
