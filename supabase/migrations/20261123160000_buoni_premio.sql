@@ -50,7 +50,7 @@ grant select on public.buoni to authenticated;
 -- Chiunque sia nella tabella staff, admin o operatore: serve solo alla cassa
 -- (verifica e uso dei buoni). Tutto il resto dei dati è per gli admin: vedi
 -- 20261123170000_operatori_solo_cassa.sql.
-create function public.is_personale()
+create or replace function public.is_personale()
 returns boolean language sql stable security definer set search_path = '' as $$
   select exists (select 1 from public.staff where user_id = auth.uid());
 $$;
