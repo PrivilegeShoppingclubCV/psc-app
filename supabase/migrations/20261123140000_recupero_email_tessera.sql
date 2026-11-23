@@ -6,10 +6,18 @@
 -- (m•••@g•••.com) e propone di mandare il codice di accesso a quella.
 --
 -- I numeri tessera sono in sequenza e facili da indovinare, quindi:
---  * l'email completa non esce mai verso il browser: queste funzioni le chiama
---    solo il server dell'app con la chiave segreta (ruolo service_role);
+--  * queste funzioni le chiama solo il server dell'app con la chiave segreta
+--    (ruolo service_role), mai il browser;
+--  * ATTENZIONE: con il modulo "solo numero" l'app mostra l'email per intero
+--    (scelta di Daniele del 2026-11-23, per far notare i refusi del gestionale):
+--    chi indovina un numero tessera vede l'email di quel socio. I limiti sotto
+--    frenano chi prova tanti numeri, ma non lo impediscono del tutto;
 --  * il codice si manda solo all'email salvata, mai a una scritta dall'utente;
 --  * tentativi limitati per indirizzo IP, per tessera e in totale (sotto).
+--
+-- Dal 2026-11-23 (scelta di Daniele) il modulo "Ho già la tessera" chiede solo il
+-- numero e il codice parte subito verso l'email della scheda: tipo 'invio' senza
+-- email scritta. Le email scritte a mano in negozio hanno troppi errori.
 --
 -- Da eseguire a mano su Supabase dopo il merge, come le altre migrazioni.
 
@@ -36,21 +44,24 @@ stable
 set search_path = ''
 as $$
   select
-    -- Stesso indirizzo IP: 10 errori l'ora.
+    -- Stesso indirizzo IP: 10 errori l'ora (numeri inesistenti, email diverse, tessere senza email).
     (select count(*) from interno.controlli_tessera
-      where ip = p_ip and tipo = 'controllo' and esito <> 'ok' and creato_il > now() - interval '1 hour') >= 10
+      where ip = p_ip and esito not in ('ok', 'troppi_tentativi') and creato_il > now() - interval '1 hour') >= 10
     -- Stessa tessera: 5 errori l'ora.
     or (select count(*) from interno.controlli_tessera
-      where tessera = p_tessera and tipo = 'controllo' and esito <> 'ok' and creato_il > now() - interval '1 hour') >= 5
+      where tessera = p_tessera and esito not in ('ok', 'troppi_tentativi') and creato_il > now() - interval '1 hour') >= 5
     -- Email mascherate mostrate in tutto l'app: 60 l'ora (frena chi prova tutti i numeri da tanti IP).
     or (select count(*) from interno.controlli_tessera
       where tipo = 'controllo' and esito = 'email_diversa' and creato_il > now() - interval '1 hour') >= 60
-    -- Invii all'email della tessera: 3 l'ora per tessera e 10 per IP.
+    -- Invii all'email della tessera: 3 l'ora per tessera, 20 per IP (wifi del negozio)
+    -- e 200 in tutto l'app.
     or (p_tipo = 'invio' and (
       (select count(*) from interno.controlli_tessera
+        where tipo = 'invio' and esito = 'ok' and creato_il > now() - interval '1 hour') >= 200
+      or (select count(*) from interno.controlli_tessera
         where tessera = p_tessera and tipo = 'invio' and esito = 'ok' and creato_il > now() - interval '1 hour') >= 3
       or (select count(*) from interno.controlli_tessera
-        where ip = p_ip and tipo = 'invio' and esito = 'ok' and creato_il > now() - interval '1 hour') >= 10));
+        where ip = p_ip and tipo = 'invio' and esito = 'ok' and creato_il > now() - interval '1 hour') >= 20));
 $$;
 revoke execute on function interno.troppi_controlli_tessera(text, text, text) from public;
 

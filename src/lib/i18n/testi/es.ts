@@ -30,6 +30,7 @@ export const es: Testi = {
     eyebrow: "Revisa tu correo",
     titolo: "Escribe el código",
     intro: "Hemos enviado un código de 6 cifras a {email}. Escríbelo aquí abajo. Si no encuentras el correo, mira también en spam.",
+    introTessera: "Hemos enviado un código de 6 cifras a {email}, el email registrado en la tienda con tu tarjeta. Escríbelo aquí abajo. Si la dirección es incorrecta el código no puede llegar: dirígete a la tienda para corregirla.",
     rimanda: "¿No te ha llegado? Envíalo de nuevo",
   },
   iscriviti: {
@@ -56,6 +57,7 @@ export const es: Testi = {
     eyebrow: "Ya tengo la tarjeta",
     titolo: "Vincula tu tarjeta",
     intro: "Escribe el número impreso en la tarjeta y el correo que dejaste en la tienda.",
+    introSoloNumero: "Introduce el número impreso en la tarjeta: te enviaremos un código de acceso al email registrado en la tienda.",
     introConAccesso: "Escribe el número impreso en la tarjeta. Debe ser la registrada en la tienda con {email}. Si en la tienda no dejaste un correo, o dejaste otro, toca el botón de abajo: en caja vinculamos la tarjeta y actualizamos tu correo.",
     numero: "Número de tarjeta",
     numeroAiuto: "Está en el reverso de la tarjeta, debajo del código de barras. Puedes escribirlo con o sin los ceros iniciales (p. ej. 4169): el número completo aparece arriba. O escanéalo con la cámara.",
@@ -102,6 +104,7 @@ export const es: Testi = {
     tesseraNonTrovata: "No encontramos ninguna tarjeta activa con este número: revisa las cifras o pregunta en la tienda.",
     troppiTentativi: "Demasiados intentos con esta tarjeta: vuelve a intentarlo dentro de una hora o pregunta en la tienda.",
     recuperoScaduto: "Se ha agotado el tiempo para introducir el código: escribe de nuevo el número de la tarjeta.",
+    tesseraProblema: "Parece que tu tarjeta tiene un problema: dirígete a la tienda para resolverlo.",
     generico: "Algo no ha funcionado. Vuelve a intentarlo en un momento.",
   },
   client: {

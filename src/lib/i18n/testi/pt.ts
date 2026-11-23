@@ -30,6 +30,7 @@ export const pt: Testi = {
     eyebrow: "Verifique o seu e-mail",
     titolo: "Escreva o código",
     intro: "Enviámos um código de 6 dígitos para {email}. Escreva-o aqui em baixo. Se não encontrar o e-mail, veja também no spam.",
+    introTessera: "Enviámos um código de 6 dígitos para {email}, o email registado na loja com o seu cartão. Escreva-o abaixo. Se o endereço estiver errado o código não pode chegar: dirija-se à loja para o corrigir.",
     rimanda: "Não chegou? Enviar de novo",
   },
   iscriviti: {
@@ -56,6 +57,7 @@ export const pt: Testi = {
     eyebrow: "Já tenho o cartão",
     titolo: "Associe o seu cartão",
     intro: "Introduza o número impresso no cartão e o e-mail que deixou na loja.",
+    introSoloNumero: "Insira o número impresso no cartão: enviamos um código de acesso para o email registado na loja.",
     introConAccesso: "Introduza o número impresso no cartão. Tem de ser o cartão registado na loja com {email}. Se não deixou um e-mail na loja, ou deixou outro, toque no botão abaixo: na caixa associamos o cartão e atualizamos o seu e-mail.",
     numero: "Número do cartão",
     numeroAiuto: "Encontra-o no verso do cartão, por baixo do código de barras. Pode escrevê-lo com ou sem os zeros iniciais (ex. 4169): o número completo aparece acima. Ou leia-o com a câmara.",
@@ -102,6 +104,7 @@ export const pt: Testi = {
     tesseraNonTrovata: "Não encontramos nenhum cartão ativo com este número: verifique os dígitos ou pergunte na loja.",
     troppiTentativi: "Demasiadas tentativas com este cartão: tente de novo dentro de uma hora ou pergunte na loja.",
     recuperoScaduto: "O tempo para inserir o código terminou: escreva novamente o número do cartão.",
+    tesseraProblema: "O seu cartão parece ter um problema: dirija-se à loja para o resolver.",
     generico: "Algo correu mal. Tente novamente daqui a pouco.",
   },
   client: {

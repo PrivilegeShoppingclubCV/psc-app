@@ -3,7 +3,18 @@
 // L'email completa resta sul server: nel browser c'è solo un cookie cifrato.
 
 import { cookies, headers } from "next/headers";
-import { cifra, clientSegreto, decifra } from "@/lib/supabase/segreto";
+import { cifra, clientSegreto, decifra, haChiaveSegreta } from "@/lib/supabase/segreto";
+
+/**
+ * Dal 2026-11-23 (scelta di Daniele): in "Ho già la tessera" si scrive solo il numero
+ * e il codice parte subito verso l'email salvata in negozio, perché le email scritte
+ * a mano nel gestionale hanno troppi errori. Per tornare al modulo con numero + email
+ * (e al riquadro "questa non è l'email della tua tessera") basta mettere false.
+ */
+export const SOLO_NUMERO_TESSERA = true;
+
+/** Il modulo chiede solo il numero? Serve anche la chiave segreta sul server. */
+export const soloNumeroTessera = () => SOLO_NUMERO_TESSERA && haChiaveSegreta;
 
 export const COOKIE_RECUPERO = "psc_recupero";
 

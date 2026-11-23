@@ -31,6 +31,7 @@ export const zh: Testi = {
     eyebrow: "查看邮箱",
     titolo: "输入验证码",
     intro: "我们已向 {email} 发送了 6 位验证码，请在下方输入。如果找不到邮件，请同时查看垃圾邮件文件夹。",
+    introTessera: "我们已将 6 位验证码发送到 {email}，即您会员卡在店内登记的邮箱。请在下方输入。如果邮箱地址有误，验证码将无法送达：请到店内更正。",
     rimanda: "没有收到？重新发送",
   },
   iscriviti: {
@@ -57,6 +58,7 @@ export const zh: Testi = {
     eyebrow: "我已有会员卡",
     titolo: "绑定您的会员卡",
     intro: "请输入会员卡上印的卡号，以及您在门店登记的电子邮箱。",
+    introSoloNumero: "请输入会员卡上印的号码：我们会把登录验证码发送到店内登记的邮箱。",
     introConAccesso: "请输入会员卡上印的卡号。该卡必须是在门店以 {email} 登记的会员卡。如果您在门店没有登记电子邮箱，或登记的是其他邮箱，请点击下方按钮：我们会在收银台为您绑定会员卡并更新邮箱。",
     numero: "会员卡号",
     numeroAiuto: "卡号位于会员卡背面的条形码下方。输入时可以带或不带开头的零（例如 4169），完整卡号会显示在上方。也可以用相机扫描。",
@@ -103,6 +105,7 @@ export const zh: Testi = {
     tesseraNonTrovata: "找不到此号码的有效会员卡：请检查数字或到店咨询。",
     troppiTentativi: "此会员卡尝试次数过多：请一小时后再试或到店咨询。",
     recuperoScaduto: "输入验证码的时间已过：请重新输入会员卡号。",
+    tesseraProblema: "您的会员卡似乎有问题：请到店内处理。",
     generico: "出了点问题，请稍后再试。",
   },
   client: {

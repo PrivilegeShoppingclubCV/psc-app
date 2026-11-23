@@ -30,6 +30,7 @@ export const ro: Testi = {
     eyebrow: "Verifică e-mailul",
     titolo: "Scrie codul",
     intro: "Am trimis un cod din 6 cifre la {email}. Scrie-l mai jos. Dacă nu găsești e-mailul, uită-te și în spam.",
+    introTessera: "Am trimis un cod de 6 cifre la {email}, emailul înregistrat în magazin cu cardul tău. Scrie-l mai jos. Dacă adresa este greșită, codul nu poate ajunge: adresează-te magazinului pentru a o corecta.",
     rimanda: "Nu a sosit? Trimite-l din nou",
   },
   iscriviti: {
@@ -56,6 +57,7 @@ export const ro: Testi = {
     eyebrow: "Am deja card",
     titolo: "Asociază-ți cardul",
     intro: "Introdu numărul tipărit pe card și e-mailul pe care l-ai lăsat în magazin.",
+    introSoloNumero: "Introdu numărul tipărit pe card: îți trimitem un cod de acces la emailul înregistrat în magazin.",
     introConAccesso: "Introdu numărul tipărit pe card. Trebuie să fie cardul înregistrat în magazin cu {email}. Dacă în magazin nu ai lăsat un e-mail sau ai lăsat altul, atinge butonul de mai jos: la casă asociem cardul și îți actualizăm e-mailul.",
     numero: "Numărul cardului",
     numeroAiuto: "Îl găsești pe spatele cardului, sub codul de bare. Îl poți scrie cu sau fără zerourile de la început (ex. 4169): numărul complet apare mai sus. Sau scanează-l cu camera.",
@@ -102,6 +104,7 @@ export const ro: Testi = {
     tesseraNonTrovata: "Nu găsim niciun card activ cu acest număr: verifică cifrele sau întreabă în magazin.",
     troppiTentativi: "Prea multe încercări cu acest card: încearcă din nou peste o oră sau întreabă în magazin.",
     recuperoScaduto: "Timpul pentru introducerea codului a expirat: scrie din nou numărul cardului.",
+    tesseraProblema: "Cardul tău pare să aibă o problemă: adresează-te magazinului pentru a o rezolva.",
     generico: "Ceva nu a funcționat. Încearcă din nou în curând.",
   },
   client: {

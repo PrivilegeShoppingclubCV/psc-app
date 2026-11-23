@@ -30,6 +30,7 @@ export const fr: Testi = {
     eyebrow: "Vérifiez vos e-mails",
     titolo: "Saisissez le code",
     intro: "Nous avons envoyé un code à 6 chiffres à {email}. Saisissez-le ci-dessous. Si vous ne trouvez pas l'e-mail, regardez aussi dans les spams.",
+    introTessera: "Nous avons envoyé un code à 6 chiffres à {email}, l'adresse e-mail enregistrée en magasin avec votre carte. Saisissez-le ci-dessous. Si l'adresse est erronée, le code ne peut pas arriver : adressez-vous au magasin pour la corriger.",
     rimanda: "Pas reçu ? Renvoyer le code",
   },
   iscriviti: {
@@ -56,6 +57,7 @@ export const fr: Testi = {
     eyebrow: "J'ai déjà une carte",
     titolo: "Associez votre carte",
     intro: "Saisissez le numéro imprimé sur la carte et l'e-mail que vous avez laissé en magasin.",
+    introSoloNumero: "Saisissez le numéro imprimé sur la carte : nous enverrons un code de connexion à l'adresse e-mail enregistrée en magasin.",
     introConAccesso: "Saisissez le numéro imprimé sur la carte. Il doit s'agir de la carte enregistrée en magasin avec {email}. Si vous n'avez pas laissé d'e-mail en magasin, ou un autre, touchez le bouton ci-dessous : à la caisse, nous associons la carte et mettons à jour votre e-mail.",
     numero: "Numéro de carte",
     numeroAiuto: "Il se trouve au dos de la carte, sous le code-barres. Vous pouvez l'écrire avec ou sans les zéros initiaux (ex. 4169) : le numéro complet s'affiche au-dessus. Vous pouvez aussi le scanner avec l'appareil photo.",
@@ -102,6 +104,7 @@ export const fr: Testi = {
     tesseraNonTrovata: "Nous ne trouvons aucune carte active avec ce numéro : vérifiez les chiffres ou renseignez-vous en magasin.",
     troppiTentativi: "Trop de tentatives avec cette carte : réessayez dans une heure ou renseignez-vous en magasin.",
     recuperoScaduto: "Le délai pour saisir le code a expiré : saisissez de nouveau le numéro de la carte.",
+    tesseraProblema: "Votre carte semble avoir un problème : adressez-vous au magasin pour le résoudre.",
     generico: "Une erreur s'est produite. Réessayez dans un instant.",
   },
   client: {

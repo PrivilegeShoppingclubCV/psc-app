@@ -30,6 +30,7 @@ export const pl: Testi = {
     eyebrow: "Sprawdź pocztę",
     titolo: "Wpisz kod",
     intro: "Wysłaliśmy 6-cyfrowy kod na adres {email}. Wpisz go poniżej. Jeśli nie widzisz wiadomości, sprawdź też folder spam.",
+    introTessera: "Wysłaliśmy 6-cyfrowy kod na {email}, adres e-mail zarejestrowany w sklepie z Twoją kartą. Wpisz go poniżej. Jeśli adres jest błędny, kod nie dotrze: zgłoś się do sklepu, aby go poprawić.",
     rimanda: "Nie dotarł? Wyślij ponownie",
   },
   iscriviti: {
@@ -56,6 +57,7 @@ export const pl: Testi = {
     eyebrow: "Mam już kartę",
     titolo: "Połącz swoją kartę",
     intro: "Wpisz numer wydrukowany na karcie i e-mail, który podałeś(-aś) w sklepie.",
+    introSoloNumero: "Wpisz numer wydrukowany na karcie: wyślemy kod logowania na adres e-mail zarejestrowany w sklepie.",
     introConAccesso: "Wpisz numer wydrukowany na karcie. Musi to być karta zarejestrowana w sklepie z adresem {email}. Jeśli w sklepie nie podałeś(-aś) e-maila albo podałeś(-aś) inny, dotknij przycisku poniżej: przy kasie połączymy kartę i zaktualizujemy Twój e-mail.",
     numero: "Numer karty",
     numeroAiuto: "Znajdziesz go z tyłu karty, pod kodem kreskowym. Możesz wpisać go z zerami na początku lub bez nich (np. 4169): pełny numer pojawi się powyżej. Możesz też zeskanować go aparatem.",
@@ -102,6 +104,7 @@ export const pl: Testi = {
     tesseraNonTrovata: "Nie znajdujemy aktywnej karty o tym numerze: sprawdź cyfry lub zapytaj w sklepie.",
     troppiTentativi: "Zbyt wiele prób z tą kartą: spróbuj ponownie za godzinę lub zapytaj w sklepie.",
     recuperoScaduto: "Czas na wpisanie kodu minął: wpisz ponownie numer karty.",
+    tesseraProblema: "Wygląda na to, że z Twoją kartą jest problem: zgłoś się do sklepu, aby go rozwiązać.",
     generico: "Coś poszło nie tak. Spróbuj ponownie za chwilę.",
   },
   client: {

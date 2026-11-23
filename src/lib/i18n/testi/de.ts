@@ -30,6 +30,7 @@ export const de: Testi = {
     eyebrow: "Sieh in deine E-Mails",
     titolo: "Code eingeben",
     intro: "Wir haben einen 6-stelligen Code an {email} geschickt. Gib ihn unten ein. Wenn du die E-Mail nicht findest, sieh auch im Spam-Ordner nach.",
+    introTessera: "Wir haben einen 6-stelligen Code an {email} geschickt, die im Geschäft mit deiner Karte registrierte E-Mail. Gib ihn unten ein. Wenn die Adresse falsch ist, kann der Code nicht ankommen: Wende dich an das Geschäft, um sie zu korrigieren.",
     rimanda: "Nicht angekommen? Erneut senden",
   },
   iscriviti: {
@@ -56,6 +57,7 @@ export const de: Testi = {
     eyebrow: "Ich habe schon eine Karte",
     titolo: "Verbinde deine Karte",
     intro: "Gib die auf der Karte gedruckte Nummer und die E-Mail ein, die du im Geschäft angegeben hast.",
+    introSoloNumero: "Gib die Nummer ein, die auf der Karte steht: Wir senden einen Anmeldecode an die im Geschäft registrierte E-Mail.",
     introConAccesso: "Gib die auf der Karte gedruckte Nummer ein. Es muss die Karte sein, die im Geschäft mit {email} registriert wurde. Wenn du im Geschäft keine oder eine andere E-Mail angegeben hast, tippe auf die Schaltfläche unten: An der Kasse verbinden wir die Karte und aktualisieren deine E-Mail.",
     numero: "Kartennummer",
     numeroAiuto: "Du findest sie auf der Rückseite der Karte unter dem Strichcode. Du kannst sie mit oder ohne führende Nullen eingeben (z. B. 4169): Die vollständige Nummer erscheint oben. Oder scanne sie mit der Kamera.",
@@ -102,6 +104,7 @@ export const de: Testi = {
     tesseraNonTrovata: "Wir finden keine aktive Karte mit dieser Nummer: Prüfe die Ziffern oder frag im Geschäft nach.",
     troppiTentativi: "Zu viele Versuche mit dieser Karte: Versuche es in einer Stunde erneut oder frag im Geschäft nach.",
     recuperoScaduto: "Die Zeit für die Eingabe des Codes ist abgelaufen: Gib die Kartennummer erneut ein.",
+    tesseraProblema: "Mit deiner Karte scheint es ein Problem zu geben: Wende dich bitte an das Geschäft, um es zu lösen.",
     generico: "Etwas hat nicht funktioniert. Versuche es gleich noch einmal.",
   },
   client: {

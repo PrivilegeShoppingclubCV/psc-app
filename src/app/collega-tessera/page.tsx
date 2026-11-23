@@ -4,7 +4,7 @@ import { AuthPage, Campo, param } from "@/components/AuthPage";
 import { CampoTessera } from "@/components/CampoTessera";
 import { getSessione } from "@/lib/dati";
 import { collegaTessera, continuaConQuestaEmail, inviaAllEmailTessera } from "../accesso/azioni";
-import { leggiRecupero, mascheraEmail } from "../accesso/recupero";
+import { leggiRecupero, mascheraEmail, soloNumeroTessera } from "../accesso/recupero";
 import { forma, getTesti, ricco } from "@/lib/i18n";
 
 export async function generateMetadata() {
@@ -25,7 +25,12 @@ export default async function CollegaTessera({ searchParams }: { searchParams: P
   // mostra solo mascherata. Vale solo per il numero tessera controllato.
   const tessera = param(q.tessera);
   const recupero = param(q.avviso) === "email_diversa" ? await leggiRecupero() : null;
-  const emailDiversa = recupero && recupero.numero === tessera ? mascheraEmail(recupero.email) : null;
+  // Con il modulo "solo numero" l'email della tessera si mostra per intero, così il
+  // socio vede subito un refuso (scelta di Daniele, 2026-11-23); altrimenti mascherata.
+  const soloNumero = soloNumeroTessera();
+  const emailDiversa = recupero && recupero.numero === tessera
+    ? (soloNumero ? recupero.email : mascheraEmail(recupero.email))
+    : null;
   const senzaEmail = param(q.avviso) === "senza_email" && /^\d{12}$/.test(tessera);
   const emailScritta = param(q.email);
   // Strada di riserva: si entra con l'email scritta (o quella dell'accesso) e la tessera
@@ -48,7 +53,7 @@ export default async function CollegaTessera({ searchParams }: { searchParams: P
       titolo={c.titolo}
       intro={conAccesso
         ? ricco(c.introConAccesso, { email: <strong dir="ltr">{email}</strong> })
-        : c.intro}
+        : soloNumero ? c.introSoloNumero : c.intro}
       errore={param(q.errore)}
     >
       {emailDiversa && (
@@ -74,7 +79,7 @@ export default async function CollegaTessera({ searchParams }: { searchParams: P
       )}
       <form action={collegaTessera}>
         <CampoTessera id="tessera" label={c.numero} required={configurato} defaultValue={tessera} help={c.numeroAiuto} />
-        {!conAccesso && <Campo id="email" label={t.comune.email} type="email" dir="ltr" autoComplete="email" required={configurato} defaultValue={param(q.email)} />}
+        {!conAccesso && !soloNumero && <Campo id="email" label={t.comune.email} type="email" dir="ltr" autoComplete="email" required={configurato} defaultValue={param(q.email)} />}
         <button type="submit" className="psc-btn psc-btn--primary psc-btn--block">{t.comune.continua}</button>
       </form>
       {conAccesso && (

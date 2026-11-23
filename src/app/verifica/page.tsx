@@ -2,7 +2,7 @@ import { redirect } from "next/navigation";
 import { AuthPage, param } from "@/components/AuthPage";
 import { CampoCodice, TastoEntra } from "@/components/CampoCodice";
 import { accedi, inviaAllEmailTessera, verifica } from "../accesso/azioni";
-import { leggiRecupero, mascheraEmail } from "../accesso/recupero";
+import { leggiRecupero, mascheraEmail, soloNumeroTessera } from "../accesso/recupero";
 import { getTesti, ricco } from "@/lib/i18n";
 
 export async function generateMetadata() {
@@ -17,7 +17,8 @@ export default async function Verifica({ searchParams }: { searchParams: Promise
   // qui si vede solo mascherato.
   const recupero = param(q.recupero) === "1" ? await leggiRecupero() : null;
   if (param(q.recupero) === "1" && !recupero) redirect("/collega-tessera");
-  const email = recupero ? mascheraEmail(recupero.email) : param(q.email);
+  // Con il modulo "solo numero" l'email della tessera si vede per intero (refusi del gestionale).
+  const email = recupero ? (soloNumeroTessera() ? recupero.email : mascheraEmail(recupero.email)) : param(q.email);
   const dopo = param(q.dopo);
   const errore = param(q.errore);
   if (!email) redirect("/accedi");
@@ -28,7 +29,7 @@ export default async function Verifica({ searchParams }: { searchParams: Promise
     <AuthPage
       eyebrow={v.eyebrow}
       titolo={v.titolo}
-      intro={ricco(v.intro, { email: <strong dir="ltr">{email}</strong> })}
+      intro={ricco(recupero && soloNumeroTessera() ? v.introTessera : v.intro, { email: <strong dir="ltr">{email}</strong> })}
       errore={errore}
       indietro={INDIETRO[dopo as keyof typeof INDIETRO] ?? "/accedi"}
     >

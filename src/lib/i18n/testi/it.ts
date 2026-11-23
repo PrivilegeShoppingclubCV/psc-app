@@ -32,6 +32,7 @@ export const it = {
     eyebrow: "Controlla la posta",
     titolo: "Scrivi il codice",
     intro: "Abbiamo mandato un codice di 6 cifre a {email}. Scrivilo qui sotto. Se non trovi l'email, guarda anche nello spam.",
+    introTessera: "Abbiamo mandato un codice di 6 cifre a {email}, l'email registrata in negozio con la tua tessera. Scrivilo qui sotto. Se l'indirizzo è sbagliato il codice non può arrivare: rivolgiti in negozio per correggerlo.",
     rimanda: "Non è arrivato? Mandalo di nuovo",
   },
   iscriviti: {
@@ -59,6 +60,7 @@ export const it = {
     eyebrow: "Ho già la tessera",
     titolo: "Collega la tua tessera",
     intro: "Inserisci il numero stampato sulla tessera e l'email che hai lasciato in negozio.",
+    introSoloNumero: "Inserisci il numero stampato sulla tessera: ti mandiamo un codice di accesso all'email registrata in negozio.",
     introConAccesso: "Inserisci il numero stampato sulla tessera. Deve essere quella registrata in negozio con {email}. Se in negozio non hai lasciato un'email, o ne hai lasciata un'altra, tocca il pulsante qui sotto: alla cassa colleghiamo la tessera e aggiorniamo la tua email.",
     numero: "Numero tessera",
     numeroAiuto: "Lo trovi sul retro della tessera, sotto il codice a barre. Puoi scriverlo con o senza gli zeri iniziali (es. 4169): il numero completo compare qui sopra. Oppure scansionalo con la fotocamera.",
@@ -105,6 +107,7 @@ export const it = {
     tesseraNonTrovata: "Non troviamo una tessera attiva con questo numero: controlla le cifre o chiedi in negozio.",
     troppiTentativi: "Troppi tentativi con questa tessera: riprova tra un'ora oppure chiedi in negozio.",
     recuperoScaduto: "Il tempo per inserire il codice è scaduto: scrivi di nuovo il numero della tessera.",
+    tesseraProblema: "La tua tessera sembra avere un problema: rivolgiti in negozio per risolverlo.",
     generico: "Qualcosa non ha funzionato. Riprova tra poco.",
   },
   /** Testi usati dai componenti che girano nel browser. */

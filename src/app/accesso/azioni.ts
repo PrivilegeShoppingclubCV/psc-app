@@ -23,7 +23,7 @@ import {
   utenteCorrente,
   type Attesa,
 } from "./flusso";
-import { controllaTessera, leggiRecupero, salvaRecupero } from "./recupero";
+import { controllaTessera, leggiRecupero, salvaRecupero, soloNumeroTessera } from "./recupero";
 
 export async function accedi(form: FormData) {
   const supabase = await getSupabase();
@@ -76,6 +76,9 @@ export async function collegaTessera(form: FormData) {
 
   if (await utenteCorrente(supabase)) redirect(await eseguiCollega(supabase, numero));
 
+  // Solo numero: il codice va subito all'email della tessera.
+  if (soloNumeroTessera()) await mandaCodiceTessera(supabase, numero);
+
   const email = testo(form, "email").toLowerCase();
   if (!email) redirect(conErrore("/collega-tessera", t.emailNegozio, { tessera: numero }));
 
@@ -100,9 +103,16 @@ export async function inviaAllEmailTessera(form: FormData) {
   const t = (await getTesti()).errori;
   const numero = testo(form, "tessera");
   if (!/^\d{12}$/.test(numero)) redirect(conErrore("/collega-tessera", t.tessera));
+  await mandaCodiceTessera(supabase, numero);
+}
 
+async function mandaCodiceTessera(supabase: NonNullable<Awaited<ReturnType<typeof getSupabase>>>, numero: string): Promise<never> {
+  const t = (await getTesti()).errori;
   const esito = await controllaTessera(numero, null, "invio");
   if (esito?.esito === "troppi_tentativi") redirect(conErrore("/collega-tessera", t.troppiTentativi, { tessera: numero }));
+  if (esito?.esito === "non_trovata") redirect(conErrore("/collega-tessera", t.tesseraNonTrovata, { tessera: numero }));
+  // Scheda senza email: la sistemano in negozio controllando il gestionale.
+  if (esito?.esito === "senza_email") redirect(conErrore("/collega-tessera", t.tesseraProblema, { tessera: numero }));
   if (esito?.esito !== "email_diversa") redirect(conErrore("/collega-tessera", t.generico, { tessera: numero }));
 
   // Chi era entrato con un'altra email esce: si rientra con quella della tessera.
