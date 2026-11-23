@@ -42,10 +42,18 @@ alter table public.buoni enable row level security;
 
 create policy "buoni: il socio vede i propri" on public.buoni
   for select to authenticated using (socio_id = public.socio_corrente_id());
-create policy "buoni: lo staff vede tutti" on public.buoni
-  for select to authenticated using (public.is_staff());
+create policy "buoni: l'admin vede tutti" on public.buoni
+  for select to authenticated using (public.is_admin());
 -- Nessuna scrittura diretta: solo dalle funzioni qui sotto.
 grant select on public.buoni to authenticated;
+
+-- Chiunque sia nella tabella staff, admin o operatore: serve solo alla cassa
+-- (verifica e uso dei buoni). Tutto il resto dei dati è per gli admin: vedi
+-- 20261123170000_operatori_solo_cassa.sql.
+create function public.is_personale()
+returns boolean language sql stable security definer set search_path = '' as $$
+  select exists (select 1 from public.staff where user_id = auth.uid());
+$$;
 
 -- "abcd-efgh " → "ABCDEFGH"
 create function interno.codice_buono(p_testo text)
@@ -211,7 +219,7 @@ as $$
 declare
   v_id uuid;
 begin
-  if not public.is_staff() then
+  if not public.is_personale() then
     raise exception 'Solo il personale dei negozi può verificare i buoni.' using errcode = 'insufficient_privilege';
   end if;
   select id into v_id from public.buoni where codice = interno.codice_buono(p_codice);
@@ -231,7 +239,7 @@ as $$
 declare
   b public.buoni;
 begin
-  if not public.is_staff() then
+  if not public.is_personale() then
     raise exception 'Solo il personale dei negozi può usare i buoni.' using errcode = 'insufficient_privilege';
   end if;
   select * into b from public.buoni where codice = interno.codice_buono(p_codice) for update;
