@@ -108,3 +108,8 @@ a.admin-stat:hover { border-color: var(--ink); }
 
 /* Prodotti → «Prendi foto dal sito» */
 .admin-foto-sito { display: flex; flex-direction: column; gap: var(--space-1, 4px); max-width: 420px; }
+
+/* Lingue: prova delle traduzioni */
+.admin-lingue__link { display: flex; flex-wrap: wrap; gap: var(--space-2); }
+.admin-lingue td { vertical-align: top; width: 50%; white-space: pre-line; }
+.admin-lingue td[dir="rtl"] { text-align: right; }

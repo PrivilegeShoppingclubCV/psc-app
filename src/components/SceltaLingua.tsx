@@ -10,7 +10,16 @@ import { cambiaLingua } from "@/app/accesso/azioni";
  * sulla lingua del browser (per chi è dentro va anche nei dati dell'utente, per
  * le email); la pagina si ricarica dal server con i nuovi testi.
  */
-export function SceltaLingua({ lingua, etichetta }: { lingua: Lingua; etichetta: string }) {
+export function SceltaLingua({
+  lingua,
+  etichetta,
+  azione = cambiaLingua,
+}: {
+  lingua: Lingua;
+  etichetta: string;
+  /** Di serie salva la scelta anche nell'account; l'admin ne passa una che cambia solo il cookie. */
+  azione?: (lingua: string) => Promise<void>;
+}) {
   const router = useRouter();
   const [inCorso, avvia] = useTransition();
 
@@ -26,7 +35,7 @@ export function SceltaLingua({ lingua, etichetta }: { lingua: Lingua; etichetta:
         onChange={(e) => {
           const scelta = e.target.value;
           avvia(async () => {
-            await cambiaLingua(scelta);
+            await azione(scelta);
             router.refresh();
           });
         }}
