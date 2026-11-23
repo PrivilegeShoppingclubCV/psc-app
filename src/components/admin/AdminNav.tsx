@@ -26,7 +26,7 @@ const GRUPPI: Gruppo[] = [
       { href: "/admin/segnalazioni", label: "Segnalazioni" },
       { href: "/admin/tentativi", label: "Tentativi non riusciti" },
       { href: "/admin/buoni", label: "Buoni premio" },
-      { href: "/cassa", label: "Cassa: verifica buono" },
+      { href: "/cassa", label: "Area negozio (operatori)" },
     ],
   },
   {

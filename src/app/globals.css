@@ -296,6 +296,8 @@ html:has(.welcome) body::before { display: none; }
 
 /* Cassa: verifica buono (personale dei negozi) */
 .cassa { max-width: 640px; margin: 0 auto; padding: var(--space-4) var(--space-4) var(--space-12); display: flex; flex-direction: column; gap: var(--space-6); }
+.cassa--larga { max-width: 960px; }
+.cassa__menu { margin: 0; padding: 0; }
 .cassa__testa { display: flex; justify-content: space-between; align-items: center; gap: var(--space-3); flex-wrap: wrap; }
 .cassa__testa .logo--wordmark { width: 160px; height: 40px; color: var(--verde-700); }
 .cassa__utente { display: flex; align-items: center; gap: var(--space-2); flex-wrap: wrap; }
