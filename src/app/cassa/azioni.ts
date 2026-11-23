@@ -3,6 +3,7 @@
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import { conEsito, messaggioDb, spunta, testo, testoONull } from "@/lib/admin/form";
+import { campiScheda, STATI_SOCIO } from "@/lib/admin/scheda";
 import { richiediStaff } from "./sessione";
 
 // Azioni dell'area operatori. Ognuna chiama una funzione del database che
@@ -20,25 +21,47 @@ export async function usaBuono(form: FormData) {
   redirect(`/cassa?${q}`);
 }
 
-/** Dati anagrafici del socio. Livello, stato, punti ed email di chi ha l'app restano all'amministrazione. */
+/** Stessa funzione e stesse regole della scheda admin: le modifiche vanno anche a ReadyPro. */
 export async function salvaSocioCassa(form: FormData) {
   const { supabase } = await richiediStaff();
   const id = testo(form, "id");
   const pagina = `/cassa/soci/${id}`;
-  const { error } = await supabase.rpc("personale_aggiorna_socio", {
-    p_id: id,
-    p_nome: testo(form, "nome"),
-    p_cognome: testo(form, "cognome"),
-    p_email: testoONull(form, "email"),
-    p_telefono: testoONull(form, "telefono"),
-    p_data_nascita: testo(form, "data_nascita") || null,
-    p_indirizzo: testoONull(form, "indirizzo"),
-    p_cap: testoONull(form, "cap"),
-    p_citta: testoONull(form, "citta"),
-    p_negozio_preferito_id: testo(form, "negozio_preferito_id") || null,
-  });
+  const stato = testo(form, "stato");
+  if (!STATI_SOCIO.includes(stato)) redirect(conEsito(pagina, { errore: "Stato non valido." }));
+  const { error } = await supabase.rpc("staff_aggiorna_socio", campiScheda(form, id, stato));
   revalidatePath(pagina);
-  redirect(conEsito(pagina, error ? { errore: messaggioDb(error) } : { ok: "Scheda salvata. Ricorda di correggere i dati anche in ReadyPro." }));
+  redirect(conEsito(pagina, error ? { errore: messaggioDb(error) } : { ok: "Scheda salvata: ReadyPro riceve le modifiche con il prossimo invio." }));
+}
+
+/** Unisce alla scheda aperta quella che ha la tessera indicata (stessa persona con due schede). */
+export async function unisciSociCassa(form: FormData) {
+  const { supabase } = await richiediStaff();
+  const id = testo(form, "socio_id");
+  const pagina = `/cassa/soci/${id}`;
+  const codice = testo(form, "codice_altro").replace(/\s/g, "");
+  const { error } = await supabase.rpc("staff_unisci_da_tessera", { p_tieni: id, p_codice: codice });
+  revalidatePath(pagina);
+  redirect(conEsito(pagina, error ? { errore: messaggioDb(error) } : { ok: `Scheda della tessera ${codice} unita a questa.` }));
+}
+
+// Scheda nata dall'app con il cellulare di una scheda senza email: si tiene quella con la tessera fisica.
+export async function unisciDaAppCassa(form: FormData) {
+  const { supabase } = await richiediStaff();
+  const tieni = testo(form, "tieni");
+  const { error } = await supabase.rpc("admin_unisci_soci", { p_tieni: tieni, p_togli: testo(form, "togli") });
+  redirect(conEsito(`/cassa/soci/${error ? testo(form, "pagina") : tieni}`, error
+    ? { errore: messaggioDb(error) }
+    : { ok: "Schede unite: ora l'app mostra la tessera fisica e i punti, e ReadyPro riceve l'email con il prossimo invio." }));
+}
+
+export async function annullaUnioneCassa(form: FormData) {
+  const { supabase } = await richiediStaff();
+  const pagina = `/cassa/soci/${testo(form, "pagina")}`;
+  const { error } = await supabase.rpc("admin_annulla_unione", { p_socio_id: testo(form, "id") });
+  revalidatePath(pagina);
+  redirect(conEsito(pagina, error
+    ? { errore: messaggioDb(error) }
+    : { ok: "Fatto: le due schede restano separate e la tessera digitale va a ReadyPro con il prossimo invio." }));
 }
 
 export async function nuovoSocioCassa(form: FormData) {
