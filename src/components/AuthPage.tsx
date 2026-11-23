@@ -1,29 +1,44 @@
 import Link from "next/link";
 import { isSupabaseConfigured } from "@/lib/supabase/config";
+import { direzione, getLingua } from "@/lib/i18n";
+import { TESTI } from "@/lib/i18n/testi";
+import { TestiProvider } from "@/lib/i18n/client";
 import { IconIndietro } from "./Icons";
+import { SceltaLingua } from "./SceltaLingua";
 
-/** Guscio comune delle pagine di accesso: torna al benvenuto, titolo, eventuale errore, contenuto. */
-export function AuthPage({ eyebrow, titolo, intro, errore, indietro = "/", children }: {
+/**
+ * Guscio comune delle pagine di accesso: torna al benvenuto, scelta della lingua,
+ * titolo, eventuale errore, contenuto. Lingua e direzione (arabo da destra a
+ * sinistra) valgono per tutta la pagina.
+ */
+export async function AuthPage({ eyebrow, titolo, intro, errore, indietro = "/", tradotta = true, children }: {
   eyebrow: string;
   titolo: string;
   intro: React.ReactNode;
   errore?: string;
   indietro?: string;
+  /** false per le pagine scritte solo in italiano (es. consenso del genitore): niente scelta lingua. */
+  tradotta?: boolean;
   children: React.ReactNode;
 }) {
+  const lingua = tradotta ? await getLingua() : "it";
+  const t = TESTI[lingua];
   return (
-    <main className="auth">
-      <Link href={indietro} className="back-link"><IconIndietro /> Indietro</Link>
-      <div className="page-head">
-        <p className="t-eyebrow">{eyebrow}</p>
-        <h1 className="t-display-l">{titolo}</h1>
-        <p className="t-body-l">{intro}</p>
-      </div>
-      {errore && <p className="notice notice--errore" role="alert">{errore}</p>}
-      {children}
-      {!isSupabaseConfigured && (
-        <p className="notice">Anteprima: il database non è collegato. Con «Continua» entri con un socio di prova.</p>
-      )}
+    <main className="auth" lang={lingua} dir={direzione(lingua)}>
+      <TestiProvider testi={t.client}>
+        <div className="auth__barra">
+          <Link href={indietro} className="back-link"><IconIndietro /> {t.comune.indietro}</Link>
+          {tradotta && <SceltaLingua lingua={lingua} etichetta={t.comune.lingua} />}
+        </div>
+        <div className="page-head">
+          <p className="t-eyebrow">{eyebrow}</p>
+          <h1 className="t-display-l">{titolo}</h1>
+          <p className="t-body-l">{intro}</p>
+        </div>
+        {errore && <p className="notice notice--errore" role="alert">{errore}</p>}
+        {children}
+        {!isSupabaseConfigured && <p className="notice">{t.comune.anteprima}</p>}
+      </TestiProvider>
     </main>
   );
 }

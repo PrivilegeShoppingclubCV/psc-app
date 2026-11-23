@@ -1,10 +1,12 @@
-import type { Metadata } from "next";
 import { redirect } from "next/navigation";
 import { AuthPage, param } from "@/components/AuthPage";
 import { CampoCodice, TastoEntra } from "@/components/CampoCodice";
 import { accedi, verifica } from "../accesso/azioni";
+import { getTesti, ricco } from "@/lib/i18n";
 
-export const metadata: Metadata = { title: "Controlla la posta" };
+export async function generateMetadata() {
+  return { title: (await getTesti()).verifica.titoloPagina };
+}
 
 const INDIETRO = { collega: "/collega-tessera", iscriviti: "/iscriviti", home: "/accedi", admin: "/accedi?dopo=admin" } as const;
 
@@ -14,12 +16,14 @@ export default async function Verifica({ searchParams }: { searchParams: Promise
   const dopo = param(q.dopo);
   const errore = param(q.errore);
   if (!email) redirect("/accedi");
+  const t = await getTesti();
+  const v = t.verifica;
 
   return (
     <AuthPage
-      eyebrow="Controlla la posta"
-      titolo="Scrivi il codice"
-      intro={<>Abbiamo mandato un codice di 6 cifre a <strong>{email}</strong>. Scrivilo qui sotto. Se non trovi l&apos;email, guarda anche nello spam.</>}
+      eyebrow={v.eyebrow}
+      titolo={v.titolo}
+      intro={ricco(v.intro, { email: <strong dir="ltr">{email}</strong> })}
       errore={errore}
       indietro={INDIETRO[dopo as keyof typeof INDIETRO] ?? "/accedi"}
     >
@@ -33,7 +37,7 @@ export default async function Verifica({ searchParams }: { searchParams: Promise
       <form action={accedi}>
         <input type="hidden" name="email" value={email} />
         <input type="hidden" name="dopo" value={dopo} />
-        <button type="submit" className="psc-btn psc-btn--ghost psc-btn--block">Non è arrivato? Mandalo di nuovo</button>
+        <button type="submit" className="psc-btn psc-btn--ghost psc-btn--block">{v.rimanda}</button>
       </form>
     </AuthPage>
   );

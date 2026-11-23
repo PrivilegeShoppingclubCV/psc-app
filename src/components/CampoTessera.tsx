@@ -2,6 +2,7 @@
 
 import { useCallback, useEffect, useRef, useState } from "react";
 import { IconChiudi, IconFotocamera } from "./Icons";
+import { forma, useTesti } from "@/lib/i18n/client";
 
 type Rilevato = { rawValue: string; format: string };
 type Rilevatore = { detect: (img: HTMLVideoElement) => Promise<Rilevato[]> };
@@ -72,6 +73,7 @@ export function cifreSignificative(valore: string) {
  */
 export function CampoTessera({ id, label, help, defaultValue, required }: { id: string; label: string; help?: string; defaultValue?: string; required?: boolean }) {
   const campo = useRef<HTMLInputElement>(null);
+  const t = useTesti().tessera;
   // Quello che si vede nel campo: solo cifre, zeri compresi.
   const [scritto, setScritto] = useState(() => String(defaultValue ?? "").replace(/\D/g, ""));
   const cifre = cifreSignificative(scritto);
@@ -141,10 +143,10 @@ export function CampoTessera({ id, label, help, defaultValue, required }: { id: 
       setStato("errore");
       setErrore(
         nome === "NotAllowedError" || nome === "SecurityError"
-          ? "Non abbiamo il permesso di usare la fotocamera. Puoi darlo dalle impostazioni del browser, oppure scrivere il numero a mano."
+          ? t.permesso
           : nome === "NotFoundError" || nome === "OverconstrainedError"
-            ? "Non troviamo una fotocamera su questo dispositivo. Scrivi il numero a mano."
-            : "Non riusciamo ad aprire la fotocamera. Scrivi il numero a mano.",
+            ? t.nessunaFotocamera
+            : t.nonSiApre,
       );
       ferma();
     }
@@ -159,7 +161,8 @@ export function CampoTessera({ id, label, help, defaultValue, required }: { id: 
         className="psc-field__input"
         inputMode="numeric"
         autoComplete="off"
-        placeholder="es. 4169"
+        placeholder={t.esempio}
+        dir="ltr"
         required={required}
         aria-describedby={`${id}-numero${help ? ` ${id}-help` : ""}`}
         maxLength={20}
@@ -169,8 +172,8 @@ export function CampoTessera({ id, label, help, defaultValue, required }: { id: 
           setScritto(v);
           const n = cifreSignificative(v);
           e.target.setCustomValidity(
-            v && !n ? "Il numero della tessera non può essere solo zeri."
-            : v.replace(/^0+/, "").length > CIFRE_TESSERA && !(v.length === 13 && ean13Valido(v)) ? "Il numero della tessera ha al massimo 12 cifre." : "",
+            v && !n ? t.soloZeri
+            : v.replace(/^0+/, "").length > CIFRE_TESSERA && !(v.length === 13 && ean13Valido(v)) ? t.massimo : "",
           );
         }}
       />
@@ -178,27 +181,27 @@ export function CampoTessera({ id, label, help, defaultValue, required }: { id: 
       <input type="hidden" name={id} value={completo} />
       <p id={`${id}-numero`} className="tessera-numero" aria-live="polite">
         {troppe ? (
-          <>Troppe cifre: il numero della tessera ne ha {CIFRE_TESSERA}.</>
+          <>{forma(t.troppe, { n: CIFRE_TESSERA })}</>
         ) : completo ? (
           <>
-            La tua tessera: <span className="tessera-numero__cifre"><span className="tessera-numero__zeri">{"0".repeat(zeri)}</span>{cifre}</span>
+            {t.latua} <span className="tessera-numero__cifre" dir="ltr"><span className="tessera-numero__zeri">{"0".repeat(zeri)}</span>{cifre}</span>
           </>
         ) : (
-          <>Il numero completo ha {CIFRE_TESSERA} cifre: gli zeri iniziali li aggiungiamo noi.</>
+          <>{forma(t.completo, { n: CIFRE_TESSERA })}</>
         )}
       </p>
       {help && <span id={`${id}-help`} className="psc-field__help">{help}</span>}
       {puoScansionare && (
         <button type="button" className="psc-btn psc-btn--secondary scansiona-btn" onClick={apri}>
           <IconFotocamera />
-          Scansiona con la fotocamera
+          {t.scansiona}
         </button>
       )}
 
-      <dialog ref={dialog} className="tessera-overlay" aria-label="Scansiona la tessera" onClose={ferma}>
+      <dialog ref={dialog} className="tessera-overlay" aria-label={t.scansionaTitolo} onClose={ferma}>
         <div className="tessera-overlay__bar">
-          <p className="t-eyebrow">Scansiona la tessera</p>
-          <button type="button" className="icon-btn" aria-label="Chiudi" onClick={chiudi}>
+          <p className="t-eyebrow">{t.scansionaTitolo}</p>
+          <button type="button" className="icon-btn" aria-label={t.chiudi} onClick={chiudi}>
             <IconChiudi />
           </button>
         </div>
@@ -210,11 +213,11 @@ export function CampoTessera({ id, label, help, defaultValue, required }: { id: 
               <video ref={video} className="scansiona-video" muted playsInline aria-hidden="true" />
             </div>
             <p className="t-body-l scansiona-testo" aria-live="polite">
-              {stato === "avvio" ? "Apro la fotocamera…" : "Inquadra il codice a barre sul retro della tessera, dentro il riquadro."}
+              {stato === "avvio" ? t.avvio : t.inquadra}
             </p>
           </>
         )}
-        <button type="button" className="psc-btn psc-btn--ghost" onClick={chiudi}>Scrivo il numero a mano</button>
+        <button type="button" className="psc-btn psc-btn--ghost" onClick={chiudi}>{t.aMano}</button>
       </dialog>
     </div>
   );
