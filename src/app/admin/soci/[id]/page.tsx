@@ -107,7 +107,9 @@ export default async function SchedaSocio({ params, searchParams }: {
           <div className="admin-grid">
             <Campo id="nome" label="Nome" defaultValue={s.nome ?? ""} />
             <Campo id="cognome" label="Cognome" defaultValue={s.cognome ?? ""} />
-            <Campo id="email" label="Email" type="email" defaultValue={s.email ?? ""} help="Con questa email il socio collega da solo la tessera all'app." />
+            <Campo id="email" label="Email" type="email" defaultValue={s.email ?? ""} help={s.user_id
+              ? "Il socio accede all'app con questa email: se la correggi, da subito entra con quella nuova (nessuna conferma da fare). Correggila anche in ReadyPro."
+              : "Con questa email il socio collega da solo la tessera all'app. Correggila anche in ReadyPro."} />
             <Campo id="telefono" label="Telefono" type="tel" defaultValue={s.telefono ?? ""} />
             <CampoData id="data_nascita" label="Data di nascita" defaultValue={s.data_nascita ?? ""} />
             <Campo id="indirizzo" label="Indirizzo" defaultValue={s.indirizzo ?? ""} />
