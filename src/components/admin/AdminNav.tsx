@@ -33,6 +33,7 @@ const GRUPPI: Gruppo[] = [
       { href: "/admin/staff", label: "Staff" },
       { href: "/admin/negozi", label: "Negozi" },
       { href: "/admin/gestionale", label: "Gestionale" },
+      { href: "/admin/lingue", label: "Lingue" },
     ],
   },
 ];
