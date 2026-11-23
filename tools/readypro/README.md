@@ -92,6 +92,14 @@ Le casse sono ReadyPro: quando il commesso scansiona la tessera, la vendita rest
 
 Le vendite senza tessera e quelle sotto il primo punto si saltano; un reso (totale negativo) toglie i punti. Gli invii arrivano dopo quelli dei clienti, così una tessera appena creata è già conosciuta.
 
+## Prodotti negli scontrini
+
+1. In ReadyPro, UTIL → Esportazione dati → **Aggiungi**, procedura **Documenti di magazzino - Righe**, stesso tipo documento e periodo del filtro vendite (RICEVUTA DI CASSA, ultimi 7 giorni), stesse impostazioni CSV. Campi: *Dettaglio testata documento : Numero del documento*, *Riga documento : Codice progressivo linea (ID dettaglio)*, *Riga documento : Descrizione*, *Quantita' (unita' di misura documento)*, *Totale SCONTATO ed IVA compresa (Prz * Quant.)*, facoltativi *Codice a barre* e *Ordinamento linee*. File: `C:\PSC\export\righe.csv`, nella stessa procedura pianificata delle vendite.
+2. In `config.json` imposta `FileRighe` con quel percorso.
+3. L'app riconosce le colonne dal nome; se non ci riesce, il log dello script lo dice e la mappatura si scrive nel pannello (Gestionale → Colonne del CSV righe).
+
+Le righe di vendite senza tessera si cancellano dopo un giorno.
+
 ## Se qualcosa va storto
 
 - **Una tessera resta "in attivazione".** La vista `tessere_in_attesa_cassa` (o la Panoramica del pannello) mostra da quante ore aspetta, quando è stata mandata e quando il server l'ha ritirata. Ritirata ma non attiva = ReadyPro non l'ha importata o non la esporta col codice giusto.

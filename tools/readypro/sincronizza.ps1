@@ -192,6 +192,13 @@ function Invia-Vendite($Auth) {
   Invia-Csv $cfg.FileVendite '/api/gestionale/vendite' 'ultimo-invio-vendite' 'vendite' $Auth
 }
 
+# I prodotti dentro gli scontrini: dopo le vendite, così lo scontrino esiste già.
+# Se FileRighe non è configurato si salta.
+function Invia-Righe($Auth) {
+  if (-not $cfg.FileRighe) { return }
+  Invia-Csv $cfg.FileRighe '/api/gestionale/righe' 'ultimo-invio-righe' 'righe scontrini' $Auth
+}
+
 # 2. app -> ReadyPro: tessere create in app e recapiti modificati in app.
 # ReadyPro importa sempre lo stesso file. Se c'è ancora il file del giro prima
 # (ReadyPro non l'ha ancora importato), le righe nuove si aggiungono in fondo;
@@ -238,7 +245,7 @@ function Scarica-NuoviIscritti($Auth) {
 try {
   $auth = @{ Authorization = "Bearer $(Leggi-Chiave)" }
   $errori = 0
-  foreach ($passo in 'Invia-Clienti', 'Invia-Vendite', 'Scarica-NuoviIscritti') {
+  foreach ($passo in 'Invia-Clienti', 'Invia-Vendite', 'Invia-Righe', 'Scarica-NuoviIscritti') {
     try { & $passo $auth } catch { $errori++; Scrivi-Log "ERRORE in ${passo}: $($_.Exception.Message)" }
   }
   Get-ChildItem $cfg.CartellaLog -Filter 'sincronizza-*.log' |

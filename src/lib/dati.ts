@@ -144,6 +144,23 @@ export async function getScontrini(socioId: string): Promise<Scontrino[]> {
     .order("numero_documento", { ascending: false })
     .limit(200);
   if (error) throw error;
+
+  // Prodotti dal CSV righe di ReadyPro, agganciati per numero di documento.
+  const numeri = data.map((s) => numeroDocumento(s.numero_documento));
+  const perNumero = new Map<string, RigaScontrino[]>();
+  if (numeri.length) {
+    const { data: righe } = await supabase
+      .from("scontrini_righe")
+      .select("numero_documento, descrizione, quantita, importo, ordine")
+      .in("numero_documento", numeri)
+      .order("ordine");
+    for (const r of righe ?? []) {
+      const lista = perNumero.get(r.numero_documento) ?? [];
+      lista.push({ descrizione: r.descrizione, quantita: r.quantita == null ? undefined : Number(r.quantita), importo: Number(r.importo ?? 0) });
+      perNumero.set(r.numero_documento, lista);
+    }
+  }
+
   return data.map((s) => ({
     id: s.id,
     numero: s.numero_documento,
@@ -151,8 +168,14 @@ export async function getScontrini(socioId: string): Promise<Scontrino[]> {
     totale: Number(s.totale),
     negozio: (s.negozi as unknown as { nome: string } | null)?.nome ?? s.cassa ?? undefined,
     punti: s.punti,
-    righe: Array.isArray(s.righe) ? (s.righe as RigaScontrino[]) : [],
+    righe: perNumero.get(numeroDocumento(s.numero_documento)) ?? (Array.isArray(s.righe) ? (s.righe as RigaScontrino[]) : []),
   }));
+}
+
+/** Come interno.numero_documento: "000123" o "123/A" → "123". */
+function numeroDocumento(n: string): string {
+  const cifre = /^\s*(\d+)/.exec(n)?.[1]?.replace(/^0+/, "");
+  return cifre || n.trim();
 }
 
 const CAMPI_BUONO = "id, codice, nome_premio, punti, stato, creato_il, scade_il, usato_il";
