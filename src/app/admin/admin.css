@@ -114,3 +114,18 @@ a.admin-stat:hover { border-color: var(--ink); }
 .admin-lingue td { vertical-align: top; width: 50%; white-space: pre-line; }
 .admin-lingue td[dir="rtl"] { text-align: right; }
 .anteprima-scontrino { max-width: 420px; }
+
+/* Segnaposto mentre una pagina del pannello si carica (loading.tsx). */
+.admin-caricamento { display: flex; flex-direction: column; gap: var(--space-4); }
+.admin-caricamento__titolo,
+.admin-caricamento__riga {
+  border-radius: 8px;
+  background: currentColor;
+  opacity: 0.08;
+  animation: admin-caricamento 1.2s ease-in-out infinite;
+}
+.admin-caricamento__titolo { height: 40px; width: 40%; margin-bottom: var(--space-4); }
+.admin-caricamento__riga { height: 48px; }
+.admin-caricamento__riga--corta { width: 60%; }
+@keyframes admin-caricamento { 50% { opacity: 0.16; } }
+@media (prefers-reduced-motion: reduce) { .admin-caricamento__titolo, .admin-caricamento__riga { animation: none; } }

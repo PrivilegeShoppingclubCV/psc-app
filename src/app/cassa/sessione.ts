@@ -16,7 +16,9 @@ export type AccessoCassa =
 export const getAccessoCassa = cache(async (): Promise<AccessoCassa> => {
   const supabase = await getSupabase();
   if (!supabase) return { stato: "non_configurato" };
-  const { data: { user } } = await supabase.auth.getUser();
+  // Come per il pannello admin: il token si controlla senza chiamare il servizio Auth.
+  const { data: claims } = await supabase.auth.getClaims();
+  const user = claims?.claims.sub ? { id: claims.claims.sub, email: claims.claims.email as string | undefined } : null;
   if (!user) return { stato: "non_entrato" };
   const { data } = await supabase.from("staff").select("ruolo, nome, negozio_id").eq("user_id", user.id).maybeSingle();
   if (!data) return { stato: "non_staff", email: user.email ?? "" };
