@@ -50,6 +50,9 @@ export const club: TestiClub = {
     punti: "{punti} Punkte",
     cortesia: "Kopie zur Information, gilt nicht als Steuerbeleg.",
     dataOra: "{data}, {ora} Uhr",
+    caricaAltri: "Mehr laden",
+    caricamento: "Wird geladen…",
+    erroreCarica: "Weitere Kassenbons konnten nicht geladen werden. Bitte erneut versuchen.",
   },
   buono: {
     titoloPagina: "Prämiengutschein",

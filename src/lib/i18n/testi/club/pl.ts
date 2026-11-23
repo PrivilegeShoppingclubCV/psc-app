@@ -50,6 +50,9 @@ export const club: TestiClub = {
     punti: "{punti} pkt",
     cortesia: "Kopia informacyjna, nie jest dokumentem fiskalnym.",
     dataOra: "{data}, godz. {ora}",
+    caricaAltri: "Wczytaj więcej",
+    caricamento: "Wczytywanie…",
+    erroreCarica: "Nie udało się wczytać kolejnych paragonów. Spróbuj ponownie.",
   },
   buono: {
     titoloPagina: "Bon nagrody",

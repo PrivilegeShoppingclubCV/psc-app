@@ -50,6 +50,9 @@ export const club: TestiClub = {
     punti: "{punti} نقطة",
     cortesia: "نسخة للاطلاع، لا تُعدّ مستندًا ضريبيًا.",
     dataOra: "{data}، الساعة {ora}",
+    caricaAltri: "تحميل المزيد",
+    caricamento: "جارٍ التحميل…",
+    erroreCarica: "تعذّر تحميل المزيد من الإيصالات. حاول مرة أخرى.",
   },
   buono: {
     titoloPagina: "قسيمة الجائزة",

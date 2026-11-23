@@ -31,6 +31,17 @@ export const movimenti: MovimentoPunti[] = [
 export const scontrini: Scontrino[] = [
   { id: "s1", numero: "48213", data: "2026-10-21T16:42:00Z", totale: 43.9, negozio: "Negozio Centro", punti: 8, righe: [] },
   { id: "s2", numero: "47880", data: "2026-10-09T00:00:00Z", totale: 77.5, negozio: "Negozio Stazione", punti: 15, righe: [] },
+  { id: "s3", numero: "46889", data: "2026-10-08T12:15:00Z", totale: 20.5, negozio: "Negozio Centro", punti: 4, righe: [] },
+  { id: "s4", numero: "46852", data: "2026-10-08T18:15:00Z", totale: 24.0, negozio: "Negozio Centro", punti: 4, righe: [] },
+  { id: "s5", numero: "46815", data: "2026-10-07T12:15:00Z", totale: 27.5, negozio: "Negozio Centro", punti: 5, righe: [] },
+  { id: "s6", numero: "46778", data: "2026-10-07T18:15:00Z", totale: 31.0, negozio: "Negozio Centro", punti: 6, righe: [] },
+  { id: "s7", numero: "46741", data: "2026-10-06T12:15:00Z", totale: 34.5, negozio: "Negozio Centro", punti: 6, righe: [] },
+  { id: "s8", numero: "46704", data: "2026-10-06T18:15:00Z", totale: 38.0, negozio: "Negozio Centro", punti: 7, righe: [] },
+  { id: "s9", numero: "46667", data: "2026-10-05T12:15:00Z", totale: 41.5, negozio: "Negozio Centro", punti: 8, righe: [] },
+  { id: "s10", numero: "46630", data: "2026-10-05T18:15:00Z", totale: 45.0, negozio: "Negozio Centro", punti: 9, righe: [] },
+  { id: "s11", numero: "46593", data: "2026-10-04T12:15:00Z", totale: 48.5, negozio: "Negozio Centro", punti: 9, righe: [] },
+  { id: "s12", numero: "46556", data: "2026-10-04T18:15:00Z", totale: 52.0, negozio: "Negozio Centro", punti: 10, righe: [] },
+  { id: "s13", numero: "46519", data: "2026-10-03T12:15:00Z", totale: 55.5, negozio: "Negozio Centro", punti: 11, righe: [] },
 ];
 
 export const buoni: Buono[] = [

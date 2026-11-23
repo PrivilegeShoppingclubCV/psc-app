@@ -50,6 +50,9 @@ export const club: TestiClub = {
     punti: "{punti} puncte",
     cortesia: "Copie informativă, nu are valoare de document fiscal.",
     dataOra: "{data}, ora {ora}",
+    caricaAltri: "Încarcă mai multe",
+    caricamento: "Se încarcă…",
+    erroreCarica: "Nu am putut încărca alte bonuri. Încearcă din nou.",
   },
   buono: {
     titoloPagina: "Voucher premiu",

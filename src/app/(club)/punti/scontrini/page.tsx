@@ -2,9 +2,9 @@ import Link from "next/link";
 import { IconIndietro } from "@/components/Icons";
 import { PageHead } from "@/components/PageHead";
 import { getScontrini } from "@/lib/dati";
-import { CartaScontrino } from "@/components/CartaScontrino";
-import { getFormati, getTestiClub } from "@/lib/i18n";
+import { getLingua, getTestiClub } from "@/lib/i18n";
 import { getSocio } from "@/lib/socio";
+import { ElencoScontrini } from "./ElencoScontrini";
 
 export async function generateMetadata() {
   return { title: (await getTestiClub()).scontrini.titoloPagina };
@@ -12,8 +12,8 @@ export async function generateMetadata() {
 
 export default async function Scontrini() {
   const socio = await getSocio();
-  const scontrini = await getScontrini(socio.id);
-  const f = await getFormati();
+  const { scontrini, altri } = await getScontrini(socio.id);
+  const lingua = await getLingua();
   const t = (await getTestiClub()).scontrini;
 
   return (
@@ -27,22 +27,7 @@ export default async function Scontrini() {
         {scontrini.length === 0 ? (
           <p className="t-caption">{t.nessuno}</p>
         ) : (
-          <ul className="scontrini">
-            {scontrini.map((s) => (
-              <li key={s.id}>
-                <details className="scontrino">
-                  <summary>
-                    <span className="list__main">
-                      <span>{s.negozio ?? t.acquisto}</span>
-                      <span className="t-caption">{f.data(s.data)}</span>
-                    </span>
-                    <span className="list__value">{f.euro(s.totale)}</span>
-                  </summary>
-                  <CartaScontrino s={s} f={f} t={t} />
-                </details>
-              </li>
-            ))}
-          </ul>
+          <ElencoScontrini iniziali={scontrini} altriIniziali={altri} lingua={lingua} t={t} />
         )}
       </section>
     </>

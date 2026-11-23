@@ -52,6 +52,9 @@ export const club = {
     punti: "{punti} punti",
     cortesia: "Copia di cortesia, non vale come documento fiscale.",
     dataOra: "{data}, ore {ora}",
+    caricaAltri: "Carica altri",
+    caricamento: "Caricamento…",
+    erroreCarica: "Non è stato possibile caricare altri scontrini. Riprova.",
   },
   buono: {
     titoloPagina: "Buono premio",
