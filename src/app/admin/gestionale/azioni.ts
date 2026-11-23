@@ -72,10 +72,17 @@ export async function elaboraImport(form: FormData) {
   redirect(conEsito("/admin/gestionale", error ? { errore: messaggioDb(error) } : { ok: "File elaborato: vedi l'esito qui sotto." }));
 }
 
-export async function salvaPuntiPerEuro(form: FormData) {
+export async function salvaRegolaPunti(form: FormData) {
   const { supabase } = await richiediAdmin();
-  const valore = Number(testo(form, "punti_per_euro").replace(",", "."));
-  if (!Number.isFinite(valore) || valore < 0) redirect(conEsito("/admin/gestionale", { errore: "Scrivi un numero, es. 1 o 0,5." }));
-  const { error } = await supabase.from("impostazioni").update({ valore }).eq("chiave", "punti_per_euro");
+  const euro = Number(testo(form, "euro_per_punto").replace(",", "."));
+  if (!Number.isFinite(euro) || euro <= 0) redirect(conEsito("/admin/gestionale", { errore: "Scrivi quanti euro servono per 1 punto, es. 5." }));
+  const dal = testo(form, "punti_dal");
+  if (dal && !/^\d{4}-\d{2}-\d{2}$/.test(dal)) redirect(conEsito("/admin/gestionale", { errore: "Data di avvio non valida." }));
+  const [a, b] = await Promise.all([
+    supabase.from("impostazioni").update({ valore: euro }).eq("chiave", "euro_per_punto"),
+    supabase.from("impostazioni").update({ valore: dal }).eq("chiave", "punti_dal"),
+  ]);
+  const error = a.error ?? b.error;
+  revalidatePath("/punti");
   redirect(conEsito("/admin/gestionale", error ? { errore: messaggioDb(error) } : { ok: "Regola dei punti salvata: vale per le prossime vendite." }));
 }

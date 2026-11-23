@@ -4,7 +4,7 @@ import { Conferma } from "@/components/admin/Conferma";
 import { Esito } from "@/components/admin/Esito";
 import { dataOra } from "@/lib/admin/form";
 import { richiediAdmin } from "@/lib/admin/sessione";
-import { elaboraImport, revocaChiave, salvaMappatura, salvaPuntiPerEuro } from "./azioni";
+import { elaboraImport, revocaChiave, salvaMappatura, salvaRegolaPunti } from "./azioni";
 import { CreaChiave } from "./CreaChiave";
 
 export const metadata: Metadata = { title: "Gestionale" };
@@ -14,7 +14,7 @@ export default async function Gestionale({ searchParams }: { searchParams: Promi
   const { supabase } = await richiediAdmin();
   const [chiavi, impostazioni, importi, attesa] = await Promise.all([
     supabase.from("gestionale_chiavi").select("id, nome, prefisso, creata_il, ultimo_uso, revocata_il").order("creata_il", { ascending: false }),
-    supabase.from("impostazioni").select("chiave, valore").in("chiave", ["gestionale_mappatura_soci", "gestionale_mappatura_vendite", "punti_per_euro"]),
+    supabase.from("impostazioni").select("chiave, valore").in("chiave", ["gestionale_mappatura_soci", "gestionale_mappatura_vendite", "euro_per_punto", "punti_dal"]),
     supabase.from("import_batch").select("id, tipo, nome_file, stato, righe_totali, righe_ok, righe_saltate, righe_errore, note, creato_il").order("creato_il", { ascending: false }).limit(20),
     supabase.from("tessere_in_attesa_cassa").select("id", { count: "exact", head: true }),
   ]);
@@ -96,12 +96,17 @@ export default async function Gestionale({ searchParams }: { searchParams: Promi
         valore={valore("gestionale_mappatura_vendite")}
         daElaborare={daElaborareVendite}
       >
-        <form action={salvaPuntiPerEuro} className="admin-form">
+        <form action={salvaRegolaPunti} className="admin-form">
           <div className="psc-field">
-            <label className="psc-field__label" htmlFor="punti-per-euro">Punti per ogni euro speso</label>
-            <input id="punti-per-euro" name="punti_per_euro" className="psc-field__input" inputMode="decimal" defaultValue={String(valore("punti_per_euro") ?? 1)} />
+            <label className="psc-field__label" htmlFor="euro-per-punto">Euro di spesa per 1 punto</label>
+            <input id="euro-per-punto" name="euro_per_punto" className="psc-field__input" inputMode="decimal" defaultValue={String(valore("euro_per_punto") ?? 5)} />
           </div>
-          <p className="t-caption">Arrotondati per difetto: con 1, una spesa di 12,50 € dà 12 punti; con 0,5 ne dà 6. Un reso toglie i punti allo stesso modo.</p>
+          <p className="t-caption">Per difetto su ogni vendita: con 5, una spesa di 24,90 € dà 4 punti e una da 4,99 € nessuno. Un reso toglie i punti allo stesso modo.</p>
+          <div className="psc-field">
+            <label className="psc-field__label" htmlFor="punti-dal">Punti dalle vendite del</label>
+            <input id="punti-dal" name="punti_dal" type="date" className="psc-field__input" defaultValue={String(valore("punti_dal") ?? "")} />
+          </div>
+          <p className="t-caption">Giorno del lancio: le vendite precedenti non danno punti, anche se ReadyPro le rimanda. Vuoto = nessun limite.</p>
           <div className="admin-azioni"><button type="submit" className="psc-btn psc-btn--secondary">Salva</button></div>
         </form>
       </Mappatura>
