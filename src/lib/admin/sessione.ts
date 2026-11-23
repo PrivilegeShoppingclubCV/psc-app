@@ -10,7 +10,7 @@ import { getSupabase } from "@/lib/dati";
 export type Accesso =
   | { stato: "non_configurato" }
   | { stato: "non_entrato" }
-  | { stato: "non_admin"; email: string }
+  | { stato: "non_admin"; email: string; operatore: boolean }
   | { stato: "admin"; email: string; userId: string; nome: string | null; supabase: NonNullable<Awaited<ReturnType<typeof getSupabase>>> };
 
 export const getAccesso = cache(async (): Promise<Accesso> => {
@@ -21,7 +21,7 @@ export const getAccesso = cache(async (): Promise<Accesso> => {
   if (!user) return { stato: "non_entrato" };
 
   const { data } = await supabase.from("staff").select("ruolo, nome").eq("user_id", user.id).maybeSingle();
-  if (data?.ruolo !== "admin") return { stato: "non_admin", email: user.email ?? "" };
+  if (data?.ruolo !== "admin") return { stato: "non_admin", email: user.email ?? "", operatore: data?.ruolo === "operatore" };
   return { stato: "admin", email: user.email ?? "", userId: user.id, nome: data.nome, supabase };
 });
 

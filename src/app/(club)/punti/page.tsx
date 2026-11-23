@@ -1,9 +1,10 @@
 import Link from "next/link";
 import { PageHead } from "@/components/PageHead";
 import { SaldoPunti } from "@/components/SaldoPunti";
-import { getEuroPerPunto, getMovimenti, getPremi, getSaldo } from "@/lib/dati";
+import { getBuoniAttivi, getEuroPerPunto, getMovimenti, getPremi, getSaldo } from "@/lib/dati";
 import { forma, getFormati, getTestiClub } from "@/lib/i18n";
 import { getSocio } from "@/lib/socio";
+import { codiceBuono } from "@/lib/tipi";
 
 export async function generateMetadata() {
   return { title: (await getTestiClub()).punti.titoloPagina };
@@ -11,6 +12,8 @@ export async function generateMetadata() {
 
 export default async function Punti() {
   const socio = await getSocio();
+  // Prima i buoni: quelli scaduti restituiscono i punti, e il saldo deve già contarli.
+  const buoni = await getBuoniAttivi(socio.id);
   const [saldo, premi, movimenti, euroPerPunto] = await Promise.all([getSaldo(socio.id), getPremi(), getMovimenti(socio.id), getEuroPerPunto()]);
   const f = await getFormati();
   const t = (await getTestiClub()).punti;
@@ -23,6 +26,23 @@ export default async function Punti() {
         <SaldoPunti saldo={saldo} premi={premi} />
       </section>
 
+      {buoni.length > 0 && (
+        <section className="section" aria-labelledby="buoni">
+          <h2 id="buoni" className="t-title">{t.tuoiBuoni}</h2>
+          <ul className="list buoni-attivi">
+            {buoni.map((b) => (
+              <li key={b.id}>
+                <Link href={`/punti/buoni/${b.id}`} className="list__main">
+                  <span>{b.premio}</span>
+                  <span className="t-caption">{forma(t.buonoScade, { data: f.data(b.scadeIl) })}</span>
+                </Link>
+                <Link href={`/punti/buoni/${b.id}`} className="psc-btn psc-btn--secondary" dir="ltr">{codiceBuono(b.codice)}</Link>
+              </li>
+            ))}
+          </ul>
+        </section>
+      )}
+
       {premi.length > 0 && (
         <section className="section" aria-labelledby="premi">
           <h2 id="premi" className="t-title">{t.premi}</h2>
@@ -30,8 +50,8 @@ export default async function Punti() {
             {premi.map((p) => (
               <li key={p.id}>
                 <span>{p.nome}</span>
-                {saldo >= p.soglia ? (
-                  <span className="psc-badge psc-badge--success">{t.disponibile}</span>
+                {saldo >= p.soglia && socio.puntiAttivi ? (
+                  <Link href={`/punti/premi/${p.id}`} className="psc-btn psc-btn--primary">{t.riscatta}</Link>
                 ) : (
                   <span className="list__value">{forma(t.soglia, { punti: f.punti(p.soglia) })}</span>
                 )}
