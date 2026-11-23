@@ -16,12 +16,12 @@ insert into public.impostazioni (chiave, valore, descrizione) values
 on conflict (chiave) do nothing;
 
 -- "000123", "123/A", " 123 " → "123": lo stesso numero scritto nei due file.
-create function interno.numero_documento(p_testo text)
+create or replace function interno.numero_documento(p_testo text)
 returns text language sql immutable set search_path = '' as $$
   select coalesce(nullif(ltrim(substring(btrim(p_testo) from '^(\d+)'), '0'), ''), nullif(btrim(p_testo), ''));
 $$;
 
-create table public.scontrini_righe (
+create table if not exists public.scontrini_righe (
   id               uuid primary key default gen_random_uuid(),
   -- Id della riga in ReadyPro, oppure numero + posizione + testo: reinviare lo
   -- stesso file non duplica nulla.
@@ -35,28 +35,30 @@ create table public.scontrini_righe (
   ricevuto_il      timestamptz not null default now()
 );
 
-create index scontrini_righe_numero on public.scontrini_righe (numero_documento, ordine);
+create index if not exists scontrini_righe_numero on public.scontrini_righe (numero_documento, ordine);
 -- Stessa normalizzazione sullo scontrino, come colonna: la regola RLS qui sotto la
 -- confronta senza chiamare funzioni dello schema interno.
-alter table public.scontrini add column numero_norm text generated always as (
+alter table public.scontrini add column if not exists numero_norm text generated always as (
   coalesce(nullif(ltrim(substring(btrim(numero_documento) from '^(\d+)'), '0'), ''), nullif(btrim(numero_documento), ''))
 ) stored;
-create index scontrini_numero_norm on public.scontrini (numero_norm);
+create index if not exists scontrini_numero_norm on public.scontrini (numero_norm);
 
 alter table public.scontrini_righe enable row level security;
 
+drop policy if exists "scontrini_righe: il socio vede quelle dei suoi scontrini" on public.scontrini_righe;
 create policy "scontrini_righe: il socio vede quelle dei suoi scontrini" on public.scontrini_righe
   for select to authenticated using (exists (
     select 1 from public.scontrini s
     where s.socio_id = public.socio_corrente_id()
       and s.numero_norm = scontrini_righe.numero_documento
   ));
+drop policy if exists "scontrini_righe: l'admin vede tutte" on public.scontrini_righe;
 create policy "scontrini_righe: l'admin vede tutte" on public.scontrini_righe
   for select to authenticated using (public.is_admin());
 grant select on public.scontrini_righe to authenticated;
 
 -- Colonna del file per un campo: dalla mappatura, oppure la prima il cui nome somiglia.
-create function interno.colonna_righe(p_mappa jsonb, p_colonne text[], p_campo text)
+create or replace function interno.colonna_righe(p_mappa jsonb, p_colonne text[], p_campo text)
 returns text language plpgsql immutable set search_path = '' as $$
 declare
   c    text;
@@ -84,7 +86,7 @@ end;
 $$;
 
 -- Chiamata dallo script del server dei negozi, come gestionale_ricevi_vendite.
-create function public.gestionale_ricevi_righe(
+create or replace function public.gestionale_ricevi_righe(
   p_chiave        text,
   p_nome_file     text,
   p_impronta_file text,
@@ -172,7 +174,7 @@ end;
 $$;
 
 -- Righe senza scontrino da più di un giorno: vendite anonime o scontrini già cancellati.
-create function interno.pulisci_righe_scontrini()
+create or replace function interno.pulisci_righe_scontrini()
 returns integer language plpgsql security definer set search_path = '' as $$
 declare
   v_tolte int;

@@ -15,7 +15,7 @@ insert into public.impostazioni (chiave, valore, descrizione) values
    'Per quanti giorni il socio vede i suoi scontrini in app: i più vecchi vengono cancellati (i punti restano).')
 on conflict (chiave) do nothing;
 
-create table public.scontrini (
+create table if not exists public.scontrini (
   id               uuid primary key default gen_random_uuid(),
   socio_id         uuid not null references public.soci (id) on delete cascade,
   -- N.Doc. di ReadyPro: numerazione unica tra le casse, quindi chiave dello scontrino.
@@ -34,20 +34,22 @@ create table public.scontrini (
   creato_il        timestamptz not null default now()
 );
 
-create index scontrini_socio_data on public.scontrini (socio_id, data_scontrino desc);
-create index scontrini_data on public.scontrini (data_scontrino);
+create index if not exists scontrini_socio_data on public.scontrini (socio_id, data_scontrino desc);
+create index if not exists scontrini_data on public.scontrini (data_scontrino);
 
 alter table public.scontrini enable row level security;
 
+drop policy if exists "scontrini: il socio vede i propri" on public.scontrini;
 create policy "scontrini: il socio vede i propri" on public.scontrini
   for select to authenticated using (socio_id = public.socio_corrente_id());
+drop policy if exists "scontrini: lo staff vede tutti" on public.scontrini;
 create policy "scontrini: lo staff vede tutti" on public.scontrini
   for select to authenticated using (public.is_staff());
 
 grant select on public.scontrini to authenticated;
 
 -- Cancella gli scontrini oltre il limite. Restituisce quanti ne ha tolti.
-create function interno.pulisci_scontrini()
+create or replace function interno.pulisci_scontrini()
 returns integer
 language plpgsql
 security definer
@@ -66,7 +68,7 @@ $$;
 
 -- Dalle righe di un file vendite elaborato salva gli scontrini dei soci.
 -- Non cambia lo stato delle righe né i punti: legge e basta.
-create function interno.salva_scontrini(p_batch_id uuid)
+create or replace function interno.salva_scontrini(p_batch_id uuid)
 returns void
 language plpgsql
 security definer
@@ -133,7 +135,7 @@ $$;
 
 -- Quando un file vendite è elaborato (invio automatico o pulsante nel pannello)
 -- se ne ricavano gli scontrini.
-create function interno.scontrini_da_batch()
+create or replace function interno.scontrini_da_batch()
 returns trigger
 language plpgsql
 security definer
@@ -145,6 +147,7 @@ begin
 end;
 $$;
 
+drop trigger if exists import_batch_scontrini on public.import_batch;
 create trigger import_batch_scontrini
   after update of stato on public.import_batch
   for each row

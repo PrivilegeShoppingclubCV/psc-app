@@ -14,7 +14,7 @@ insert into public.impostazioni (chiave, valore, descrizione) values
    'Per quanti giorni vale un buono premio. Scaduto, i punti tornano al socio.')
 on conflict (chiave) do nothing;
 
-create table public.buoni (
+create table if not exists public.buoni (
   id               uuid primary key default gen_random_uuid(),
   -- 8 caratteri senza quelli che si confondono (0/O, 1/I/L): si mostra "ABCD-EFGH".
   codice           text not null unique check (codice ~ '^[A-Z2-9]{8}$'),
@@ -35,13 +35,15 @@ create table public.buoni (
   rimborso_id      uuid references public.movimenti_punti (id) on delete set null
 );
 
-create index buoni_socio on public.buoni (socio_id, creato_il desc);
-create index buoni_attivi_scadenza on public.buoni (scade_il) where stato = 'attivo';
+create index if not exists buoni_socio on public.buoni (socio_id, creato_il desc);
+create index if not exists buoni_attivi_scadenza on public.buoni (scade_il) where stato = 'attivo';
 
 alter table public.buoni enable row level security;
 
+drop policy if exists "buoni: il socio vede i propri" on public.buoni;
 create policy "buoni: il socio vede i propri" on public.buoni
   for select to authenticated using (socio_id = public.socio_corrente_id());
+drop policy if exists "buoni: l'admin vede tutti" on public.buoni;
 create policy "buoni: l'admin vede tutti" on public.buoni
   for select to authenticated using (public.is_admin());
 -- Nessuna scrittura diretta: solo dalle funzioni qui sotto.
@@ -50,18 +52,18 @@ grant select on public.buoni to authenticated;
 -- Chiunque sia nella tabella staff, admin o operatore: serve solo alla cassa
 -- (verifica e uso dei buoni). Tutto il resto dei dati è per gli admin: vedi
 -- 20261123170000_operatori_solo_cassa.sql.
-create function public.is_personale()
+create or replace function public.is_personale()
 returns boolean language sql stable security definer set search_path = '' as $$
   select exists (select 1 from public.staff where user_id = auth.uid());
 $$;
 
 -- "abcd-efgh " → "ABCDEFGH"
-create function interno.codice_buono(p_testo text)
+create or replace function interno.codice_buono(p_testo text)
 returns text language sql immutable set search_path = '' as $$
   select upper(regexp_replace(coalesce(p_testo, ''), '[^A-Za-z0-9]', '', 'g'));
 $$;
 
-create function interno.nuovo_codice_buono()
+create or replace function interno.nuovo_codice_buono()
 returns text language plpgsql volatile set search_path = '' as $$
 declare
   v_alfabeto constant text := 'ABCDEFGHJKMNPQRSTUVWXYZ23456789';
@@ -81,7 +83,7 @@ end;
 $$;
 
 -- Chiude un buono attivo (annullato o scaduto) e restituisce i punti.
-create function interno.chiudi_buono(p_id uuid, p_stato text)
+create or replace function interno.chiudi_buono(p_id uuid, p_stato text)
 returns void language plpgsql security definer set search_path = '' as $$
 declare
   b    public.buoni;
@@ -102,7 +104,7 @@ end;
 $$;
 
 -- Buoni attivi oltre la scadenza → scaduti, con i punti restituiti.
-create function interno.scadi_buoni()
+create or replace function interno.scadi_buoni()
 returns integer language plpgsql security definer set search_path = '' as $$
 declare
   v_id uuid;
@@ -118,7 +120,7 @@ $$;
 
 -- Gli stessi, solo per il socio che sta usando l'app (lo chiama la pagina Punti):
 -- così i punti tornano anche senza pg_cron.
-create function public.scadi_miei_buoni()
+create or replace function public.scadi_miei_buoni()
 returns void language plpgsql security definer set search_path = '' as $$
 declare
   v_id uuid;
@@ -131,7 +133,7 @@ end;
 $$;
 
 -- Il socio riscatta un premio: punti scalati subito, nasce il buono.
-create function public.riscatta_premio(p_premio_id uuid)
+create or replace function public.riscatta_premio(p_premio_id uuid)
 returns jsonb
 language plpgsql
 security definer
@@ -170,7 +172,7 @@ end;
 $$;
 
 -- Il socio annulla un suo buono non ancora usato: i punti tornano.
-create function public.annulla_buono(p_id uuid)
+create or replace function public.annulla_buono(p_id uuid)
 returns void
 language plpgsql
 security definer
@@ -189,7 +191,7 @@ end;
 $$;
 
 -- Cosa vede il commesso: il buono e di chi è.
-create function interno.scheda_buono(p_id uuid)
+create or replace function interno.scheda_buono(p_id uuid)
 returns jsonb language sql stable security definer set search_path = '' as $$
   select jsonb_build_object(
     'id', b.id,
@@ -210,7 +212,7 @@ returns jsonb language sql stable security definer set search_path = '' as $$
   where b.id = p_id;
 $$;
 
-create function public.verifica_buono(p_codice text)
+create or replace function public.verifica_buono(p_codice text)
 returns jsonb
 language plpgsql
 security definer
@@ -230,7 +232,7 @@ begin
 end;
 $$;
 
-create function public.usa_buono(p_codice text, p_negozio_id uuid default null)
+create or replace function public.usa_buono(p_codice text, p_negozio_id uuid default null)
 returns jsonb
 language plpgsql
 security definer
