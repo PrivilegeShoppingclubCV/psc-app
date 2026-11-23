@@ -1,6 +1,7 @@
 "use server";
 
-import { revalidatePath } from "next/cache";
+import { revalidatePath, updateTag } from "next/cache";
+import { TAG } from "@/lib/pubblico";
 import { redirect } from "next/navigation";
 import { conEsito, intero, messaggioDb, numero, spunta, testo, testoONull } from "@/lib/admin/form";
 import { richiediAdmin } from "@/lib/admin/sessione";
@@ -34,6 +35,7 @@ export async function salvaPremio(form: FormData) {
     : await supabase.from("premi").insert(dati).select("id").single();
   if (error) errore(messaggioDb(error));
 
+  updateTag(TAG.premi);
   revalidatePath("/punti");
   revalidatePath("/home");
   redirect(conEsito(`/admin/premi/${data!.id}`, { ok: id ? "Premio salvato." : "Premio creato." }));
