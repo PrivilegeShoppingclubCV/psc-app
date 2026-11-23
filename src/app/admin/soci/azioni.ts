@@ -15,10 +15,18 @@ export async function salvaSocio(form: FormData) {
   const dataNascita = testo(form, "data_nascita");
   if (!STATI.includes(stato)) redirect(conEsito(pagina, { errore: "Stato non valido." }));
 
+  // L'email passa da admin_cambia_email: se il socio ha l'app cambia anche
+  // l'email con cui accede, e l'import da ReadyPro non rimette quella vecchia.
+  const email = testoONull(form, "email")?.toLowerCase() ?? null;
+  const { data: prima } = await supabase.from("soci").select("email").eq("id", id).maybeSingle();
+  if (email !== (prima?.email?.trim().toLowerCase() ?? null)) {
+    const { error: errEmail } = await supabase.rpc("admin_cambia_email", { p_socio_id: id, p_email: email });
+    if (errEmail) redirect(conEsito(pagina, { errore: messaggioDb(errEmail) }));
+  }
+
   const { error } = await supabase.from("soci").update({
     nome: testoONull(form, "nome"),
     cognome: testoONull(form, "cognome"),
-    email: testoONull(form, "email")?.toLowerCase() ?? null,
     telefono: testoONull(form, "telefono"),
     data_nascita: dataNascita || null,
     indirizzo: testoONull(form, "indirizzo"),
