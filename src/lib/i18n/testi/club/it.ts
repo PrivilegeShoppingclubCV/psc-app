@@ -181,9 +181,8 @@ export const club = {
     saldo: {
       unita: "Punti",
       avanzamento: "Avanzamento verso {premio}",
-      // {minuscolo} è il nome del premio in minuscolo, per l'italiano ("per il buono da 10 €").
-      mancano: "Ancora **{punti} punti** per il {minuscolo}",
-      raggiunto: "Hai raggiunto il **{minuscolo}**: chiedilo in cassa",
+      mancano: "Ancora **{punti} punti** per: {premio}",
+      raggiunto: "Hai raggiunto: **{premio}**. Chiedilo in cassa",
     },
     foto: {
       ingrandisci: "Ingrandisci la foto: {nome}",

@@ -20,9 +20,9 @@ export async function SaldoPunti({ saldo, premi }: { saldo: number; premi: Premi
 }
 
 function Avanzamento({ saldo, premio, f, t }: { saldo: number; premio: Premio; f: Formati; t: TestiClub["client"]["saldo"] }) {
-  const valori = { premio: premio.nome, minuscolo: premio.nome.toLowerCase() };
+  const valori = { premio: premio.nome };
   // <bdi>: il nome del premio (es. "Buono da 15 €") resta intero anche dentro una frase in arabo.
-  const nomi = { premio: <bdi>{premio.nome}</bdi>, minuscolo: <bdi>{valori.minuscolo}</bdi> };
+  const nomi = { premio: <bdi>{premio.nome}</bdi> };
   const mancano = Math.max(premio.soglia - saldo, 0);
   const percentuale = Math.max(0, Math.min(100, Math.round((saldo / premio.soglia) * 100)));
 

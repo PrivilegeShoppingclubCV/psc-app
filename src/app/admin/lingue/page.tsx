@@ -110,7 +110,8 @@ export default async function Lingue() {
         Tutti i testi ({totale}){lingua === "it" ? ": scegli una lingua in alto per vederli accanto all'italiano" : ""}
       </h2>
       <p className="t-caption">
-        Le parole tra graffe, come {"{nome}"}, vengono sostituite dall&apos;app. Offerte, premi e nomi dei negozi arrivano dal
+        Le parole tra graffe vengono sostituite dall&apos;app: {"{nome}"} col nome del socio, {"{premio}"} col nome del premio,
+        {"{punti}"} coi punti, {"{data}"} e {"{ora}"} con data e ora. Il testo tra doppi asterischi esce in grassetto. Offerte, premi e nomi dei negozi arrivano dal
         database e restano in italiano.
       </p>
       <div className="admin-table-wrap">
