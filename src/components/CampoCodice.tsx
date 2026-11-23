@@ -2,6 +2,7 @@
 
 import { useEffect, useRef, useState } from "react";
 import { useFormStatus } from "react-dom";
+import { forma, useTesti } from "@/lib/i18n/client";
 
 const CIFRE = 6;
 
@@ -18,6 +19,7 @@ export function CampoCodice({ name = "codice" }: { name?: string }) {
   // Il codice vale una volta sola: il modulo parte una volta sola (sesta cifra,
   // Invio o "Entra"), finché non si cambia una cifra.
   const inviato = useRef(false);
+  const t = useTesti().codice;
 
   useEffect(() => {
     const form = nascosto.current?.form;
@@ -51,8 +53,8 @@ export function CampoCodice({ name = "codice" }: { name?: string }) {
 
   return (
     <div className="psc-field">
-      <span className="psc-field__label" id={`${name}-label`}>Codice di 6 cifre</span>
-      <div className="codice-caselle" role="group" aria-labelledby={`${name}-label`}>
+      <span className="psc-field__label" id={`${name}-label`}>{t.etichetta}</span>
+      <div className="codice-caselle" dir="ltr" role="group" aria-labelledby={`${name}-label`}>
         {cifre.map((c, i) => (
           <input
             key={i}
@@ -65,7 +67,7 @@ export function CampoCodice({ name = "codice" }: { name?: string }) {
             autoComplete={i === 0 ? "one-time-code" : "off"}
             autoFocus={i === 0}
             maxLength={i === 0 ? CIFRE : 1}
-            aria-label={`Cifra ${i + 1}`}
+            aria-label={forma(t.cifra, { n: i + 1 })}
             onFocus={(e) => e.currentTarget.select()}
             onChange={(e) => {
               const v = e.currentTarget.value;
@@ -104,9 +106,10 @@ export function CampoCodice({ name = "codice" }: { name?: string }) {
 /** Tasto "Entra": mentre il codice viene controllato è spento e lo dice. */
 export function TastoEntra() {
   const { pending } = useFormStatus();
+  const t = useTesti().codice;
   return (
     <button type="submit" className="psc-btn psc-btn--primary psc-btn--block" disabled={pending} aria-busy={pending}>
-      {pending ? "Controllo il codice…" : "Entra"}
+      {pending ? t.controllo : t.entra}
     </button>
   );
 }

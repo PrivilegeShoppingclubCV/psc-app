@@ -16,3 +16,6 @@ export const formatDataOra = (iso: string) => {
   const soloData = d.getUTCHours() === 0 && d.getUTCMinutes() === 0 && d.getUTCSeconds() === 0;
   return soloData ? data.format(d) : `${data.format(d)}, ore ${ora.format(d)}`;
 };
+/** 5 → "1 punto ogni 5 € spesi"; 1 → "1 punto ogni euro speso". */
+export const formatRegolaPunti = (euroPerPunto: number) =>
+  euroPerPunto === 1 ? "1 punto ogni euro speso" : `1 punto ogni ${numero.format(euroPerPunto)} € spesi`;

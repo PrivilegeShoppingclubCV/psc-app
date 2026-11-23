@@ -89,7 +89,7 @@ Regole:
 - date `27/10/2026` o `2026-10-27`, numeri all'italiana (`1.500`, `12,50`);
 - le colonne non mappate finiscono in `soci.dati_gestionale`, così non si perde nulla.
 
-`importa_movimenti_punti` serve se il gestionale esporta scontrini o accrediti (il socio si trova da qualunque sua tessera, anche bloccata): il campo `riferimento` (id scontrino) impedisce di contare due volte lo stesso movimento. Senza la colonna `punti` li calcola dall'`importo`: importo × `impostazioni.punti_per_euro`, per difetto (un reso, importo negativo, li toglie come `storno`); le vendite senza tessera o sotto il primo punto si saltano.
+`importa_movimenti_punti` serve se il gestionale esporta scontrini o accrediti (il socio si trova da qualunque sua tessera, anche bloccata): il campo `riferimento` (id scontrino) impedisce di contare due volte lo stesso movimento. Senza la colonna `punti` li calcola dall'`importo`: 1 punto ogni `impostazioni.euro_per_punto` euro (5), per difetto su ogni vendita (un reso, importo negativo, li toglie come `storno`); le vendite senza tessera, sotto il primo punto o con data prima di `impostazioni.punti_dal` (il lancio) si saltano.
 
 ## Sincronizzazione con ReadyPro
 

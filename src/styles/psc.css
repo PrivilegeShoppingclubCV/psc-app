@@ -139,9 +139,9 @@ body { background: var(--surface); color: var(--ink); font-family: var(--font-te
 
 /* Campo data: testo GG/MM/AAAA + icona calendario con il selettore nativo trasparente sopra. */
 .campo-data { position: relative; }
-.campo-data .psc-field__input { width: 100%; box-sizing: border-box; padding-right: 52px; }
+.campo-data .psc-field__input { width: 100%; box-sizing: border-box; padding-inline-end: 52px; }
 .campo-data__calendario {
-  position: absolute; top: 0; right: 0; bottom: 0; width: 48px;
+  position: absolute; top: 0; inset-inline-end: 0; bottom: 0; width: 48px;
   display: flex; align-items: center; justify-content: center; color: var(--ink-muted);
 }
 .campo-data__calendario svg { width: 22px; height: 22px; pointer-events: none; }

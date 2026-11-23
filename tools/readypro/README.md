@@ -88,7 +88,7 @@ Le casse sono ReadyPro: quando il commesso scansiona la tessera, la vendita rest
 
 1. In ReadyPro crea un filtro di esportazione delle **vendite** (scontrini), con almeno: codice a barre del cliente, totale pagato, un identificativo univoco della vendita (es. ID o numero + data), data, negozio. Pianificalo come quello dei clienti, sempre nello stesso file (es. `C:\PSC\export\vendite.csv`). Bastano le vendite degli ultimi giorni: lo script manda solo le righe nuove e l'app scarta quelle già contate grazie all'identificativo.
 2. In `config.json` imposta `FileVendite` con quel percorso. Vuoto = le vendite non si mandano.
-3. Al primo invio, nel pannello (Gestionale → Colonne del CSV vendite) abbina le colonne: `numero_tessera`, `importo`, `riferimento`, `data`, `negozio`. Lì imposti anche quanti punti vale un euro.
+3. Al primo invio, nel pannello (Gestionale → Colonne del CSV vendite) abbina le colonne: `numero_tessera`, `importo`, `riferimento`, `data`, `negozio`. Lì imposti anche quanti euro servono per 1 punto (5) e da che giorno le vendite danno punti (il lancio).
 
 Le vendite senza tessera e quelle sotto il primo punto si saltano; un reso (totale negativo) toglie i punti. Gli invii arrivano dopo quelli dei clienti, così una tessera appena creata è già conosciuta.
 

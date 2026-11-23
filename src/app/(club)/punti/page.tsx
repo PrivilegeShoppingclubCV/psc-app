@@ -2,19 +2,19 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { PageHead } from "@/components/PageHead";
 import { SaldoPunti } from "@/components/SaldoPunti";
-import { getMovimenti, getPremi, getSaldo } from "@/lib/dati";
-import { formatData, formatPunti } from "@/lib/format";
+import { getEuroPerPunto, getMovimenti, getPremi, getSaldo } from "@/lib/dati";
+import { formatData, formatPunti, formatRegolaPunti } from "@/lib/format";
 import { getSocio } from "@/lib/socio";
 
 export const metadata: Metadata = { title: "Punti" };
 
 export default async function Punti() {
   const socio = await getSocio();
-  const [saldo, premi, movimenti] = await Promise.all([getSaldo(socio.id), getPremi(), getMovimenti(socio.id)]);
+  const [saldo, premi, movimenti, euroPerPunto] = await Promise.all([getSaldo(socio.id), getPremi(), getMovimenti(socio.id), getEuroPerPunto()]);
 
   return (
     <>
-      <PageHead eyebrow="1 punto ogni euro speso" titolo="I tuoi punti" />
+      <PageHead eyebrow={formatRegolaPunti(euroPerPunto)} titolo="I tuoi punti" />
       <section className="section">
         <SaldoPunti saldo={saldo} premi={premi} />
       </section>

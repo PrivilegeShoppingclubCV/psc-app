@@ -107,7 +107,7 @@ html:has(.welcome) body::before { display: none; }
 .barra-installa {
   position: fixed; top: 0; left: 0; right: 0; z-index: 20;
   display: flex; align-items: center; gap: var(--space-3);
-  padding: calc(var(--safe-top) + var(--space-2)) var(--space-4) var(--space-2) var(--space-2);
+  padding-block: calc(var(--safe-top) + var(--space-2)) var(--space-2); padding-inline: var(--space-2) var(--space-4);
   background: var(--bianco); color: var(--verde-800); box-shadow: 0 2px 12px rgba(9, 29, 16, 0.25);
 }
 .barra-installa__spazio { height: 40px; flex: none; }
@@ -142,6 +142,22 @@ html:has(.welcome) body::before { display: none; }
 .spunta input { flex: none; width: 20px; height: 20px; margin: 1px 0 0; accent-color: var(--verde-700); }
 .back-link { display: inline-flex; align-items: center; gap: var(--space-1); min-height: var(--space-12); text-decoration: none; color: var(--ink-muted); }
 .back-link svg { width: 20px; height: 20px; }
+[dir="rtl"] .back-link svg { transform: scaleX(-1); }
+
+/* ---------- Lingua ---------- */
+.sr-only { position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; border: 0; }
+.auth__barra { display: flex; align-items: center; justify-content: space-between; gap: var(--space-3); }
+.scelta-lingua { position: relative; display: inline-flex; align-items: center; gap: var(--space-1); min-height: 44px; color: var(--ink-muted); }
+.scelta-lingua svg { width: 18px; height: 18px; flex: none; pointer-events: none; }
+.scelta-lingua select {
+  appearance: none; -webkit-appearance: none; border: 0; background: transparent; color: inherit;
+  font: inherit; font-size: 15px; padding: var(--space-2) 0; cursor: pointer; text-decoration: underline; text-underline-offset: 3px;
+}
+.scelta-lingua select:focus-visible { outline: 2px solid var(--focus); outline-offset: 2px; border-radius: 4px; }
+.welcome__lingua { display: flex; justify-content: center; margin-block-start: calc(-1 * var(--space-6)); }
+.welcome .scelta-lingua { color: var(--bianco); }
+.welcome .scelta-lingua option { color: var(--ink); background: var(--surface); }
+.welcome .scelta-lingua select:focus-visible { outline-color: var(--oro-300); }
 
 /* Numero tessera completo sotto il campo di /collega-tessera */
 .tessera-numero { margin: 0; font-size: 15px; line-height: 22px; color: var(--ink-muted); }
@@ -175,11 +191,11 @@ html:has(.welcome) body::before { display: none; }
 
 /* Banner "Metti l'app sulla schermata Home" */
 .installa { position: relative; display: flex; flex-direction: column; gap: var(--space-3); padding: var(--space-4); border: 1px solid var(--line-strong); border-radius: var(--radius-md); background: var(--surface-tint); }
-.installa__titolo { font-family: var(--font-display); font-size: 20px; line-height: 26px; font-weight: 400; margin: 0; padding-right: var(--space-8); }
+.installa__titolo { font-family: var(--font-display); font-size: 20px; line-height: 26px; font-weight: 400; margin: 0; padding-inline-end: var(--space-8); }
 .installa__testo { margin: 0; font-size: 15px; line-height: 22px; }
-.installa__passi { margin: 0; padding-left: 1.25em; display: flex; flex-direction: column; gap: var(--space-2); font-size: 15px; line-height: 22px; }
+.installa__passi { margin: 0; padding-inline-start: 1.25em; display: flex; flex-direction: column; gap: var(--space-2); font-size: 15px; line-height: 22px; }
 .installa__icona { display: inline-block; width: 18px; height: 18px; vertical-align: -3px; }
-.installa__chiudi { position: absolute; top: var(--space-2); right: var(--space-2); width: 40px; height: 40px; display: grid; place-items: center; background: none; border: 0; color: var(--ink-muted); cursor: pointer; }
+.installa__chiudi { position: absolute; top: var(--space-2); inset-inline-end: var(--space-2); width: 40px; height: 40px; display: grid; place-items: center; background: none; border: 0; color: var(--ink-muted); cursor: pointer; }
 .installa__chiudi svg { width: 20px; height: 20px; }
 
 /* Tasto "Installa l'app" nell'intestazione: resta anche se il banner è stato chiuso. */
@@ -192,7 +208,7 @@ html:has(.welcome) body::before { display: none; }
 }
 .installa-tasto svg { width: 16px; height: 16px; }
 .installa-tasto:focus-visible { outline: 2px solid var(--focus); outline-offset: 2px; }
-.installa-dialog { text-align: left; width: min(100% - 2 * var(--space-4), 420px); margin: auto auto calc(var(--safe-bottom) + var(--space-4)); padding: 0; border: 0; border-radius: var(--radius-md); background: var(--surface); color: var(--ink); }
+.installa-dialog { text-align: start; width: min(100% - 2 * var(--space-4), 420px); margin: auto auto calc(var(--safe-bottom) + var(--space-4)); padding: 0; border: 0; border-radius: var(--radius-md); background: var(--surface); color: var(--ink); }
 .installa-dialog::backdrop { background: rgba(9, 29, 16, 0.45); }
 .installa-dialog[open] { animation: sheet-up .22s ease-out; }
 .installa--dialog { border: 0; background: var(--surface); }

@@ -26,7 +26,7 @@ export default async function Genitore({ params, searchParams }: {
 
   if (param(q.fatto)) {
     return (
-      <AuthPage eyebrow="Consenso del genitore" titolo="Grazie!" intro="Abbiamo registrato le tue scelte. Tuo figlio trova tutto attivo riaprendo l'app." indietro="/">
+      <AuthPage tradotta={false} eyebrow="Consenso del genitore" titolo="Grazie!" intro="Abbiamo registrato le tue scelte. Tuo figlio trova tutto attivo riaprendo l'app." indietro="/">
         {null}
       </AuthPage>
     );
@@ -34,7 +34,7 @@ export default async function Genitore({ params, searchParams }: {
 
   if (link.stato !== "valido") {
     return (
-      <AuthPage eyebrow="Consenso del genitore" titolo="Link non utilizzabile" intro={NON_VALIDO[link.stato]} indietro="/">
+      <AuthPage tradotta={false} eyebrow="Consenso del genitore" titolo="Link non utilizzabile" intro={NON_VALIDO[link.stato]} indietro="/">
         {null}
       </AuthPage>
     );
@@ -42,6 +42,7 @@ export default async function Genitore({ params, searchParams }: {
 
   return (
     <AuthPage
+      tradotta={false}
       eyebrow="Consenso del genitore"
       titolo={`${link.nome} ti chiede l'ok`}
       intro={

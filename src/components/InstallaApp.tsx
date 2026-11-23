@@ -3,6 +3,7 @@
 import { useEffect, useRef, useState } from "react";
 import { installaAndroid, linkChrome, useInstallazione, type Installazione } from "@/lib/installa";
 import { IconChiudi, IconInstalla } from "./Icons";
+import { ricco, useTesti } from "@/lib/i18n/client";
 
 // Banner "Installa l'app" in Home, tasto "Installa" nell'intestazione e barra
 // fissa nella pagina di benvenuto.
@@ -27,6 +28,7 @@ function chiusoDalSocio() {
 export function InstallaApp() {
   const tipo = useInstallazione();
   const [chiuso, setChiuso] = useState(true);
+  const t = useTesti().installa;
 
   useEffect(() => setChiuso(chiusoDalSocio()), []);
 
@@ -41,14 +43,14 @@ export function InstallaApp() {
 
   return (
     <aside className="installa" aria-labelledby="installa-titolo">
-      <button type="button" className="installa__chiudi" onClick={chiudi} aria-label="Non mostrare più">
+      <button type="button" className="installa__chiudi" onClick={chiudi} aria-label={t.nonMostrare}>
         <IconChiudi />
       </button>
-      <h2 id="installa-titolo" className="installa__titolo">Metti l&apos;app sulla schermata Home</h2>
+      <h2 id="installa-titolo" className="installa__titolo">{t.titolo}</h2>
       {tipo === "android" ? (
         <>
-          <p className="installa__testo">La apri con un tocco, come le altre app, e la tessera è sempre a portata di mano.</p>
-          <button type="button" className="psc-btn psc-btn--primary psc-btn--block" onClick={installaAndroid}>Installa l&apos;app</button>
+          <p className="installa__testo">{t.testoAndroid}</p>
+          <button type="button" className="psc-btn psc-btn--primary psc-btn--block" onClick={installaAndroid}>{t.installaApp}</button>
         </>
       ) : (
         <Passi tipo={tipo} />
@@ -61,6 +63,7 @@ export function InstallaApp() {
 export function TastoInstalla() {
   const tipo = useInstallazione();
   const dialog = useRef<HTMLDialogElement>(null);
+  const t = useTesti().installa;
 
   if (tipo === "nessuna") return null;
 
@@ -68,7 +71,7 @@ export function TastoInstalla() {
     <>
       <button type="button" className="installa-tasto" onClick={() => premiInstalla(tipo, dialog.current)}>
         <IconInstalla />
-        Installa
+        {t.installa}
       </button>
       <FinestraPassi tipo={tipo} ref={dialog} />
     </>
@@ -86,6 +89,7 @@ export function BarraInstalla() {
   const tipo = useInstallazione();
   const dialog = useRef<HTMLDialogElement>(null);
   const [chiusa, setChiusa] = useState(true);
+  const t = useTesti().installa;
 
   useEffect(() => {
     try {
@@ -108,14 +112,14 @@ export function BarraInstalla() {
     <>
       {/* Occupa lo spazio della barra, così non copre il logo. */}
       <div className="barra-installa__spazio" aria-hidden="true" />
-      <aside className="barra-installa" aria-label="Installa l'app">
-        <button type="button" className="barra-installa__chiudi" onClick={chiudi} aria-label="Chiudi e non mostrare più">
+      <aside className="barra-installa" aria-label={t.installaApp}>
+        <button type="button" className="barra-installa__chiudi" onClick={chiudi} aria-label={t.chiudiNonMostrare}>
           <IconChiudi />
         </button>
         {/* eslint-disable-next-line @next/next/no-img-element */}
         <img src="/icons/icon-192.png" alt="" width={40} height={40} className="barra-installa__icona" />
-        <p className="barra-installa__testo">Installa l&apos;app per averla sempre con te</p>
-        <button type="button" className="barra-installa__tasto" onClick={() => premiInstalla(tipo, dialog.current)}>Installa</button>
+        <p className="barra-installa__testo">{t.barra}</p>
+        <button type="button" className="barra-installa__tasto" onClick={() => premiInstalla(tipo, dialog.current)}>{t.installa}</button>
       </aside>
       <FinestraPassi tipo={tipo} ref={dialog} />
     </>
@@ -131,6 +135,7 @@ function premiInstalla(tipo: Installazione, dialog: HTMLDialogElement | null) {
 function FinestraPassi({ tipo, ref }: { tipo: Installazione; ref: React.Ref<HTMLDialogElement> }) {
   if (tipo === "android" || tipo === "nessuna") return null;
   const chiudi = (e: React.MouseEvent<HTMLElement>) => e.currentTarget.closest("dialog")?.close();
+  const t = useTesti().installa;
   return (
     <dialog
       ref={ref}
@@ -139,10 +144,10 @@ function FinestraPassi({ tipo, ref }: { tipo: Installazione; ref: React.Ref<HTML
       onClick={(e) => e.target === e.currentTarget && e.currentTarget.close()}
     >
       <div className="installa installa--dialog">
-        <button type="button" className="installa__chiudi" onClick={chiudi} aria-label="Chiudi">
+        <button type="button" className="installa__chiudi" onClick={chiudi} aria-label={t.chiudi}>
           <IconChiudi />
         </button>
-        <h2 id="installa-dialog-titolo" className="installa__titolo">Metti l&apos;app sulla schermata Home</h2>
+        <h2 id="installa-dialog-titolo" className="installa__titolo">{t.titolo}</h2>
         <Passi tipo={tipo} />
       </div>
     </dialog>
@@ -153,28 +158,37 @@ const Passi = ({ tipo }: { tipo: Installazione }) =>
   tipo === "ios" ? <PassiIOS /> : tipo === "samsung" ? <PassiSamsung /> : <PassiMenu />;
 
 // Samsung Internet: l'installazione da qui viene bloccata da Play Protect.
-const PassiSamsung = () => (
-  <>
-    <p className="installa__testo">Da Samsung Internet l&apos;installazione può essere bloccata dal telefono. Apri la pagina in Chrome e installala da lì.</p>
-    <a href={linkChrome()} className="psc-btn psc-btn--primary psc-btn--block">Apri in Chrome</a>
-  </>
-);
+function PassiSamsung() {
+  const t = useTesti().installa;
+  return (
+    <>
+      <p className="installa__testo">{t.samsung}</p>
+      <a href={linkChrome()} className="psc-btn psc-btn--primary psc-btn--block">{t.apriChrome}</a>
+    </>
+  );
+}
 
-const PassiIOS = () => (
-  <ol className="installa__passi">
-    <li>Apri questa pagina in Safari.</li>
-    <li>Tocca <strong>Condividi</strong> <IconCondividi /> in basso (o in alto su iPad).</li>
-    <li>Scegli <strong>Aggiungi alla schermata Home</strong>, poi <strong>Aggiungi</strong>.</li>
-  </ol>
-);
+function PassiIOS() {
+  const t = useTesti().installa;
+  return (
+    <ol className="installa__passi">
+      <li>{t.ios1}</li>
+      <li>{ricco(t.ios2, { icona: <IconCondividi /> })}</li>
+      <li>{ricco(t.ios3)}</li>
+    </ol>
+  );
+}
 
-const PassiMenu = () => (
-  <ol className="installa__passi">
-    <li>Tocca il menu del browser <IconMenu /> in alto a destra.</li>
-    <li>Scegli <strong>Installa app</strong> oppure <strong>Aggiungi a schermata Home</strong>.</li>
-    <li>Conferma con <strong>Installa</strong> o <strong>Aggiungi</strong>.</li>
-  </ol>
-);
+function PassiMenu() {
+  const t = useTesti().installa;
+  return (
+    <ol className="installa__passi">
+      <li>{ricco(t.menu1, { icona: <IconMenu /> })}</li>
+      <li>{ricco(t.menu2)}</li>
+      <li>{ricco(t.menu3)}</li>
+    </ol>
+  );
+}
 
 // I tre puntini del menu di Chrome.
 const IconMenu = () => (

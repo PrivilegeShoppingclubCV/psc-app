@@ -102,6 +102,15 @@ export async function getSaldo(socioId: string): Promise<number> {
   return data?.saldo ?? 0;
 }
 
+/** Euro di spesa per 1 punto (impostazioni.euro_per_punto, letta con una funzione: la tabella è solo per lo staff). */
+export async function getEuroPerPunto(): Promise<number> {
+  const supabase = await getSupabase();
+  if (!supabase) return 5;
+  // Se la migrazione non è ancora applicata la funzione manca: si mostra la regola di default invece di un errore.
+  const { data, error } = await supabase.rpc("euro_per_punto");
+  return (!error && Number(data)) || 5;
+}
+
 export async function getMovimenti(socioId: string): Promise<MovimentoPunti[]> {
   const supabase = await getSupabase();
   if (!supabase) return mock.movimenti;

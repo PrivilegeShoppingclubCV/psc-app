@@ -25,7 +25,8 @@ export const sansumi = localFont({
 
 // Jost: testo corrente.
 export const jost = Jost({
-  subsets: ["latin"],
+  // latin-ext per rumeno e polacco, cyrillic per il russo. Arabo e cinese usano i font del telefono.
+  subsets: ["latin", "latin-ext", "cyrillic"],
   weight: ["400", "500", "600", "700"],
   variable: "--font-jost",
   display: "swap",

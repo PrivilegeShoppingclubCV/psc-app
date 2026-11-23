@@ -1,11 +1,13 @@
-import type { Metadata } from "next";
 import Link from "next/link";
 import { redirect } from "next/navigation";
 import { AuthPage, Campo, param } from "@/components/AuthPage";
 import { getSessione } from "@/lib/dati";
 import { accedi } from "../accesso/azioni";
+import { getTesti } from "@/lib/i18n";
 
-export const metadata: Metadata = { title: "Accedi" };
+export async function generateMetadata() {
+  return { title: (await getTesti()).accedi.titoloPagina };
+}
 
 export default async function Accedi({ searchParams }: { searchParams: Promise<Record<string, string | string[] | undefined>> }) {
   const q = await searchParams;
@@ -14,19 +16,21 @@ export default async function Accedi({ searchParams }: { searchParams: Promise<R
   if (configurato && admin && email) redirect("/admin");
   if (configurato && socio && !admin) redirect("/home");
 
+  const t = await getTesti();
+  const a = t.accedi;
   return (
     <AuthPage
-      eyebrow={admin ? "Pannello admin" : "Accedi"}
-      titolo={admin ? "Accedi al pannello" : "Accedi al club"}
-      intro="Ti mandiamo un codice di 6 cifre via email: niente password da ricordare."
+      eyebrow={admin ? a.eyebrowAdmin : a.eyebrow}
+      titolo={admin ? a.titoloAdmin : a.titolo}
+      intro={a.intro}
       errore={param(q.errore)}
     >
       <form action={accedi}>
         <input type="hidden" name="dopo" value={admin ? "admin" : "home"} />
-        <Campo id="email" label="Email" type="email" autoComplete="email" required={configurato} defaultValue={param(q.email)} />
-        <button type="submit" className="psc-btn psc-btn--primary psc-btn--block">Continua</button>
+        <Campo id="email" label={t.comune.email} type="email" dir="ltr" autoComplete="email" required={configurato} defaultValue={param(q.email)} />
+        <button type="submit" className="psc-btn psc-btn--primary psc-btn--block">{t.comune.continua}</button>
       </form>
-      {!admin && <Link href="/?registrati=1" className="psc-btn psc-btn--ghost">Prima volta sull&apos;app? Registrati!</Link>}
+      {!admin && <Link href="/?registrati=1" className="psc-btn psc-btn--ghost">{t.benvenuto.registrati}</Link>}
     </AuthPage>
   );
 }
