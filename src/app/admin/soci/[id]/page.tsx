@@ -25,7 +25,7 @@ export default async function SchedaSocio({ params, searchParams }: {
 }) {
   const [{ id }, q] = await Promise.all([params, searchParams]);
   const { supabase } = await richiediAdmin();
-  const [socio, tessere, saldo, movimenti, consensi, invitati, invitatoDa, livelli, negozi, premi, genitore] = await Promise.all([
+  const [socio, tessere, saldo, movimenti, consensi, invitati, invitatoDa, livelli, negozi, premi, genitore, { data: scontrini }] = await Promise.all([
     supabase.from("soci").select("*").eq("id", id).maybeSingle(),
     supabase.from("tessere").select("id, codice, tipo, stato, stato_cassa, consegnata_il, bloccata_il, motivo_blocco").eq("socio_id", id).order("creato_il"),
     supabase.from("saldi_punti").select("saldo").eq("socio_id", id).maybeSingle(),
@@ -38,20 +38,22 @@ export default async function SchedaSocio({ params, searchParams }: {
     supabase.from("premi").select("id, nome, soglia_punti").eq("attivo", true).order("soglia_punti"),
     supabase.from("autorizzazioni_genitore").select("id, approvato_il, genitore_nome, genitore_cognome, genitore_email, approva_iscrizione, approva_punti, approva_marketing")
       .eq("socio_id", id).not("approvato_il", "is", null).order("approvato_il", { ascending: false }),
+    // Scontrini degli ultimi 30 giorni, con chi li ha battuti (solo per l'amministrazione).
+    supabase.from("scontrini")
+      .select("id, numero_documento, data_scontrino, totale, punti, cassa, negozi(nome)")
+      .eq("socio_id", id).order("data_scontrino", { ascending: false }).limit(100),
   ]);
   const s = socio.data;
   if (!s) notFound();
-  // Scontrini degli ultimi 30 giorni, con chi li ha battuti (solo per l'amministrazione).
-  const { data: scontrini } = await supabase.from("scontrini")
-    .select("id, numero_documento, data_scontrino, totale, punti, cassa, negozi(nome)")
-    .eq("socio_id", id).order("data_scontrino", { ascending: false }).limit(100);
-  const { data: operatori } = scontrini?.length
-    ? await supabase.from("scontrini_operatori").select("numero_documento, operatore").in("numero_documento", scontrini.map((x) => x.numero_documento))
-    : { data: [] };
+  const [{ data: operatori }, { data: daUnire }] = await Promise.all([
+    scontrini?.length
+      ? supabase.from("scontrini_operatori").select("numero_documento, operatore").in("numero_documento", scontrini.map((x) => x.numero_documento))
+      : { data: [] },
+    // Iscritti dall'app con il cellulare di una scheda senza email: da unire in negozio.
+    supabase.from("soci").select("id, nome, cognome, email, da_unire_con")
+      .or(`id.eq.${s.da_unire_con ?? "00000000-0000-0000-0000-000000000000"},da_unire_con.eq.${s.id}`),
+  ]);
   const operatoreDi = new Map((operatori ?? []).map((o) => [o.numero_documento, o.operatore]));
-  // Iscritti dall'app con il cellulare di una scheda senza email: da unire in negozio.
-  const { data: daUnire } = await supabase.from("soci").select("id, nome, cognome, email, da_unire_con")
-    .or(`id.eq.${s.da_unire_con ?? "00000000-0000-0000-0000-000000000000"},da_unire_con.eq.${s.id}`);
 
   const nome = [s.nome, s.cognome].filter(Boolean).join(" ") || "Senza nome";
   const opzioniNegozi = [{ value: "", label: "Nessuno" }, ...(negozi.data ?? []).map((n) => ({ value: n.id, label: n.nome }))];

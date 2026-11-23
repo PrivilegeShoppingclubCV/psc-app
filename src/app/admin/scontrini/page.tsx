@@ -11,7 +11,7 @@ export const metadata: Metadata = { title: "Scontrini" };
 const PER_PAGINA = 25;
 
 type Riga = {
-  id: string; numero_documento: string; data_scontrino: string; totale: number; punti: number; cassa: string | null;
+  id: string; numero_documento: string; numero_norm: string; data_scontrino: string; totale: number; punti: number; cassa: string | null;
   negozi: { nome: string } | null; soci: { id: string; nome: string | null; cognome: string | null } | null;
 };
 
@@ -22,7 +22,7 @@ export default async function ScontriniAdmin({ searchParams }: { searchParams: P
   const pagina = Math.max(1, Number(param(q.pagina)) || 1);
   const { supabase } = await richiediAdmin();
   let query = supabase.from("scontrini")
-    .select("id, numero_documento, data_scontrino, totale, punti, cassa, negozi(nome), soci(id, nome, cognome)")
+    .select("id, numero_documento, numero_norm, data_scontrino, totale, punti, cassa, negozi(nome), soci(id, nome, cognome)")
     .order("data_scontrino", { ascending: false }).order("id", { ascending: false })
     .range((pagina - 1) * PER_PAGINA, pagina * PER_PAGINA);
   if (cerca) query = query.ilike("numero_documento", `%${cerca.replace(/[,()*%\\]/g, "")}%`);
@@ -32,16 +32,13 @@ export default async function ScontriniAdmin({ searchParams }: { searchParams: P
   const scontrini = tutti.slice(0, PER_PAGINA);
   const successivi = tutti.length > PER_PAGINA;
   const link = (p: number) => `/admin/scontrini?${new URLSearchParams({ ...(cerca ? { q: cerca } : {}), ...(p > 1 ? { pagina: String(p) } : {}) })}`;
-  const { data: conProdotti } = scontrini.length
-    ? await supabase.from("scontrini").select("numero_documento, numero_norm").in("id", scontrini.map((s) => s.id))
-    : { data: [] };
-  const norm = (conProdotti ?? []).map((s) => s.numero_norm as string);
+  const norm = scontrini.map((s) => s.numero_norm).filter(Boolean);
   const { data: righe } = norm.length
     ? await supabase.from("scontrini_righe").select("numero_documento").in("numero_documento", norm)
     : { data: [] };
   const prodotti = new Map<string, number>();
   for (const r of righe ?? []) prodotti.set(r.numero_documento, (prodotti.get(r.numero_documento) ?? 0) + 1);
-  const normDi = new Map((conProdotti ?? []).map((s) => [s.numero_documento, s.numero_norm as string]));
+  const normDi = new Map(scontrini.map((s) => [s.numero_documento, s.numero_norm]));
 
   return (
     <>

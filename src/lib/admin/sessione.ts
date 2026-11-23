@@ -17,7 +17,10 @@ export const getAccesso = cache(async (): Promise<Accesso> => {
   const supabase = await getSupabase();
   if (!supabase) return { stato: "non_configurato" };
 
-  const { data: { user } } = await supabase.auth.getUser();
+  // getClaims controlla il token con le chiavi pubbliche di Supabase, senza
+  // chiedere ogni volta al servizio Auth (una chiamata di rete in meno a pagina).
+  const { data: claims } = await supabase.auth.getClaims();
+  const user = claims?.claims.sub ? { id: claims.claims.sub, email: claims.claims.email as string | undefined } : null;
   if (!user) return { stato: "non_entrato" };
 
   const { data } = await supabase.from("staff").select("ruolo, nome").eq("user_id", user.id).maybeSingle();
