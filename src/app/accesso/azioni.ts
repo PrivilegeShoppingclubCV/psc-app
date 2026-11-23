@@ -2,7 +2,9 @@
 
 // Azioni dei moduli di accesso. La logica condivisa con /auth/callback è in flusso.ts.
 
+import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
+import { COOKIE_LINGUA, isLingua } from "@/lib/i18n/lingue";
 import { getSupabase } from "@/lib/dati";
 import { getTesti } from "@/lib/i18n";
 import {
@@ -15,6 +17,7 @@ import {
   mandaLink,
   messaggioAuth,
   salvaAttesa,
+  salvaLinguaUtente,
   testo,
   utenteCorrente,
   type Attesa,
@@ -110,4 +113,12 @@ export async function esci() {
   const supabase = await getSupabase();
   await supabase?.auth.signOut();
   redirect("/");
+}
+
+/** Cambio lingua dal menu: cookie per un anno e, se si è dentro, anche nei dati dell'utente (email). */
+export async function cambiaLingua(lingua: string) {
+  if (!isLingua(lingua)) return;
+  (await cookies()).set(COOKIE_LINGUA, lingua, { path: "/", maxAge: 60 * 60 * 24 * 365, sameSite: "lax" });
+  const supabase = await getSupabase();
+  if (supabase) await salvaLinguaUtente(supabase);
 }

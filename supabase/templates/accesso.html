@@ -1,18 +1,21 @@
+{{- $l := or .Data.lingua "it" -}}
 <!doctype html>
-<html lang="it">
+<html lang="{{ $l }}" dir="{{ if eq $l "ar" }}rtl{{ else }}ltr{{ end }}">
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <meta name="color-scheme" content="light">
 <meta name="supported-color-schemes" content="light">
-<title>Il tuo codice per il Privilege Shopping Club</title>
+<title>Privilege Shopping Club: {{ .Token }}</title>
 </head>
 <!--
   Email di accesso (codice di 6 cifre) del Privilege Shopping Club.
   Supabase: Authentication → Emails → Templates → "Magic Link" e "Confirm signup" (lo stesso testo in tutte e due)
-  Oggetto: Il tuo codice per il Privilege Shopping Club
+  Oggetto: Privilege Shopping Club: {{ .Token }}
   Nessun link per entrare: l'app installata aprirebbe il link nel browser,
   fuori dall'app. Si entra solo scrivendo il codice nell'app.
+  La lingua arriva da .Data.lingua (dati dell'utente, salvati dall'app a ogni
+  accesso e cambio lingua); se manca, l'email è in italiano.
   Stesso layout per tutte le email (generato da un solo modello): testata verde
   con il logo, filetto oro, Georgia al posto di Butler e Helvetica al posto di
   Sansumi (i font del brand non arrivano nelle app di posta).
@@ -21,7 +24,7 @@
 <body style="margin:0;padding:0;background-color:#f3f6f4;">
   <!-- Anteprima nella lista delle email -->
   <div style="display:none;max-height:0;overflow:hidden;mso-hide:all;font-size:1px;line-height:1px;color:#f3f6f4;">
-    Il tuo codice è {{ .Token }}. Scrivilo nell'app per entrare.
+    {{ if eq $l "en" }}Your code is {{ .Token }}. Enter it in the app to log in.{{ else if eq $l "fr" }}Votre code est {{ .Token }}. Saisissez-le dans l'application pour vous connecter.{{ else if eq $l "de" }}Dein Code lautet {{ .Token }}. Gib ihn in der App ein, um dich anzumelden.{{ else if eq $l "es" }}Tu código es {{ .Token }}. Escríbelo en la app para entrar.{{ else if eq $l "pt" }}O seu código é {{ .Token }}. Escreva-o na app para entrar.{{ else if eq $l "ro" }}Codul tău este {{ .Token }}. Scrie-l în aplicație ca să intri.{{ else if eq $l "pl" }}Twój kod to {{ .Token }}. Wpisz go w aplikacji, aby się zalogować.{{ else if eq $l "ru" }}Ваш код: {{ .Token }}. Введите его в приложении, чтобы войти.{{ else if eq $l "zh" }}您的验证码是 {{ .Token }}，请在应用中输入以登录。{{ else if eq $l "ar" }}رمزك هو {{ .Token }}. أدخله في التطبيق لتسجيل الدخول.{{ else }}Il tuo codice è {{ .Token }}. Scrivilo nell'app per entrare.{{ end }}
   </div>
 
   <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="background-color:#f3f6f4;">
@@ -43,13 +46,13 @@
           <tr>
             <td style="padding:36px 32px 20px;font-family:'Helvetica Neue',Helvetica,Arial,sans-serif;color:#0f1e17;">
               <p style="margin:0 0 8px;font-size:11px;line-height:16px;letter-spacing:2.5px;text-transform:uppercase;color:#7a5f1f;font-weight:600;">
-                Accesso al club
+                {{ if eq $l "en" }}Club login{{ else if eq $l "fr" }}Connexion au club{{ else if eq $l "de" }}Club-Anmeldung{{ else if eq $l "es" }}Acceso al club{{ else if eq $l "pt" }}Acesso ao clube{{ else if eq $l "ro" }}Autentificare în club{{ else if eq $l "pl" }}Logowanie do klubu{{ else if eq $l "ru" }}Вход в клуб{{ else if eq $l "zh" }}俱乐部登录{{ else if eq $l "ar" }}الدخول إلى النادي{{ else }}Accesso al club{{ end }}
               </p>
               <h1 style="margin:0 0 16px;font-family:Georgia,'Times New Roman',serif;font-size:28px;line-height:34px;font-weight:normal;color:#113f2d;">
-                Il tuo codice
+                {{ if eq $l "en" }}Your code{{ else if eq $l "fr" }}Votre code{{ else if eq $l "de" }}Dein Code{{ else if eq $l "es" }}Tu código{{ else if eq $l "pt" }}O seu código{{ else if eq $l "ro" }}Codul tău{{ else if eq $l "pl" }}Twój kod{{ else if eq $l "ru" }}Ваш код{{ else if eq $l "zh" }}您的验证码{{ else if eq $l "ar" }}رمزك{{ else }}Il tuo codice{{ end }}
               </h1>
               <p style="margin:0;font-size:15px;line-height:22px;color:#4a5b53;">
-                Scrivi queste 6 cifre nell'app per entrare. Se ne hai chiesti più di uno, usa l'ultimo.
+                {{ if eq $l "en" }}Enter these 6 digits in the app to log in. If you asked for more than one, use the latest.{{ else if eq $l "fr" }}Saisissez ces 6 chiffres dans l'application pour vous connecter. Si vous en avez demandé plusieurs, utilisez le dernier.{{ else if eq $l "de" }}Gib diese 6 Ziffern in der App ein, um dich anzumelden. Wenn du mehrere angefordert hast, nimm den neuesten.{{ else if eq $l "es" }}Escribe estas 6 cifras en la app para entrar. Si has pedido más de uno, usa el último.{{ else if eq $l "pt" }}Escreva estes 6 dígitos na app para entrar. Se pediu mais do que um, use o último.{{ else if eq $l "ro" }}Scrie aceste 6 cifre în aplicație ca să intri. Dacă ai cerut mai multe, folosește-l pe ultimul.{{ else if eq $l "pl" }}Wpisz te 6 cyfr w aplikacji, aby się zalogować. Jeśli prosiłeś(-aś) o kilka, użyj ostatniego.{{ else if eq $l "ru" }}Введите эти 6 цифр в приложении, чтобы войти. Если вы запрашивали несколько кодов, используйте последний.{{ else if eq $l "zh" }}请在应用中输入这 6 位数字登录。如果您申请了多个验证码，请使用最新的那个。{{ else if eq $l "ar" }}أدخل هذه الأرقام الستة في التطبيق لتسجيل الدخول. إذا طلبت أكثر من رمز، فاستخدم آخر رمز.{{ else }}Scrivi queste 6 cifre nell'app per entrare. Se ne hai chiesti più di uno, usa l'ultimo.{{ end }}
               </p>
             </td>
           </tr>
@@ -59,7 +62,7 @@
             <td align="center" style="padding:4px 32px 12px;">
               <table role="presentation" cellpadding="0" cellspacing="0" border="0">
                 <tr>
-                  <td align="center" style="background-color:#e4ede7;border:1px solid #d3dcd7;border-radius:12px;padding:18px 28px 18px 38px;font-family:'SFMono-Regular',Menlo,Consolas,'Courier New',monospace;font-size:34px;line-height:40px;letter-spacing:10px;font-weight:bold;color:#113f2d;white-space:nowrap;">
+                  <td align="center" dir="ltr" style="background-color:#e4ede7;border:1px solid #d3dcd7;border-radius:12px;padding:18px 28px 18px 38px;font-family:'SFMono-Regular',Menlo,Consolas,'Courier New',monospace;font-size:34px;line-height:40px;letter-spacing:10px;font-weight:bold;color:#113f2d;white-space:nowrap;">
                     {{ .Token }}
                   </td>
                 </tr>
@@ -68,14 +71,14 @@
           </tr>
           <tr>
             <td align="center" style="padding:0 32px 28px;font-family:'Helvetica Neue',Helvetica,Arial,sans-serif;font-size:12px;line-height:18px;color:#7a8c84;">
-              Vale per poco tempo e si usa una volta sola.
+              {{ if eq $l "en" }}It's only valid for a short time and can be used once.{{ else if eq $l "fr" }}Il n'est valable que peu de temps et ne s'utilise qu'une seule fois.{{ else if eq $l "de" }}Er gilt nur kurze Zeit und kann nur einmal verwendet werden.{{ else if eq $l "es" }}Es válido durante poco tiempo y solo se puede usar una vez.{{ else if eq $l "pt" }}É válido por pouco tempo e só pode ser usado uma vez.{{ else if eq $l "ro" }}Este valabil pentru scurt timp și se folosește o singură dată.{{ else if eq $l "pl" }}Jest ważny przez krótki czas i można go użyć tylko raz.{{ else if eq $l "ru" }}Код действует недолго и используется только один раз.{{ else if eq $l "zh" }}验证码有效期很短，且只能使用一次。{{ else if eq $l "ar" }}الرمز صالح لفترة قصيرة ويُستخدم مرة واحدة فقط.{{ else }}Vale per poco tempo e si usa una volta sola.{{ end }}
             </td>
           </tr>
 
           <tr>
             <td style="padding:0 32px 32px;font-family:'Helvetica Neue',Helvetica,Arial,sans-serif;">
               <p style="margin:0;font-size:13px;line-height:19px;color:#4a5b53;">
-                Non l'hai chiesto tu? Ignora questa email: senza questo codice nessuno può entrare nel tuo account.
+                {{ if eq $l "en" }}Didn't ask for this? Ignore this email: without this code nobody can get into your account.{{ else if eq $l "fr" }}Vous n'avez rien demandé ? Ignorez cet e-mail : sans ce code, personne ne peut accéder à votre compte.{{ else if eq $l "de" }}Du hast das nicht angefordert? Ignoriere diese E-Mail: Ohne diesen Code kann niemand auf dein Konto zugreifen.{{ else if eq $l "es" }}¿No lo has pedido tú? Ignora este correo: sin este código nadie puede entrar en tu cuenta.{{ else if eq $l "pt" }}Não foi você que pediu? Ignore este e-mail: sem este código ninguém consegue entrar na sua conta.{{ else if eq $l "ro" }}Nu l-ai cerut tu? Ignoră acest e-mail: fără acest cod nimeni nu poate intra în contul tău.{{ else if eq $l "pl" }}To nie Ty prosiłeś(-aś) o kod? Zignoruj tę wiadomość: bez tego kodu nikt nie wejdzie na Twoje konto.{{ else if eq $l "ru" }}Вы не запрашивали код? Просто проигнорируйте это письмо: без этого кода никто не сможет войти в ваш аккаунт.{{ else if eq $l "zh" }}不是您本人申请的？请忽略此邮件：没有此验证码，任何人都无法登录您的账户。{{ else if eq $l "ar" }}لم تطلب هذا الرمز؟ تجاهل هذه الرسالة: بدون هذا الرمز لا يمكن لأحد الدخول إلى حسابك.{{ else }}Non l'hai chiesto tu? Ignora questa email: senza questo codice nessuno può entrare nel tuo account.{{ end }}
               </p>
             </td>
           </tr>
@@ -94,7 +97,7 @@
         </table>
 
         <p style="margin:16px 0 0;font-family:'Helvetica Neue',Helvetica,Arial,sans-serif;font-size:11px;line-height:16px;color:#7a8c84;">
-          Email automatica inviata a {{ .Email }}: non rispondere a questo messaggio.
+          {{ if eq $l "en" }}Automatic email sent to {{ .Email }}: please do not reply.{{ else if eq $l "fr" }}E-mail automatique envoyé à {{ .Email }} : merci de ne pas y répondre.{{ else if eq $l "de" }}Automatische E-Mail an {{ .Email }}: Bitte antworte nicht auf diese Nachricht.{{ else if eq $l "es" }}Correo automático enviado a {{ .Email }}: no respondas a este mensaje.{{ else if eq $l "pt" }}E-mail automático enviado para {{ .Email }}: não responda a esta mensagem.{{ else if eq $l "ro" }}E-mail automat trimis la {{ .Email }}: nu răspunde la acest mesaj.{{ else if eq $l "pl" }}Wiadomość automatyczna wysłana na adres {{ .Email }}: nie odpowiadaj na nią.{{ else if eq $l "ru" }}Автоматическое письмо отправлено на {{ .Email }}: не отвечайте на него.{{ else if eq $l "zh" }}此邮件为系统自动发送至 {{ .Email }}，请勿回复。{{ else if eq $l "ar" }}رسالة تلقائية مُرسلة إلى {{ .Email }}: يُرجى عدم الرد عليها.{{ else }}Email automatica inviata a {{ .Email }}: non rispondere a questo messaggio.{{ end }}
         </p>
 
       </td>

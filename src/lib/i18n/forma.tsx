@@ -10,7 +10,7 @@ export const forma = (testo: string, valori: Record<string, string | number>) =>
  */
 export function ricco(testo: string, valori: Record<string, ReactNode> = {}): ReactNode {
   return testo.split(/(\*\*[^*]+\*\*|\{\w+\})/).map((pezzo, i) => {
-    if (pezzo.startsWith("**") && pezzo.endsWith("**")) return <strong key={i}>{pezzo.slice(2, -2)}</strong>;
+    if (pezzo.startsWith("**") && pezzo.endsWith("**")) return <strong key={i}>{ricco(pezzo.slice(2, -2), valori)}</strong>;
     const k = /^\{(\w+)\}$/.exec(pezzo)?.[1];
     return <Fragment key={i}>{k && k in valori ? valori[k] : pezzo}</Fragment>;
   });

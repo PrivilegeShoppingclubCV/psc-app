@@ -1,16 +1,19 @@
-import type { Metadata } from "next";
 import { PageHead } from "@/components/PageHead";
 import { getNegozi } from "@/lib/dati";
+import { getTestiClub } from "@/lib/i18n";
 
-export const metadata: Metadata = { title: "Negozi" };
+export async function generateMetadata() {
+  return { title: (await getTestiClub()).negozi.titoloPagina };
+}
 
 export default async function Negozi() {
   const negozi = await getNegozi();
+  const t = (await getTestiClub()).negozi;
 
   return (
     <>
-      <PageHead eyebrow="I nostri negozi" titolo="Negozi">
-        <p className="t-caption">Mappa e indicazioni arriveranno più avanti.</p>
+      <PageHead eyebrow={t.eyebrow} titolo={t.titolo}>
+        <p className="t-caption">{t.mappa}</p>
       </PageHead>
       <ul className="list">
         {negozi.map((n) => (

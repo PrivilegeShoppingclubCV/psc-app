@@ -148,4 +148,4 @@ export const it = {
 };
 
 export type Testi = typeof it;
-export type TestiClient = Testi["client"];
+

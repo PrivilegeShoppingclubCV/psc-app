@@ -1,57 +1,68 @@
-import type { Metadata } from "next";
 import Link from "next/link";
 import { param } from "@/components/AuthPage";
 import { EsciButton } from "@/components/EsciButton";
 import { PageHead } from "@/components/PageHead";
-import { formatData, formatTessera } from "@/lib/format";
+import { formatTessera } from "@/lib/format";
+import { SceltaLingua } from "@/components/SceltaLingua";
+import { forma, getFormati, getLingua, getTestiClub } from "@/lib/i18n";
 import { getRecapiti } from "@/lib/dati";
 import { getSocio } from "@/lib/socio";
 
-export const metadata: Metadata = { title: "Profilo" };
+export async function generateMetadata() {
+  return { title: (await getTestiClub()).profilo.titoloPagina };
+}
 
 export default async function Profilo({ searchParams }: { searchParams: Promise<Record<string, string | string[] | undefined>> }) {
   const q = await searchParams;
   const socio = await getSocio();
   const r = await getRecapiti(socio.id);
-  const nonIndicato = <span className="t-caption">Non indicato</span>;
+  const f = await getFormati();
+  const lingua = await getLingua();
+  const t = (await getTestiClub()).profilo;
+  const nonIndicato = <span className="t-caption">{t.nonIndicato}</span>;
 
   return (
     <>
-      <PageHead eyebrow={`Livello ${socio.livello}`} titolo={`${socio.nome} ${socio.cognome}`.trim() || "Il tuo profilo"} />
+      <PageHead eyebrow={forma(t.livello, { livello: socio.livello })} titolo={`${socio.nome} ${socio.cognome}`.trim() || t.tuoProfilo} />
 
       <section className="section" aria-labelledby="dati">
-        <h2 id="dati" className="t-title">I tuoi dati</h2>
-        {param(q.salvato) && <p className="notice notice--ok" role="status">Dati salvati. Arrivano alle casse dei negozi in pochi minuti.</p>}
-        {param(q.segnalato) && <p className="notice notice--ok" role="status">Grazie, abbiamo ricevuto la segnalazione: sistemiamo il dato al più presto.</p>}
+        <h2 id="dati" className="t-title">{t.tuoiDati}</h2>
+        {param(q.salvato) && <p className="notice notice--ok" role="status">{t.salvato}</p>}
+        {param(q.segnalato) && <p className="notice notice--ok" role="status">{t.segnalato}</p>}
         <ul className="list">
-          <li><span className="t-caption">Nome</span><span>{socio.nome || nonIndicato}</span></li>
-          <li><span className="t-caption">Cognome</span><span>{socio.cognome || nonIndicato}</span></li>
-          <li><span className="t-caption">Email</span><span>{socio.email}</span></li>
-          <li><span className="t-caption">Cellulare</span><span>{r.telefono || nonIndicato}</span></li>
-          <li><span className="t-caption">Data di nascita</span><span>{r.nascita ? formatData(r.nascita) : nonIndicato}</span></li>
-          <li><span className="t-caption">Indirizzo</span><span>{r.indirizzo || nonIndicato}</span></li>
-          <li><span className="t-caption">CAP e città</span><span>{[r.cap, r.citta].filter(Boolean).join(" ") || nonIndicato}</span></li>
-          {socio.tessere.map((t) => (
-            <li key={t.codice}>
-              <span className="t-caption">Tessera {t.tipo}</span>
-              <span className="psc-code">{formatTessera(t.codice)}{t.inAttivazione ? " · in attivazione" : ""}</span>
+          <li><span className="t-caption">{t.nome}</span><span>{socio.nome || nonIndicato}</span></li>
+          <li><span className="t-caption">{t.cognome}</span><span>{socio.cognome || nonIndicato}</span></li>
+          <li><span className="t-caption">{t.email}</span><span dir="ltr">{socio.email}</span></li>
+          <li><span className="t-caption">{t.cellulare}</span><span dir="ltr">{r.telefono || nonIndicato}</span></li>
+          <li><span className="t-caption">{t.nascita}</span><span>{r.nascita ? f.data(r.nascita) : nonIndicato}</span></li>
+          <li><span className="t-caption">{t.indirizzo}</span><span>{r.indirizzo || nonIndicato}</span></li>
+          <li><span className="t-caption">{t.capCitta}</span><span>{[r.cap, r.citta].filter(Boolean).join(" ") || nonIndicato}</span></li>
+          {socio.tessere.map((c) => (
+            <li key={c.codice}>
+              <span className="t-caption">{c.tipo === "fisica" ? t.tesseraFisica : t.tesseraDigitale}</span>
+              <span className="psc-code"><span dir="ltr">{formatTessera(c.codice)}</span>{c.inAttivazione ? ` · ${t.inAttivazione}` : ""}</span>
             </li>
           ))}
-          <li><span className="t-caption">Socio dal</span><span>{formatData(socio.iscrittoDal)}</span></li>
+          <li><span className="t-caption">{t.socioDal}</span><span>{f.data(socio.iscrittoDal)}</span></li>
         </ul>
-        <Link href="/profilo/dati" className="psc-btn psc-btn--secondary psc-btn--block">Modifica i tuoi dati</Link>
-        <Link href="/profilo/segnala" className="psc-btn psc-btn--ghost psc-btn--block">Un dato è sbagliato? Segnalacelo</Link>
+        <Link href="/profilo/dati" className="psc-btn psc-btn--secondary psc-btn--block">{t.modifica}</Link>
+        <Link href="/profilo/segnala" className="psc-btn psc-btn--ghost psc-btn--block">{t.segnala}</Link>
       </section>
 
       <section className="section" aria-labelledby="invita">
         <div className="psc-referral">
-          <span className="psc-referral__eyebrow">Invita un amico</span>
-          <h2 id="invita" className="psc-referral__title">Il tuo codice invito</h2>
-          <p className="psc-referral__text">Chi si iscrive con il tuo codice risulta invitato da te. I punti per gli inviti arrivano con la prossima versione.</p>
+          <span className="psc-referral__eyebrow">{t.invitaEyebrow}</span>
+          <h2 id="invita" className="psc-referral__title">{t.codiceTitolo}</h2>
+          <p className="psc-referral__text">{t.codiceTesto}</p>
           <div className="psc-referral__code">
             <span className="psc-code">{socio.codiceInvito}</span>
           </div>
         </div>
+      </section>
+
+      <section className="section profilo-lingua" aria-label={t.lingua}>
+        <span className="t-caption">{t.lingua}</span>
+        <SceltaLingua lingua={lingua} etichetta={t.lingua} />
       </section>
 
       <EsciButton />
