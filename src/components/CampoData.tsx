@@ -2,6 +2,8 @@
 
 import { useRef, useState } from "react";
 import { IconCalendario } from "./Icons";
+import { forma, useTesti } from "@/lib/i18n/client";
+import type { TestiClient } from "@/lib/i18n/testi";
 
 /**
  * Campo data che si può sia scrivere a mano (GG/MM/AAAA, le "/" si mettono da sole)
@@ -21,23 +23,24 @@ export function CampoData({ id, label, help, defaultValue = "", min, max, requir
 }) {
   const [testo, setTesto] = useState(() => daIso(defaultValue));
   const campo = useRef<HTMLInputElement>(null);
+  const t = useTesti().data;
   const iso = aIso(testo);
 
   const aggiorna = (nuovo: string) => {
     setTesto(nuovo);
-    campo.current?.setCustomValidity(errore(nuovo, min, max));
+    campo.current?.setCustomValidity(errore(t, nuovo, min, max));
   };
 
   return (
     <div className="psc-field">
       <label className="psc-field__label" htmlFor={id}>{label}</label>
-      <div className="campo-data">
+      <div className="campo-data" dir="ltr">
         <input
           ref={campo}
           id={id}
           type="text"
           inputMode="numeric"
-          placeholder="GG/MM/AAAA"
+          placeholder={t.formato}
           maxLength={10}
           autoComplete={autoComplete}
           required={required}
@@ -60,7 +63,7 @@ export function CampoData({ id, label, help, defaultValue = "", min, max, requir
           <input
             type="date"
             tabIndex={-1}
-            aria-label={`${label}: scegli dal calendario`}
+            aria-label={forma(t.calendario, { campo: label })}
             min={min}
             max={max}
             value={iso ?? ""}
@@ -100,11 +103,11 @@ function aIso(v: string): string | null {
   return `${m[3]}-${m[2]}-${m[1]}`;
 }
 
-function errore(v: string, min?: string, max?: string) {
+function errore(t: TestiClient["data"], v: string, min?: string, max?: string) {
   if (!v) return "";
   const iso = aIso(v);
-  if (!iso) return "Scrivi la data come GG/MM/AAAA, per esempio 12/05/1990.";
-  if (max && iso > max) return `La data non può essere dopo il ${daIso(max)}.`;
-  if (min && iso < min) return `La data non può essere prima del ${daIso(min)}.`;
+  if (!iso) return t.erroreFormato;
+  if (max && iso > max) return forma(t.erroreDopo, { data: daIso(max) });
+  if (min && iso < min) return forma(t.errorePrima, { data: daIso(min) });
   return "";
 }

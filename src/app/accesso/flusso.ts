@@ -11,6 +11,8 @@
 import { cookies, headers } from "next/headers";
 import { redirect } from "next/navigation";
 import type { getSupabase } from "@/lib/dati";
+import { forma, getTesti } from "@/lib/i18n";
+import type { Testi } from "@/lib/i18n/testi";
 
 export type Supabase = NonNullable<Awaited<ReturnType<typeof getSupabase>>>;
 
@@ -52,17 +54,18 @@ export const testo = (f: FormData, k: string) => String(f.get(k) ?? "").trim();
 export const conErrore = (pagina: string, messaggio: string, extra: Record<string, string> = {}) =>
   `${pagina}?${new URLSearchParams({ ...extra, errore: messaggio })}`;
 
-export function messaggioAuth(e: { message: string; code?: string; status?: number }) {
+/** Messaggio per il socio, nella sua lingua, a partire da un errore di Supabase Auth. */
+export function messaggioAuth(e: { message: string; code?: string; status?: number }, t: Testi["errori"]) {
   // Supabase lascia passare un'email ogni 60 secondi per indirizzo ("...only request this
   // after 42 seconds") e un tetto di email l'ora per tutto il progetto.
   const secondi = /after (\d+) seconds?/i.exec(e.message)?.[1];
-  if (secondi) return `Ti abbiamo appena mandato un'email: aspetta ${secondi} secondi prima di chiederne un'altra.`;
+  if (secondi) return forma(t.aspetta, { secondi });
   if (e.status === 429 || e.code === "over_email_send_rate_limit" || e.code === "over_request_rate_limit")
-    return "Sono state chieste troppe email di accesso: riprova tra qualche minuto.";
+    return t.troppeEmail;
   if (e.code === "otp_expired" || e.code === "invalid_credentials" || /expired|invalid/i.test(e.message))
-    return "Codice sbagliato o scaduto: controlla le cifre oppure chiedi un nuovo codice e usa l'ultimo che ricevi.";
-  if (e.code === "email_address_invalid" || /email/i.test(e.message)) return "Controlla l'indirizzo email.";
-  return "Qualcosa non ha funzionato. Riprova tra poco.";
+    return t.codiceSbagliato;
+  if (e.code === "email_address_invalid" || /email/i.test(e.message)) return t.controllaEmail;
+  return t.generico;
 }
 
 export async function salvaAttesa(attesa: Attesa) {
@@ -108,11 +111,12 @@ export async function mandaLink(supabase: Supabase, email: string, dopo: Dopo, p
     email,
     options: { emailRedirectTo: `${origine}/auth/callback?dopo=${dopo}`, shouldCreateUser: !soloSeEsiste },
   });
+  const t = (await getTesti()).errori;
   if (error && soloSeEsiste && senzaAccount(error)) {
-    if (dopo === "admin") redirect(conErrore(pagina, "Questa email non ha un account.", { email, dopo }));
+    if (dopo === "admin") redirect(conErrore(pagina, t.senzaAccount, { email, dopo }));
     redirect(`/?${new URLSearchParams({ registrati: "1", email })}`);
   }
-  if (error) redirect(conErrore(pagina, messaggioAuth(error), { email }));
+  if (error) redirect(conErrore(pagina, messaggioAuth(error, t), { email }));
   redirect(`/verifica?${new URLSearchParams({ email, dopo })}`);
 }
 

@@ -1,14 +1,15 @@
-import type { Metadata } from "next";
 import Link from "next/link";
 import { redirect } from "next/navigation";
 import { AuthPage } from "@/components/AuthPage";
 import { getSessione, getSupabase } from "@/lib/dati";
+import { forma, getLingua, getTesti } from "@/lib/i18n";
 
-export const metadata: Metadata = { title: "Collega la tessera in negozio" };
+export async function generateMetadata() {
+  return { title: (await getTesti()).negozio.titoloPagina };
+}
 // Ogni visita crea un codice nuovo: niente cache.
 export const dynamic = "force-dynamic";
 
-const ora = new Intl.DateTimeFormat("it-IT", { timeZone: "Europe/Rome", hour: "2-digit", minute: "2-digit" });
 
 /**
  * Per chi ha la tessera fisica ma in negozio non ha lasciato un'email (o ne ha
@@ -30,19 +31,22 @@ export default async function CollegaInNegozio() {
     else ({ codice, scade_il: scade } = data as { codice: string; scade_il: string });
   }
 
+  const t = await getTesti();
+  const n = t.negozio;
+  const ora = new Intl.DateTimeFormat(await getLingua(), { timeZone: "Europe/Rome", hour: "2-digit", minute: "2-digit" });
   return (
     <AuthPage
-      eyebrow="Ho già la tessera"
-      titolo="Mostra questo codice in negozio"
-      intro="Porta la tessera in negozio e fai vedere questo codice alla cassa: il commesso collega la tessera al tuo account e da lì in poi trovi qui punti e offerte."
+      eyebrow={t.collega.eyebrow}
+      titolo={n.titolo}
+      intro={n.intro}
       errore={errore}
       indietro="/collega-tessera"
     >
       {!errore && (
-        <p className="codice-negozio" aria-label={`Codice ${codice.split("").join(" ")}`}>{codice}</p>
+        <p className="codice-negozio" dir="ltr" aria-label={forma(n.codiceAria, { codice: codice.split("").join(" ") })}>{codice}</p>
       )}
-      {!errore && <p className="psc-hint">Vale fino alle {ora.format(new Date(scade))}. Se scade, ricarica la pagina per averne uno nuovo.</p>}
-      <Link href="/home" className="psc-btn psc-btn--primary psc-btn--block">Fatto, apri l&apos;app</Link>
+      {!errore && <p className="psc-hint">{forma(n.vale, { ora: ora.format(new Date(scade)) })}</p>}
+      <Link href="/home" className="psc-btn psc-btn--primary psc-btn--block">{n.fatto}</Link>
     </AuthPage>
   );
 }

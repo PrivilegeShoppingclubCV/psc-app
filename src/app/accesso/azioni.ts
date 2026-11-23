@@ -4,6 +4,7 @@
 
 import { redirect } from "next/navigation";
 import { getSupabase } from "@/lib/dati";
+import { getTesti } from "@/lib/i18n";
 import {
   campiIscrizione,
   completaAccesso,
@@ -22,18 +23,20 @@ import {
 export async function accedi(form: FormData) {
   const supabase = await getSupabase();
   if (!supabase) redirect("/home");
+  const t = (await getTesti()).errori;
   const email = testo(form, "email").toLowerCase();
-  if (!email) redirect(conErrore("/accedi", "Inserisci la tua email."));
+  if (!email) redirect(conErrore("/accedi", t.email));
   await mandaLink(supabase, email, leggiDopo(form.get("dopo")), "/accedi", true);
 }
 
 export async function verifica(form: FormData) {
   const supabase = await getSupabase();
   if (!supabase) redirect("/home");
+  const t = (await getTesti()).errori;
   const email = testo(form, "email").toLowerCase();
   const dopo = leggiDopo(form.get("dopo"));
   const token = testo(form, "codice").replace(/\s/g, "");
-  if (!token) redirect(conErrore("/verifica", "Inserisci il codice ricevuto via email.", { email, dopo }));
+  if (!token) redirect(conErrore("/verifica", t.codice, { email, dopo }));
 
   let { error } = await supabase.auth.verifyOtp({ email, token, type: "email" });
   // Iscrizione nuova: alcuni progetti Supabase accettano il codice di "Confirm signup"
@@ -46,7 +49,7 @@ export async function verifica(form: FormData) {
     const user = await utenteCorrente(supabase);
     if (user?.email?.toLowerCase() === email) redirect(await completaAccesso(supabase, dopo));
     console.error("verifica codice", email.replace(/^(.).*@/, "$1***@"), error.code ?? error.message);
-    redirect(conErrore("/verifica", messaggioAuth(error), { email, dopo }));
+    redirect(conErrore("/verifica", messaggioAuth(error, t), { email, dopo }));
   }
   redirect(await completaAccesso(supabase, dopo));
 }
@@ -54,16 +57,17 @@ export async function verifica(form: FormData) {
 export async function collegaTessera(form: FormData) {
   const supabase = await getSupabase();
   if (!supabase) redirect("/home");
+  const t = (await getTesti()).errori;
   // Il campo manda già 12 cifre; qui si completa comunque chi ne ha scritte meno.
   const scritto = testo(form, "tessera").replace(/\s/g, "");
   const numero = /^\d{1,12}$/.test(scritto) ? scritto.padStart(12, "0") : scritto;
-  if (!numero) redirect(conErrore("/collega-tessera", "Inserisci il numero della tessera."));
-  if (!/^\d{12}$/.test(numero)) redirect(conErrore("/collega-tessera", "Il numero della tessera ha 12 cifre: controlla di averlo scritto bene.", { tessera: numero }));
+  if (!numero) redirect(conErrore("/collega-tessera", t.tessera));
+  if (!/^\d{12}$/.test(numero)) redirect(conErrore("/collega-tessera", t.tessera12, { tessera: numero }));
 
   if (await utenteCorrente(supabase)) redirect(await eseguiCollega(supabase, numero));
 
   const email = testo(form, "email").toLowerCase();
-  if (!email) redirect(conErrore("/collega-tessera", "Inserisci l'email che hai lasciato in negozio.", { tessera: numero }));
+  if (!email) redirect(conErrore("/collega-tessera", t.emailNegozio, { tessera: numero }));
   await salvaAttesa({ tipo: "collega", numero });
   await mandaLink(supabase, email, "collega", "/collega-tessera");
 }
@@ -71,6 +75,7 @@ export async function collegaTessera(form: FormData) {
 export async function iscriviti(form: FormData) {
   const supabase = await getSupabase();
   if (!supabase) redirect("/home");
+  const t = (await getTesti()).errori;
   const attesa: Attesa = {
     tipo: "iscriviti",
     nome: testo(form, "nome"),
@@ -84,19 +89,19 @@ export async function iscriviti(form: FormData) {
     marketing: form.get("marketing") === "on",
   };
   const campi = campiIscrizione(attesa);
-  if (!attesa.nome || !attesa.cognome) redirect(conErrore("/iscriviti", "Nome e cognome sono obbligatori.", campi));
-  if (!attesa.telefono) redirect(conErrore("/iscriviti", "Il numero di telefono è obbligatorio.", campi));
+  if (!attesa.nome || !attesa.cognome) redirect(conErrore("/iscriviti", t.nomeCognome, campi));
+  if (!attesa.telefono) redirect(conErrore("/iscriviti", t.telefono, campi));
   // Gli stessi controlli li rifà il database: qui servono per avvisare prima di mandare l'email.
-  if (!attesa.nascita) redirect(conErrore("/iscriviti", "La data di nascita è obbligatoria.", campi));
-  if (!attesa.indirizzo) redirect(conErrore("/iscriviti", "L'indirizzo è obbligatorio.", campi));
-  if (!/^\d{5}$/.test(attesa.cap)) redirect(conErrore("/iscriviti", "Il CAP è obbligatorio ed è fatto di 5 cifre.", campi));
-  if (!attesa.citta) redirect(conErrore("/iscriviti", "La città è obbligatoria.", campi));
-  if (form.get("privacy") !== "on") redirect(conErrore("/iscriviti", "Per iscriverti conferma di aver letto l'informativa privacy.", campi));
+  if (!attesa.nascita) redirect(conErrore("/iscriviti", t.nascita, campi));
+  if (!attesa.indirizzo) redirect(conErrore("/iscriviti", t.indirizzo, campi));
+  if (!/^\d{5}$/.test(attesa.cap)) redirect(conErrore("/iscriviti", t.cap, campi));
+  if (!attesa.citta) redirect(conErrore("/iscriviti", t.citta, campi));
+  if (form.get("privacy") !== "on") redirect(conErrore("/iscriviti", t.privacy, campi));
 
   if (await utenteCorrente(supabase)) redirect(await eseguiIscrizione(supabase, attesa));
 
   const email = testo(form, "email").toLowerCase();
-  if (!email) redirect(conErrore("/iscriviti", "Inserisci la tua email.", campi));
+  if (!email) redirect(conErrore("/iscriviti", t.email, campi));
   await salvaAttesa(attesa);
   await mandaLink(supabase, email, "iscriviti", "/iscriviti");
 }
