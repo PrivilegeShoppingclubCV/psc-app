@@ -106,9 +106,9 @@ export async function getSaldo(socioId: string): Promise<number> {
 export async function getEuroPerPunto(): Promise<number> {
   const supabase = await getSupabase();
   if (!supabase) return 5;
+  // Se la migrazione non è ancora applicata la funzione manca: si mostra la regola di default invece di un errore.
   const { data, error } = await supabase.rpc("euro_per_punto");
-  if (error) throw error;
-  return Number(data) || 5;
+  return (!error && Number(data)) || 5;
 }
 
 export async function getMovimenti(socioId: string): Promise<MovimentoPunti[]> {
