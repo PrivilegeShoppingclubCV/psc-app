@@ -30,6 +30,7 @@ export const pl: Testi = {
     eyebrow: "Sprawdź pocztę",
     titolo: "Wpisz kod",
     intro: "Wysłaliśmy 6-cyfrowy kod na adres {email}. Wpisz go poniżej. Jeśli nie widzisz wiadomości, sprawdź też folder spam.",
+    introTessera: "Wysłaliśmy 6-cyfrowy kod na {email}, adres e-mail zarejestrowany w sklepie z Twoją kartą. Wpisz go poniżej. Jeśli adres jest błędny, kod nie dotrze: zgłoś się do sklepu, aby go poprawić.",
     rimanda: "Nie dotarł? Wyślij ponownie",
   },
   iscriviti: {
@@ -56,11 +57,23 @@ export const pl: Testi = {
     eyebrow: "Mam już kartę",
     titolo: "Połącz swoją kartę",
     intro: "Wpisz numer wydrukowany na karcie i e-mail, który podałeś(-aś) w sklepie.",
+    introSoloNumero: "Wpisz numer wydrukowany na karcie: wyślemy kod logowania na adres e-mail zarejestrowany w sklepie.",
     introConAccesso: "Wpisz numer wydrukowany na karcie. Musi to być karta zarejestrowana w sklepie z adresem {email}. Jeśli w sklepie nie podałeś(-aś) e-maila albo podałeś(-aś) inny, dotknij przycisku poniżej: przy kasie połączymy kartę i zaktualizujemy Twój e-mail.",
     numero: "Numer karty",
     numeroAiuto: "Znajdziesz go z tyłu karty, pod kodem kreskowym. Możesz wpisać go z zerami na początku lub bez nich (np. 4169): pełny numer pojawi się powyżej. Możesz też zeskanować go aparatem.",
     altraEmail: "Nie podałem(-am) tego e-maila w sklepie",
     nonHaiTessera: "Nie masz karty? Zarejestruj się",
+  },
+  /** Email sbagliata nel collegamento della tessera: si propone quella salvata in negozio. */
+  recupero: {
+    titoloDiversa: "To nie jest e-mail Twojej karty",
+    testoDiversa: "W sklepie karta została zarejestrowana z innym adresem e-mail: {email}. Możemy wysłać tam kod logowania.",
+    invia: "Wyślij kod na {email}",
+    nonUsoPiu: "Nie używasz już tego adresu? Zaloguj się wpisanym adresem e-mail i połącz kartę przy kasie.",
+    continua: "Kontynuuj z {email}",
+    titoloSenza: "Ta karta nie ma adresu e-mail",
+    testoSenza: "W sklepie nie zapisano adresu e-mail dla tej karty. Zaloguj się swoim adresem e-mail: aplikacja da Ci kod do pokazania przy kasie, aby połączyć kartę.",
+    codiceNegozio: "Pokaż kod w sklepie",
   },
   negozio: {
     titoloPagina: "Połącz kartę w sklepie",
@@ -88,6 +101,10 @@ export const pl: Testi = {
     troppeEmail: "Wysłano zbyt wiele próśb o e-mail logowania: spróbuj ponownie za kilka minut.",
     codiceSbagliato: "Błędny lub wygasły kod: sprawdź cyfry albo poproś o nowy kod i użyj ostatniego, który otrzymasz.",
     controllaEmail: "Sprawdź adres e-mail.",
+    tesseraNonTrovata: "Nie znajdujemy aktywnej karty o tym numerze: sprawdź cyfry lub zapytaj w sklepie.",
+    troppiTentativi: "Zbyt wiele prób z tą kartą: spróbuj ponownie za godzinę lub zapytaj w sklepie.",
+    recuperoScaduto: "Czas na wpisanie kodu minął: wpisz ponownie numer karty.",
+    tesseraProblema: "Wygląda na to, że z Twoją kartą jest problem: zgłoś się do sklepu, aby go rozwiązać.",
     generico: "Coś poszło nie tak. Spróbuj ponownie za chwilę.",
   },
   client: {

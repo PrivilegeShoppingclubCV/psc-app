@@ -2,14 +2,15 @@
 
 // Azioni dei moduli di accesso. La logica condivisa con /auth/callback è in flusso.ts.
 
-import { cookies } from "next/headers";
+import { cookies, headers } from "next/headers";
 import { redirect } from "next/navigation";
 import { COOKIE_LINGUA, isLingua } from "@/lib/i18n/lingue";
 import { getSupabase } from "@/lib/dati";
-import { getTesti } from "@/lib/i18n";
+import { getLingua, getTesti } from "@/lib/i18n";
 import {
   campiIscrizione,
   completaAccesso,
+  conAvviso,
   conErrore,
   eseguiCollega,
   eseguiIscrizione,
@@ -22,6 +23,7 @@ import {
   utenteCorrente,
   type Attesa,
 } from "./flusso";
+import { controllaTessera, leggiRecupero, salvaRecupero, soloNumeroTessera } from "./recupero";
 
 export async function accedi(form: FormData) {
   const supabase = await getSupabase();
@@ -36,10 +38,15 @@ export async function verifica(form: FormData) {
   const supabase = await getSupabase();
   if (!supabase) redirect("/home");
   const t = (await getTesti()).errori;
-  const email = testo(form, "email").toLowerCase();
+  // Recupero: l'email è quella della tessera, che il socio non vede. Sta nel cookie cifrato.
+  const recupero = form.get("recupero") === "1";
+  const email = recupero ? ((await leggiRecupero())?.email ?? "") : testo(form, "email").toLowerCase();
+  if (recupero && !email) redirect(conErrore("/collega-tessera", t.recuperoScaduto));
   const dopo = leggiDopo(form.get("dopo"));
+  // Nell'indirizzo della pagina non deve mai finire l'email della tessera.
+  const ritorno: Record<string, string> = recupero ? { recupero: "1", dopo } : { email, dopo };
   const token = testo(form, "codice").replace(/\s/g, "");
-  if (!token) redirect(conErrore("/verifica", t.codice, { email, dopo }));
+  if (!token) redirect(conErrore("/verifica", t.codice, ritorno));
 
   let { error } = await supabase.auth.verifyOtp({ email, token, type: "email" });
   // Iscrizione nuova: alcuni progetti Supabase accettano il codice di "Confirm signup"
@@ -52,7 +59,7 @@ export async function verifica(form: FormData) {
     const user = await utenteCorrente(supabase);
     if (user?.email?.toLowerCase() === email) redirect(await completaAccesso(supabase, dopo));
     console.error("verifica codice", email.replace(/^(.).*@/, "$1***@"), error.code ?? error.message);
-    redirect(conErrore("/verifica", messaggioAuth(error, t), { email, dopo }));
+    redirect(conErrore("/verifica", messaggioAuth(error, t), ritorno));
   }
   redirect(await completaAccesso(supabase, dopo));
 }
@@ -69,10 +76,71 @@ export async function collegaTessera(form: FormData) {
 
   if (await utenteCorrente(supabase)) redirect(await eseguiCollega(supabase, numero));
 
+  // Solo numero: il codice va subito all'email della tessera.
+  if (soloNumeroTessera()) await mandaCodiceTessera(supabase, numero);
+
   const email = testo(form, "email").toLowerCase();
   if (!email) redirect(conErrore("/collega-tessera", t.emailNegozio, { tessera: numero }));
+
+  // Prima di mandare il codice si controlla che l'email sia quella della tessera.
+  // (Senza chiave segreta sul server il controllo salta e si va avanti come prima.)
+  const esito = await controllaTessera(numero, email, "controllo");
+  if (esito?.esito === "non_trovata") redirect(conErrore("/collega-tessera", t.tesseraNonTrovata, { tessera: numero, email }));
+  if (esito?.esito === "troppi_tentativi") redirect(conErrore("/collega-tessera", t.troppiTentativi, { tessera: numero, email }));
+  if (esito?.esito === "senza_email") redirect(conAvviso("senza_email", numero, email));
+  if (esito?.esito === "email_diversa") {
+    await salvaRecupero({ numero, email: esito.email });
+    redirect(conAvviso("email_diversa", numero, email));
+  }
   await salvaAttesa({ tipo: "collega", numero });
   await mandaLink(supabase, email, "collega", "/collega-tessera");
+}
+
+/** "Manda il codice all'email della tessera": l'indirizzo lo sa solo il database. */
+export async function inviaAllEmailTessera(form: FormData) {
+  const supabase = await getSupabase();
+  if (!supabase) redirect("/home");
+  const t = (await getTesti()).errori;
+  const numero = testo(form, "tessera");
+  if (!/^\d{12}$/.test(numero)) redirect(conErrore("/collega-tessera", t.tessera));
+  await mandaCodiceTessera(supabase, numero);
+}
+
+async function mandaCodiceTessera(supabase: NonNullable<Awaited<ReturnType<typeof getSupabase>>>, numero: string): Promise<never> {
+  const t = (await getTesti()).errori;
+  const esito = await controllaTessera(numero, null, "invio");
+  if (esito?.esito === "troppi_tentativi") redirect(conErrore("/collega-tessera", t.troppiTentativi, { tessera: numero }));
+  if (esito?.esito === "non_trovata") redirect(conErrore("/collega-tessera", t.tesseraNonTrovata, { tessera: numero }));
+  // Scheda senza email: la sistemano in negozio controllando il gestionale.
+  if (esito?.esito === "senza_email") redirect(conErrore("/collega-tessera", t.tesseraProblema, { tessera: numero }));
+  if (esito?.esito !== "email_diversa") redirect(conErrore("/collega-tessera", t.generico, { tessera: numero }));
+
+  // Chi era entrato con un'altra email esce: si rientra con quella della tessera.
+  if (await utenteCorrente(supabase)) await supabase.auth.signOut();
+  const h = await headers();
+  const origine = h.get("origin") ?? `https://${h.get("host")}`;
+  const { error } = await supabase.auth.signInWithOtp({
+    email: esito.email,
+    options: { emailRedirectTo: `${origine}/auth/callback?dopo=collega`, shouldCreateUser: true, data: { lingua: await getLingua() } },
+  });
+  if (error) redirect(conErrore("/collega-tessera", messaggioAuth(error, t), { tessera: numero }));
+  await salvaRecupero({ numero, email: esito.email });
+  await salvaAttesa({ tipo: "collega", numero });
+  redirect(`/verifica?${new URLSearchParams({ recupero: "1", dopo: "collega" })}`);
+}
+
+/**
+ * Tessera senza email in negozio (o email della tessera che non si usa più):
+ * si entra con l'email scritta e poi si collega la tessera alla cassa con il codice.
+ */
+export async function continuaConQuestaEmail(form: FormData) {
+  const supabase = await getSupabase();
+  if (!supabase) redirect("/home");
+  const t = (await getTesti()).errori;
+  if (await utenteCorrente(supabase)) redirect("/collega-tessera/negozio");
+  const email = testo(form, "email").toLowerCase();
+  if (!email) redirect(conErrore("/collega-tessera", t.emailNegozio, { tessera: testo(form, "tessera") }));
+  await mandaLink(supabase, email, "negozio", "/collega-tessera");
 }
 
 export async function iscriviti(form: FormData) {

@@ -30,6 +30,7 @@ export const en: Testi = {
     eyebrow: "Check your email",
     titolo: "Enter the code",
     intro: "We sent a 6-digit code to {email}. Enter it below. If you can't find the email, check your spam folder too.",
+    introTessera: "We sent a 6-digit code to {email}, the email registered in the shop with your card. Type it below. If the address is wrong the code can't arrive: please ask in the shop to correct it.",
     rimanda: "Didn't get it? Send it again",
   },
   iscriviti: {
@@ -56,11 +57,23 @@ export const en: Testi = {
     eyebrow: "I already have a card",
     titolo: "Link your card",
     intro: "Enter the number printed on your card and the email you gave in the shop.",
+    introSoloNumero: "Enter the number printed on your card: we'll send a login code to the email registered in the shop.",
     introConAccesso: "Enter the number printed on your card. It must be the card registered in the shop with {email}. If you didn't give an email in the shop, or gave a different one, tap the button below: we'll link the card at the till and update your email.",
     numero: "Card number",
     numeroAiuto: "You'll find it on the back of the card, under the barcode. You can type it with or without the leading zeros (e.g. 4169): the full number appears above. Or scan it with your camera.",
     altraEmail: "I didn't give this email in the shop",
     nonHaiTessera: "No card? Sign up",
+  },
+  /** Email sbagliata nel collegamento della tessera: si propone quella salvata in negozio. */
+  recupero: {
+    titoloDiversa: "This isn't the email of your card",
+    testoDiversa: "Your card was registered in the shop with a different email: {email}. We can send the login code there.",
+    invia: "Send the code to {email}",
+    nonUsoPiu: "Don't use that address any more? Log in with the email you typed and link the card at the till.",
+    continua: "Continue with {email}",
+    titoloSenza: "This card has no email",
+    testoSenza: "No email was saved for this card in the shop. Log in with your email: the app will give you a code to show at the till to link the card.",
+    codiceNegozio: "Show the code in the shop",
   },
   negozio: {
     titoloPagina: "Link your card in the shop",
@@ -88,6 +101,10 @@ export const en: Testi = {
     troppeEmail: "Too many login emails have been requested: try again in a few minutes.",
     codiceSbagliato: "Wrong or expired code: check the digits, or ask for a new code and use the latest one you receive.",
     controllaEmail: "Check the email address.",
+    tesseraNonTrovata: "We can't find an active card with this number: check the digits or ask in the shop.",
+    troppiTentativi: "Too many attempts with this card: try again in an hour or ask in the shop.",
+    recuperoScaduto: "The time to enter the code has run out: type your card number again.",
+    tesseraProblema: "There seems to be a problem with your card: please ask in the shop to sort it out.",
     generico: "Something went wrong. Please try again shortly.",
   },
   client: {
