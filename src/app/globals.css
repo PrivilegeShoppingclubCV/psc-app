@@ -284,3 +284,29 @@ html:has(.welcome) body::before { display: none; }
 .scontrino__totale { display: flex; justify-content: space-between; padding-top: var(--space-3); border-top: 1px dashed #c8c8c8; font-weight: 600; font-size: 17px; }
 .scontrino__punti { text-align: center; font-weight: 500; color: #1e6b45; }
 .scontrino__carta .t-caption { text-align: center; color: #6b6b6b; }
+
+/* Buono premio da mostrare in cassa (Punti → premio) */
+.buono { display: flex; flex-direction: column; align-items: center; gap: var(--space-3); padding: var(--space-6) var(--space-4); border: 1px dashed var(--line-strong); border-radius: var(--radius-sm); text-align: center; }
+.buono p { margin: 0; }
+.buono .psc-barcode-box { max-width: 360px; }
+.buono .psc-barcode { height: 96px; }
+.buono__codice { font-family: var(--font-label); font-size: 28px; line-height: 34px; letter-spacing: 0.12em; font-weight: 600; font-variant-numeric: tabular-nums; }
+.buono--chiuso .buono__codice { text-decoration: line-through; opacity: 0.6; }
+.buoni-attivi a { color: inherit; text-decoration: none; }
+
+/* Cassa: verifica buono (personale dei negozi) */
+.cassa { max-width: 640px; margin: 0 auto; padding: var(--space-4) var(--space-4) var(--space-12); display: flex; flex-direction: column; gap: var(--space-6); }
+.cassa__testa { display: flex; justify-content: space-between; align-items: center; gap: var(--space-3); flex-wrap: wrap; }
+.cassa__testa .logo--wordmark { width: 160px; height: 40px; color: var(--verde-700); }
+.cassa__utente { display: flex; align-items: center; gap: var(--space-2); flex-wrap: wrap; }
+.cassa__utente form { margin: 0; }
+.cassa__campo { font-size: 22px; letter-spacing: 0.1em; text-transform: uppercase; }
+.cassa__buono { display: flex; flex-direction: column; gap: var(--space-4); padding: var(--space-4); border-radius: var(--radius-sm); border: 2px solid var(--line-strong); }
+.cassa__buono--attivo { border-color: var(--success); }
+.cassa__buono--usato, .cassa__buono--annullato, .cassa__buono--scaduto { border-color: var(--danger); }
+.cassa__esito { margin: 0; font-size: 22px; font-weight: 700; }
+.cassa__buono--attivo .cassa__esito { color: var(--success); }
+.cassa__buono--usato .cassa__esito, .cassa__buono--annullato .cassa__esito, .cassa__buono--scaduto .cassa__esito { color: var(--danger); }
+.cassa__dati { display: grid; grid-template-columns: auto 1fr; gap: var(--space-2) var(--space-4); margin: 0; }
+.cassa__dati dt { color: var(--line-strong); }
+.cassa__dati dd { margin: 0; }

@@ -5,7 +5,7 @@
 import { cache } from "react";
 import * as mock from "./mock-data";
 import { createClient } from "./supabase/server";
-import { tesseraDaMostrare, type MovimentoPunti, type Negozio, type Offerta, type Premio, type Recapiti, type RigaScontrino, type Scontrino, type Socio, type TesseraSocio } from "./tipi";
+import { tesseraDaMostrare, type Buono, type MovimentoPunti, type Negozio, type Offerta, type Premio, type Recapiti, type RigaScontrino, type Scontrino, type Socio, type TesseraSocio } from "./tipi";
 
 export interface Sessione {
   /** false = Supabase non configurato, l'app usa i dati finti. */
@@ -153,6 +153,37 @@ export async function getScontrini(socioId: string): Promise<Scontrino[]> {
     punti: s.punti,
     righe: Array.isArray(s.righe) ? (s.righe as RigaScontrino[]) : [],
   }));
+}
+
+const CAMPI_BUONO = "id, codice, nome_premio, punti, stato, creato_il, scade_il, usato_il";
+type RigaBuono = { id: string; codice: string; nome_premio: string; punti: number; stato: Buono["stato"]; creato_il: string; scade_il: string; usato_il: string | null };
+const buono = (b: RigaBuono): Buono => ({
+  id: b.id, codice: b.codice, premio: b.nome_premio, punti: b.punti, stato: b.stato,
+  creatoIl: b.creato_il, scadeIl: b.scade_il, usatoIl: b.usato_il,
+});
+
+/** Buoni ancora da usare (quelli scaduti prima restituiscono i punti). */
+export async function getBuoniAttivi(socioId: string): Promise<Buono[]> {
+  const supabase = await getSupabase();
+  if (!supabase) return mock.buoni;
+  // Senza la migrazione dei buoni la funzione manca: la pagina Punti resta com'era.
+  const { error: e } = await supabase.rpc("scadi_miei_buoni");
+  if (e) return [];
+  const { data, error } = await supabase
+    .from("buoni")
+    .select(CAMPI_BUONO)
+    .eq("socio_id", socioId)
+    .eq("stato", "attivo")
+    .order("creato_il", { ascending: false });
+  if (error) return [];
+  return (data as RigaBuono[]).map(buono);
+}
+
+export async function getBuono(socioId: string, id: string): Promise<Buono | null> {
+  const supabase = await getSupabase();
+  if (!supabase) return mock.buoni.find((b) => b.id === id) ?? null;
+  const { data } = await supabase.from("buoni").select(CAMPI_BUONO).eq("socio_id", socioId).eq("id", id).maybeSingle();
+  return data ? buono(data as RigaBuono) : null;
 }
 
 export async function getRecapiti(socioId: string): Promise<Recapiti> {

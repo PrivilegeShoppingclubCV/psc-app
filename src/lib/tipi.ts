@@ -70,6 +70,21 @@ export interface Scontrino {
   righe: RigaScontrino[];
 }
 
+/** Buono nato dal riscatto di un premio: il socio lo mostra in cassa. */
+export interface Buono {
+  id: string;
+  codice: string;
+  premio: string;
+  punti: number;
+  stato: "attivo" | "usato" | "annullato" | "scaduto";
+  creatoIl: string;
+  scadeIl: string;
+  usatoIl: string | null;
+}
+
+/** "ABCDEFGH" → "ABCD-EFGH", più facile da leggere a voce in cassa. */
+export const codiceBuono = (c: string) => `${c.slice(0, 4)}-${c.slice(4)}`;
+
 export interface Premio {
   id: string;
   nome: string;

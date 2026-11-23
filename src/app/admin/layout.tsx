@@ -14,6 +14,8 @@ export const metadata: Metadata = {
 export default async function AdminLayout({ children }: { children: React.ReactNode }) {
   const accesso = await getAccesso();
   if (accesso.stato === "non_entrato") redirect("/accedi?dopo=admin");
+  // Gli operatori dei negozi non vedono il pannello: per loro c'è la cassa (verifica buoni).
+  if (accesso.stato === "non_admin" && accesso.operatore) redirect("/cassa");
 
   if (accesso.stato !== "admin") {
     return (
