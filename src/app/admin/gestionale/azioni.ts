@@ -1,6 +1,7 @@
 "use server";
 
-import { revalidatePath } from "next/cache";
+import { revalidatePath, updateTag } from "next/cache";
+import { TAG } from "@/lib/pubblico";
 import { redirect } from "next/navigation";
 import { conEsito, messaggioDb, testo } from "@/lib/admin/form";
 import { richiediAdmin } from "@/lib/admin/sessione";
@@ -87,6 +88,7 @@ export async function salvaRegolaPunti(form: FormData) {
     supabase.from("impostazioni").update({ valore: dal }).eq("chiave", "punti_dal"),
   ]);
   const error = a.error ?? b.error;
+  updateTag(TAG.regolaPunti);
   revalidatePath("/punti");
   redirect(conEsito("/admin/gestionale", error ? { errore: messaggioDb(error) } : { ok: "Regola dei punti salvata: vale per le prossime vendite." }));
 }

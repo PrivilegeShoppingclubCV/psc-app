@@ -21,7 +21,8 @@ export async function proxy(request: NextRequest) {
       },
     },
   });
-  await supabase.auth.getUser();
+  // Rinnova il token se è scaduto; altrimenti lo verifica in locale (nessuna chiamata ad Auth).
+  await supabase.auth.getClaims();
   return response;
 }
 

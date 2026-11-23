@@ -2,6 +2,7 @@
 // Finché Supabase non è configurato restituiscono i dati finti di mock-data.ts,
 // così le anteprime senza chiavi continuano a funzionare.
 
+import { euroPerPunto, negoziAttivi, premiAttivi } from "./pubblico";
 import { cache } from "react";
 import * as mock from "./mock-data";
 import { createClient } from "./supabase/server";
@@ -51,7 +52,10 @@ export const getSessione = cache(async (): Promise<Sessione> => {
   const supabase = await getSupabase();
   if (!supabase) return { configurato: false, email: mock.socio.email, socio: { ...mock.socio, id: "mock" } };
 
-  const { data: { user } } = await supabase.auth.getUser();
+  // getClaims verifica il token sul server dell'app con le chiavi pubbliche di
+  // Supabase (in cache), senza chiamare ogni volta il servizio Auth come getUser.
+  const { data: claims } = await supabase.auth.getClaims();
+  const user = claims?.claims.sub ? { id: claims.claims.sub, email: claims.claims.email as string | undefined } : null;
   if (!user) return { configurato: true, email: null, socio: null };
 
   const { data, error } = await supabase
@@ -104,11 +108,9 @@ export async function getSaldo(socioId: string): Promise<number> {
 
 /** Euro di spesa per 1 punto (impostazioni.euro_per_punto, letta con una funzione: la tabella è solo per lo staff). */
 export async function getEuroPerPunto(): Promise<number> {
-  const supabase = await getSupabase();
-  if (!supabase) return 5;
+  if (!(await getSupabase())) return 5;
   // Se la migrazione non è ancora applicata la funzione manca: si mostra la regola di default invece di un errore.
-  const { data, error } = await supabase.rpc("euro_per_punto");
-  return (!error && Number(data)) || 5;
+  return (await euroPerPunto()) ?? 5;
 }
 
 export async function getMovimenti(socioId: string): Promise<MovimentoPunti[]> {
@@ -213,16 +215,21 @@ const buono = (b: RigaBuono): Buono => ({
 export async function getBuoniAttivi(socioId: string): Promise<Buono[]> {
   const supabase = await getSupabase();
   if (!supabase) return mock.buoni;
-  // Senza la migrazione dei buoni la funzione manca: la pagina Punti resta com'era.
-  const { error: e } = await supabase.rpc("scadi_miei_buoni");
-  if (e) return [];
-  const { data, error } = await supabase
+  const leggi = () => supabase
     .from("buoni")
     .select(CAMPI_BUONO)
     .eq("socio_id", socioId)
     .eq("stato", "attivo")
     .order("creato_il", { ascending: false });
+  // Senza la migrazione dei buoni la tabella manca: la pagina Punti resta com'era.
+  let { data, error } = await leggi();
   if (error) return [];
+  // Un buono scaduto restituisce i punti: si chiama la funzione solo se ce n'è uno.
+  if ((data as RigaBuono[]).some((b) => new Date(b.scade_il) < new Date())) {
+    await supabase.rpc("scadi_miei_buoni");
+    ({ data, error } = await leggi());
+    if (error) return [];
+  }
   return (data as RigaBuono[]).map(buono);
 }
 
@@ -253,28 +260,13 @@ export async function getRecapiti(socioId: string): Promise<Recapiti> {
 }
 
 export async function getPremi(): Promise<Premio[]> {
-  const supabase = await getSupabase();
-  if (!supabase) return mock.premi;
-  const { data, error } = await supabase
-    .from("premi")
-    .select("id, nome, soglia_punti")
-    .eq("attivo", true)
-    .order("soglia_punti");
-  if (error) throw error;
-  return data.map((p) => ({ id: p.id, nome: p.nome, soglia: p.soglia_punti }));
+  if (!(await getSupabase())) return mock.premi;
+  return (await premiAttivi()).map((p) => ({ id: p.id, nome: p.nome, soglia: p.soglia_punti }));
 }
 
 export async function getNegozi(): Promise<Negozio[]> {
-  const supabase = await getSupabase();
-  if (!supabase) return mock.negozi;
-  const { data, error } = await supabase
-    .from("negozi")
-    .select("id, nome, indirizzo, cap, citta, orari_testo")
-    .eq("attivo", true)
-    .order("ordine")
-    .order("nome");
-  if (error) throw error;
-  return data.map((n) => ({
+  if (!(await getSupabase())) return mock.negozi;
+  return (await negoziAttivi()).map((n) => ({
     id: n.id,
     nome: n.nome,
     indirizzo: [n.indirizzo, [n.cap, n.citta].filter(Boolean).join(" ")].filter(Boolean).join(", "),
