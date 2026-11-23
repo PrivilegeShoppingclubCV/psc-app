@@ -33,7 +33,7 @@ Colonne di `nuovi-iscritti.csv` (separatore `;`, codifica configurabile, Windows
 
 `numero_tessera;tipo_tessera;tessera_precedente;cognome;nome;email;telefono;data_nascita;cap;citta;negozio;iscritto_il;consenso_privacy;consenso_marketing;ragione_sociale;indirizzo`
 
-`ragione_sociale` è "COGNOME NOME" in maiuscolo, per il campo "Ragione sociale oppure cognome e nome" di ReadyPro, che non ha cognome e nome separati in importazione. ReadyPro legge le colonne per posizione: nel filtro di importazione le colonne che non servono vanno messe come "Ignora campo". `indirizzo` (via e numero civico, dal 2026-11-21) è in fondo per non spostare le altre: va aggiunta al filtro come campo Indirizzo.
+`ragione_sociale` è "COGNOME NOME" in maiuscolo, per il campo "Ragione sociale oppure cognome e nome" di ReadyPro, che non ha cognome e nome separati in importazione. ReadyPro poi separa da solo cognome e nome e a volte sbaglia il punto ("Mammoli D" + "aniele"): l'import clienti dell'app rimette a posto queste divisioni e, se le lettere sono le stesse della scheda, tiene la divisione dell'app (migrazione 20261124090000). ReadyPro legge le colonne per posizione: nel filtro di importazione le colonne che non servono vanno messe come "Ignora campo". `indirizzo` (via e numero civico, dal 2026-11-21) è in fondo per non spostare le altre: va aggiunta al filtro come campo Indirizzo.
 
 Una riga per tessera. `tipo_tessera` è `fisica` o `digitale`; `tessera_precedente` è il codice che questa tessera sostituisce sullo stesso cliente, vuoto per un cliente nuovo. Le date sono `GG/MM/AAAA`, i consensi `SI`/`NO`, `negozio` è il codice del negozio nel gestionale.
 
