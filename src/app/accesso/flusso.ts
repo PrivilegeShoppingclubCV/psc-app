@@ -11,7 +11,7 @@
 import { cookies, headers } from "next/headers";
 import { redirect } from "next/navigation";
 import type { getSupabase } from "@/lib/dati";
-import { forma, getTesti } from "@/lib/i18n";
+import { forma, getLingua, getTesti } from "@/lib/i18n";
 import type { Testi } from "@/lib/i18n/testi";
 
 export type Supabase = NonNullable<Awaited<ReturnType<typeof getSupabase>>>;
@@ -109,7 +109,9 @@ export async function mandaLink(supabase: Supabase, email: string, dopo: Dopo, p
   const origine = h.get("origin") ?? `https://${h.get("host")}`;
   const { error } = await supabase.auth.signInWithOtp({
     email,
-    options: { emailRedirectTo: `${origine}/auth/callback?dopo=${dopo}`, shouldCreateUser: !soloSeEsiste },
+    // La lingua finisce nei dati dell'utente solo quando l'account è nuovo: serve all'email
+    // di benvenuto. Per gli account che esistono già la aggiorna salvaLinguaUtente.
+    options: { emailRedirectTo: `${origine}/auth/callback?dopo=${dopo}`, shouldCreateUser: !soloSeEsiste, data: { lingua: await getLingua() } },
   });
   const t = (await getTesti()).errori;
   if (error && soloSeEsiste && senzaAccount(error)) {
@@ -170,7 +172,21 @@ export async function eseguiIscrizione(supabase: Supabase, a: Extract<Attesa, { 
 }
 
 /** Dopo un accesso riuscito: completa il modulo rimasto in attesa e dice dove andare. */
+/**
+ * Salva la lingua dell'app nei dati dell'utente Supabase (.Data.lingua nei modelli
+ * email): così il prossimo codice di accesso arriva nella lingua giusta.
+ * Se non riesce si va avanti: l'email arriverà in italiano.
+ */
+export async function salvaLinguaUtente(supabase: Supabase) {
+  const user = await utenteCorrente(supabase);
+  const lingua = await getLingua();
+  if (!user || user.user_metadata?.lingua === lingua) return;
+  const { error } = await supabase.auth.updateUser({ data: { lingua } });
+  if (error) console.error("lingua utente", error.code ?? error.message);
+}
+
 export async function completaAccesso(supabase: Supabase, dopo: Dopo): Promise<string> {
+  await salvaLinguaUtente(supabase);
   const attesa = await prendiAttesa();
   // Il modulo in attesa vale anche se "dopo" si è perso per strada (link dell'email
   // che torna alla Site URL o modello con {{ .TokenHash }}, che non lo porta).

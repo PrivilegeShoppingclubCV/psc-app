@@ -2,11 +2,13 @@
 
 import { useRouter } from "next/navigation";
 import { useTransition } from "react";
-import { COOKIE_LINGUA, LINGUE, type Lingua } from "@/lib/i18n/lingue";
+import { LINGUE, type Lingua } from "@/lib/i18n/lingue";
+import { cambiaLingua } from "@/app/accesso/azioni";
 
 /**
  * Menu per cambiare lingua. La scelta resta in un cookie per un anno e vince
- * sulla lingua del browser; la pagina si ricarica dal server con i nuovi testi.
+ * sulla lingua del browser (per chi è dentro va anche nei dati dell'utente, per
+ * le email); la pagina si ricarica dal server con i nuovi testi.
  */
 export function SceltaLingua({ lingua, etichetta }: { lingua: Lingua; etichetta: string }) {
   const router = useRouter();
@@ -22,8 +24,11 @@ export function SceltaLingua({ lingua, etichetta }: { lingua: Lingua; etichetta:
         value={lingua}
         disabled={inCorso}
         onChange={(e) => {
-          document.cookie = `${COOKIE_LINGUA}=${e.target.value}; path=/; max-age=${60 * 60 * 24 * 365}; samesite=lax`;
-          avvia(() => router.refresh());
+          const scelta = e.target.value;
+          avvia(async () => {
+            await cambiaLingua(scelta);
+            router.refresh();
+          });
         }}
       >
         {LINGUE.map((l) => (

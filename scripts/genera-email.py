@@ -7,14 +7,24 @@ SANS = "'Helvetica Neue',Helvetica,Arial,sans-serif"
 SERIF = "Georgia,'Times New Roman',serif"
 MONO = "'SFMono-Regular',Menlo,Consolas,'Courier New',monospace"
 
-def codice():
+def scegli(testo):
+    """Testo fisso, oppure {lingua: testo}: diventa una scelta nel linguaggio dei modelli di Supabase,
+    sulla lingua salvata nei dati dell'utente (.Data.lingua, vedi $l in testa all'email). Di base italiano."""
+    if isinstance(testo, str):
+        return testo
+    altre = [l for l in testo if l != "it"]
+    parti = [f'{{{{ {"if" if i == 0 else "else if"} eq $l "{l}" }}}}{testo[l]}' for i, l in enumerate(altre)]
+    return "".join(parti) + f'{{{{ else }}}}{testo["it"]}{{{{ end }}}}'
+
+
+def codice(scadenza="Vale per poco tempo e si usa una volta sola."):
     return f'''
           <!-- Codice -->
           <tr>
             <td align="center" style="padding:4px 32px 12px;">
               <table role="presentation" cellpadding="0" cellspacing="0" border="0">
                 <tr>
-                  <td align="center" style="background-color:#e4ede7;border:1px solid #d3dcd7;border-radius:12px;padding:18px 28px 18px 38px;font-family:{MONO};font-size:34px;line-height:40px;letter-spacing:10px;font-weight:bold;color:#113f2d;white-space:nowrap;">
+                  <td align="center" dir="ltr" style="background-color:#e4ede7;border:1px solid #d3dcd7;border-radius:12px;padding:18px 28px 18px 38px;font-family:{MONO};font-size:34px;line-height:40px;letter-spacing:10px;font-weight:bold;color:#113f2d;white-space:nowrap;">
                     {{{{ .Token }}}}
                   </td>
                 </tr>
@@ -23,7 +33,7 @@ def codice():
           </tr>
           <tr>
             <td align="center" style="padding:0 32px 28px;font-family:{SANS};font-size:12px;line-height:18px;color:#7a8c84;">
-              Vale per poco tempo e si usa una volta sola.
+              {scegli(scadenza)}
             </td>
           </tr>
 '''
@@ -51,15 +61,21 @@ def passi(righe):
           </tr>
 '''
 
-def email(*, nome, supabase, oggetto, anteprima, eyebrow, titolo, testo, corpo, nota, extra_commento=""):
-    return f'''<!doctype html>
-<html lang="it">
+PIEDE = "Email automatica inviata a {{ .Email }}: non rispondere a questo messaggio."
+
+
+def email(*, nome, supabase, oggetto, anteprima, eyebrow, titolo, testo, corpo, nota, extra_commento="", piede=PIEDE, lingue=False):
+    # Con più lingue: $l è la lingua dell'utente ("it" se manca), e l'arabo va da destra a sinistra.
+    testa = '{{- $l := or .Data.lingua "it" -}}\n' if lingue else ""
+    html = '<html lang="{{ $l }}" dir="{{ if eq $l "ar" }}rtl{{ else }}ltr{{ end }}">' if lingue else '<html lang="it">'
+    return testa + f'''<!doctype html>
+{html}
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <meta name="color-scheme" content="light">
 <meta name="supported-color-schemes" content="light">
-<title>{oggetto}</title>
+<title>{scegli(oggetto)}</title>
 </head>
 <!--
   {nome} del Privilege Shopping Club.
@@ -75,7 +91,7 @@ def email(*, nome, supabase, oggetto, anteprima, eyebrow, titolo, testo, corpo, 
 <body style="margin:0;padding:0;background-color:#f3f6f4;">
   <!-- Anteprima nella lista delle email -->
   <div style="display:none;max-height:0;overflow:hidden;mso-hide:all;font-size:1px;line-height:1px;color:#f3f6f4;">
-    {anteprima}
+    {scegli(anteprima)}
   </div>
 
   <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="background-color:#f3f6f4;">
@@ -97,13 +113,13 @@ def email(*, nome, supabase, oggetto, anteprima, eyebrow, titolo, testo, corpo, 
           <tr>
             <td style="padding:36px 32px 20px;font-family:{SANS};color:#0f1e17;">
               <p style="margin:0 0 8px;font-size:11px;line-height:16px;letter-spacing:2.5px;text-transform:uppercase;color:#7a5f1f;font-weight:600;">
-                {eyebrow}
+                {scegli(eyebrow)}
               </p>
               <h1 style="margin:0 0 16px;font-family:{SERIF};font-size:28px;line-height:34px;font-weight:normal;color:#113f2d;">
-                {titolo}
+                {scegli(titolo)}
               </h1>
               <p style="margin:0;font-size:15px;line-height:22px;color:#4a5b53;">
-                {testo}
+                {scegli(testo)}
               </p>
             </td>
           </tr>
@@ -111,7 +127,7 @@ def email(*, nome, supabase, oggetto, anteprima, eyebrow, titolo, testo, corpo, 
           <tr>
             <td style="padding:0 32px 32px;font-family:{SANS};">
               <p style="margin:0;font-size:13px;line-height:19px;color:#4a5b53;">
-                {nota}
+                {scegli(nota)}
               </p>
             </td>
           </tr>
@@ -130,7 +146,7 @@ def email(*, nome, supabase, oggetto, anteprima, eyebrow, titolo, testo, corpo, 
         </table>
 
         <p style="margin:16px 0 0;font-family:{SANS};font-size:11px;line-height:16px;color:#7a8c84;">
-          Email automatica inviata a {{{{ .Email }}}}: non rispondere a questo messaggio.
+          {scegli(piede)}
         </p>
 
       </td>
@@ -143,17 +159,100 @@ def email(*, nome, supabase, oggetto, anteprima, eyebrow, titolo, testo, corpo, 
 NON_TU = "Non l'hai chiesto tu? Ignora questa email: senza questo codice nessuno può entrare nel tuo account."
 ENTRA = "apri l'app Privilege Shopping Club (o {{ .SiteURL }}) e tocca <strong>Accedi</strong>"
 
+# Email di accesso nelle 11 lingue dell'app. La lingua arriva da .Data.lingua, che l'app
+# salva nei dati dell'utente (src/app/accesso/flusso.ts); chi non ce l'ha la riceve in italiano.
+ACCESSO = {
+    "anteprima": {
+        "it": "Il tuo codice è {{ .Token }}. Scrivilo nell'app per entrare.",
+        "en": "Your code is {{ .Token }}. Enter it in the app to log in.",
+        "fr": "Votre code est {{ .Token }}. Saisissez-le dans l'application pour vous connecter.",
+        "de": "Dein Code lautet {{ .Token }}. Gib ihn in der App ein, um dich anzumelden.",
+        "es": "Tu código es {{ .Token }}. Escríbelo en la app para entrar.",
+        "pt": "O seu código é {{ .Token }}. Escreva-o na app para entrar.",
+        "ro": "Codul tău este {{ .Token }}. Scrie-l în aplicație ca să intri.",
+        "pl": "Twój kod to {{ .Token }}. Wpisz go w aplikacji, aby się zalogować.",
+        "ru": "Ваш код: {{ .Token }}. Введите его в приложении, чтобы войти.",
+        "zh": "您的验证码是 {{ .Token }}，请在应用中输入以登录。",
+        "ar": "رمزك هو {{ .Token }}. أدخله في التطبيق لتسجيل الدخول.",
+    },
+    "eyebrow": {
+        "it": "Accesso al club", "en": "Club login", "fr": "Connexion au club", "de": "Club-Anmeldung",
+        "es": "Acceso al club", "pt": "Acesso ao clube", "ro": "Autentificare în club", "pl": "Logowanie do klubu",
+        "ru": "Вход в клуб", "zh": "俱乐部登录", "ar": "الدخول إلى النادي",
+    },
+    "titolo": {
+        "it": "Il tuo codice", "en": "Your code", "fr": "Votre code", "de": "Dein Code", "es": "Tu código",
+        "pt": "O seu código", "ro": "Codul tău", "pl": "Twój kod", "ru": "Ваш код", "zh": "您的验证码", "ar": "رمزك",
+    },
+    "testo": {
+        "it": "Scrivi queste 6 cifre nell'app per entrare. Se ne hai chiesti più di uno, usa l'ultimo.",
+        "en": "Enter these 6 digits in the app to log in. If you asked for more than one, use the latest.",
+        "fr": "Saisissez ces 6 chiffres dans l'application pour vous connecter. Si vous en avez demandé plusieurs, utilisez le dernier.",
+        "de": "Gib diese 6 Ziffern in der App ein, um dich anzumelden. Wenn du mehrere angefordert hast, nimm den neuesten.",
+        "es": "Escribe estas 6 cifras en la app para entrar. Si has pedido más de uno, usa el último.",
+        "pt": "Escreva estes 6 dígitos na app para entrar. Se pediu mais do que um, use o último.",
+        "ro": "Scrie aceste 6 cifre în aplicație ca să intri. Dacă ai cerut mai multe, folosește-l pe ultimul.",
+        "pl": "Wpisz te 6 cyfr w aplikacji, aby się zalogować. Jeśli prosiłeś(-aś) o kilka, użyj ostatniego.",
+        "ru": "Введите эти 6 цифр в приложении, чтобы войти. Если вы запрашивали несколько кодов, используйте последний.",
+        "zh": "请在应用中输入这 6 位数字登录。如果您申请了多个验证码，请使用最新的那个。",
+        "ar": "أدخل هذه الأرقام الستة في التطبيق لتسجيل الدخول. إذا طلبت أكثر من رمز، فاستخدم آخر رمز.",
+    },
+    "scadenza": {
+        "it": "Vale per poco tempo e si usa una volta sola.",
+        "en": "It's only valid for a short time and can be used once.",
+        "fr": "Il n'est valable que peu de temps et ne s'utilise qu'une seule fois.",
+        "de": "Er gilt nur kurze Zeit und kann nur einmal verwendet werden.",
+        "es": "Es válido durante poco tiempo y solo se puede usar una vez.",
+        "pt": "É válido por pouco tempo e só pode ser usado uma vez.",
+        "ro": "Este valabil pentru scurt timp și se folosește o singură dată.",
+        "pl": "Jest ważny przez krótki czas i można go użyć tylko raz.",
+        "ru": "Код действует недолго и используется только один раз.",
+        "zh": "验证码有效期很短，且只能使用一次。",
+        "ar": "الرمز صالح لفترة قصيرة ويُستخدم مرة واحدة فقط.",
+    },
+    "nota": {
+        "it": NON_TU,
+        "en": "Didn't ask for this? Ignore this email: without this code nobody can get into your account.",
+        "fr": "Vous n'avez rien demandé ? Ignorez cet e-mail : sans ce code, personne ne peut accéder à votre compte.",
+        "de": "Du hast das nicht angefordert? Ignoriere diese E-Mail: Ohne diesen Code kann niemand auf dein Konto zugreifen.",
+        "es": "¿No lo has pedido tú? Ignora este correo: sin este código nadie puede entrar en tu cuenta.",
+        "pt": "Não foi você que pediu? Ignore este e-mail: sem este código ninguém consegue entrar na sua conta.",
+        "ro": "Nu l-ai cerut tu? Ignoră acest e-mail: fără acest cod nimeni nu poate intra în contul tău.",
+        "pl": "To nie Ty prosiłeś(-aś) o kod? Zignoruj tę wiadomość: bez tego kodu nikt nie wejdzie na Twoje konto.",
+        "ru": "Вы не запрашивали код? Просто проигнорируйте это письмо: без этого кода никто не сможет войти в ваш аккаунт.",
+        "zh": "不是您本人申请的？请忽略此邮件：没有此验证码，任何人都无法登录您的账户。",
+        "ar": "لم تطلب هذا الرمز؟ تجاهل هذه الرسالة: بدون هذا الرمز لا يمكن لأحد الدخول إلى حسابك.",
+    },
+    "piede": {
+        "it": PIEDE,
+        "en": "Automatic email sent to {{ .Email }}: please do not reply.",
+        "fr": "E-mail automatique envoyé à {{ .Email }} : merci de ne pas y répondre.",
+        "de": "Automatische E-Mail an {{ .Email }}: Bitte antworte nicht auf diese Nachricht.",
+        "es": "Correo automático enviado a {{ .Email }}: no respondas a este mensaje.",
+        "pt": "E-mail automático enviado para {{ .Email }}: não responda a esta mensagem.",
+        "ro": "E-mail automat trimis la {{ .Email }}: nu răspunde la acest mesaj.",
+        "pl": "Wiadomość automatyczna wysłana na adres {{ .Email }}: nie odpowiadaj na nią.",
+        "ru": "Автоматическое письмо отправлено на {{ .Email }}: не отвечайте на него.",
+        "zh": "此邮件为系统自动发送至 {{ .Email }}，请勿回复。",
+        "ar": "رسالة تلقائية مُرسلة إلى {{ .Email }}: يُرجى عدم الرد عليها.",
+    },
+}
+
 MODELLI = {
     "accesso.html": dict(
         nome="Email di accesso (codice di 6 cifre)",
         supabase='"Magic Link" e "Confirm signup" (lo stesso testo in tutte e due)',
-        oggetto="Il tuo codice per il Privilege Shopping Club",
-        anteprima="Il tuo codice è {{ .Token }}. Scrivilo nell'app per entrare.",
-        eyebrow="Accesso al club",
-        titolo="Il tuo codice",
-        testo="Scrivi queste 6 cifre nell'app per entrare. Se ne hai chiesti più di uno, usa l'ultimo.",
-        corpo=codice(),
-        nota=NON_TU,
+        # Oggetto uguale per tutte le lingue: Supabase ha un solo campo oggetto.
+        oggetto="Privilege Shopping Club: {{ .Token }}",
+        anteprima=ACCESSO["anteprima"],
+        eyebrow=ACCESSO["eyebrow"],
+        titolo=ACCESSO["titolo"],
+        testo=ACCESSO["testo"],
+        corpo=codice(ACCESSO["scadenza"]),
+        nota=ACCESSO["nota"],
+        piede=ACCESSO["piede"],
+        lingue=True,
+        extra_commento="\n  La lingua arriva da .Data.lingua (dati dell'utente, salvati dall'app a ogni\n  accesso e cambio lingua); se manca, l'email è in italiano.",
     ),
     "conferma-identita.html": dict(
         nome="Email di conferma dell'identità",

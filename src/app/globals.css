@@ -143,6 +143,9 @@ html:has(.welcome) body::before { display: none; }
 .back-link { display: inline-flex; align-items: center; gap: var(--space-1); min-height: var(--space-12); text-decoration: none; color: var(--ink-muted); }
 .back-link svg { width: 20px; height: 20px; }
 [dir="rtl"] .back-link svg { transform: scaleX(-1); }
+[dir="rtl"] .scontrino summary .list__value::after { content: "‹"; }
+[dir="rtl"] .scontrino[open] summary .list__value::after { transform: rotate(-90deg); }
+.profilo-lingua { display: flex; align-items: center; justify-content: space-between; gap: var(--space-3); }
 
 /* ---------- Lingua ---------- */
 .sr-only { position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; border: 0; }
@@ -269,7 +272,7 @@ html:has(.welcome) body::before { display: none; }
 .scontrino summary::-webkit-details-marker { display: none; }
 .scontrino summary .list__main { display: flex; flex-direction: column; }
 .scontrino summary .list__value { font-variant-numeric: tabular-nums; font-weight: 500; white-space: nowrap; }
-.scontrino summary .list__value::after { content: "›"; display: inline-block; margin-left: var(--space-2); transition: transform 0.2s; color: var(--line-strong); }
+.scontrino summary .list__value::after { content: "›"; display: inline-block; margin-inline-start: var(--space-2); transition: transform 0.2s; color: var(--line-strong); }
 .scontrino[open] summary .list__value::after { transform: rotate(90deg); }
 .scontrino__carta { display: flex; flex-direction: column; gap: var(--space-3); margin: 0 0 var(--space-4); padding: var(--space-4); background: var(--bianco); color: #1a1a1a; border-radius: var(--radius-sm); border: 1px dashed var(--line); font-variant-numeric: tabular-nums; }
 .scontrino__carta p { margin: 0; }

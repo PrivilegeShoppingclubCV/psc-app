@@ -2,6 +2,7 @@
 
 import { useState, useTransition } from "react";
 import { creaLinkGenitore } from "@/app/genitore/azioni";
+import { forma, useTesti } from "@/lib/i18n/client";
 
 /**
  * Tasto "Invia il link a un genitore": crea il link e apre la condivisione del
@@ -12,6 +13,7 @@ export function LinkGenitore({ nome }: { nome: string }) {
   const [inCorso, avvia] = useTransition();
   const [link, setLink] = useState<string | null>(null);
   const [errore, setErrore] = useState<string | null>(null);
+  const t = useTesti().genitoreLink;
 
   const invia = () =>
     avvia(async () => {
@@ -21,7 +23,7 @@ export function LinkGenitore({ nome }: { nome: string }) {
         setErrore(r.errore);
         return;
       }
-      const testo = `Ciao, sono ${nome || "io"}: per usare la tessera del Privilege Shopping Club mi serve il tuo ok. Apri questo link:`;
+      const testo = forma(t.messaggio, { nome: nome || t.io });
       try {
         if (navigator.share) {
           await navigator.share({ title: "Privilege Shopping Club", text: testo, url: r.url });
@@ -38,12 +40,12 @@ export function LinkGenitore({ nome }: { nome: string }) {
   return (
     <div className="link-genitore">
       <button type="button" className="psc-btn psc-btn--primary psc-btn--block" onClick={invia} disabled={inCorso}>
-        {inCorso ? "Un attimo…" : "Invia il link a un genitore"}
+        {inCorso ? t.attimo : t.invia}
       </button>
       {errore && <p className="notice notice--errore" role="alert">{errore}</p>}
       {link && (
         <p className="notice" role="status">
-          Link copiato. Mandalo a un genitore: <span className="link-genitore__url">{link}</span>
+          {t.copiato} <span className="link-genitore__url" dir="ltr">{link}</span>
         </p>
       )}
     </div>

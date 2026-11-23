@@ -1,7 +1,7 @@
 import Link from "next/link";
 import { isSupabaseConfigured } from "@/lib/supabase/config";
 import { direzione, getLingua } from "@/lib/i18n";
-import { TESTI } from "@/lib/i18n/testi";
+import { TESTI, testiClient } from "@/lib/i18n/testi";
 import { TestiProvider } from "@/lib/i18n/client";
 import { IconIndietro } from "./Icons";
 import { SceltaLingua } from "./SceltaLingua";
@@ -11,24 +11,22 @@ import { SceltaLingua } from "./SceltaLingua";
  * titolo, eventuale errore, contenuto. Lingua e direzione (arabo da destra a
  * sinistra) valgono per tutta la pagina.
  */
-export async function AuthPage({ eyebrow, titolo, intro, errore, indietro = "/", tradotta = true, children }: {
+export async function AuthPage({ eyebrow, titolo, intro, errore, indietro = "/", children }: {
   eyebrow: string;
   titolo: string;
   intro: React.ReactNode;
   errore?: string;
   indietro?: string;
-  /** false per le pagine scritte solo in italiano (es. consenso del genitore): niente scelta lingua. */
-  tradotta?: boolean;
   children: React.ReactNode;
 }) {
-  const lingua = tradotta ? await getLingua() : "it";
+  const lingua = await getLingua();
   const t = TESTI[lingua];
   return (
     <main className="auth" lang={lingua} dir={direzione(lingua)}>
-      <TestiProvider testi={t.client}>
+      <TestiProvider testi={testiClient(lingua)}>
         <div className="auth__barra">
           <Link href={indietro} className="back-link"><IconIndietro /> {t.comune.indietro}</Link>
-          {tradotta && <SceltaLingua lingua={lingua} etichetta={t.comune.lingua} />}
+          <SceltaLingua lingua={lingua} etichetta={t.comune.lingua} />
         </div>
         <div className="page-head">
           <p className="t-eyebrow">{eyebrow}</p>

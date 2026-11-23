@@ -4,6 +4,7 @@ import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import { getRecapiti, getSessione, getSupabase } from "@/lib/dati";
 import { conErrore, testo } from "../../accesso/flusso";
+import { getTesti, getTestiClub } from "@/lib/i18n";
 
 // Le modifiche vanno anche a ReadyPro: il server dei negozi le scarica con i nuovi iscritti.
 export async function salvaRecapiti(form: FormData) {
@@ -13,7 +14,7 @@ export async function salvaRecapiti(form: FormData) {
   if (!socio) redirect("/collega-tessera");
 
   const campi = { telefono: testo(form, "telefono"), nascita: testo(form, "nascita"), indirizzo: testo(form, "indirizzo"), cap: testo(form, "cap"), citta: testo(form, "citta") };
-  if (!campi.telefono) redirect(conErrore("/profilo/dati", "Il numero di telefono è obbligatorio.", campi));
+  if (!campi.telefono) redirect(conErrore("/profilo/dati", (await getTesti()).errori.telefono, campi));
 
   // Il negozio preferito non è in questo modulo: si tiene quello che c'è.
   const { negozioPreferitoId } = await getRecapiti(socio.id);
@@ -39,8 +40,8 @@ export async function segnalaDato(form: FormData) {
   const campo = testo(form, "campo");
   const messaggio = testo(form, "messaggio");
   const campi = { campo, messaggio };
-  if (!CAMPI_SEGNALAZIONE.includes(campo)) redirect(conErrore("/profilo/segnala", "Scegli quale dato non è corretto.", campi));
-  if (messaggio.length < 3) redirect(conErrore("/profilo/segnala", "Scrivi cosa non è corretto e il dato giusto.", campi));
+  if (!CAMPI_SEGNALAZIONE.includes(campo)) redirect(conErrore("/profilo/segnala", (await getTestiClub()).segnala.erroreCampo, campi));
+  if (messaggio.length < 3) redirect(conErrore("/profilo/segnala", (await getTestiClub()).segnala.erroreMessaggio, campi));
   const { error } = await supabase.rpc("segnala_dato_errato", { p_campo: campo, p_messaggio: messaggio });
   if (error) redirect(conErrore("/profilo/segnala", error.message, campi));
   redirect("/profilo?segnalato=1");

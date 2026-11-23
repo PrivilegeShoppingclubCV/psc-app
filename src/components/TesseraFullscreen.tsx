@@ -6,6 +6,7 @@ import { formatTessera } from "@/lib/format";
 import { Barcode } from "./Barcode";
 import { IconChiudi, IconTessera } from "./Icons";
 import { Tessera } from "./Tessera";
+import { forma, useTesti } from "@/lib/i18n/client";
 
 type WakeLock = { release: () => Promise<void> };
 
@@ -16,6 +17,7 @@ type WakeLock = { release: () => Promise<void> };
 export function ApriTessera({ socio }: { socio: Socio }) {
   const dialog = useRef<HTMLDialogElement>(null);
   const wakeLock = useRef<WakeLock | null>(null);
+  const t = useTesti().carta;
 
   const rilascia = useCallback(() => {
     wakeLock.current?.release().catch(() => {});
@@ -41,40 +43,40 @@ export function ApriTessera({ socio }: { socio: Socio }) {
     <>
       <button type="button" className="psc-btn psc-btn--primary psc-btn--block" onClick={apri}>
         <IconTessera />
-        Apri tessera
+        {t.apri}
       </button>
 
-      <dialog ref={dialog} className="tessera-overlay" aria-label="La tua tessera" onClose={rilascia}>
+      <dialog ref={dialog} className="tessera-overlay" aria-label={t.latua} onClose={rilascia}>
         <div className="tessera-overlay__bar">
-          <p className="t-eyebrow">La tua tessera</p>
-          <button type="button" className="icon-btn" aria-label="Chiudi" onClick={() => dialog.current?.close()}>
+          <p className="t-eyebrow">{t.latua}</p>
+          <button type="button" className="icon-btn" aria-label={t.chiudi} onClick={() => dialog.current?.close()}>
             <IconChiudi />
           </button>
         </div>
         <Tessera socio={socio} />
         <div className="psc-tessera-back">
           {!socio.numeroTessera ? (
-            <p className="psc-hint">Non hai una tessera attiva: chiedi in negozio una tessera nuova.</p>
+            <p className="psc-hint">{t.nessuna}</p>
           ) : socio.inAttivazione ? (
             <>
               <div className="psc-barcode-box">
-                <Barcode value={socio.numeroTessera} label={`Codice a barre della tessera ${numero}`} />
+                <Barcode value={socio.numeroTessera} label={forma(t.barcode, { numero })} />
               </div>
-              <span className="psc-code">{numero}</span>
-              <span className="psc-badge psc-badge--warning">Appena creata</span>
+              <span className="psc-code" dir="ltr">{numero}</span>
+              <span className="psc-badge psc-badge--warning">{t.appenaCreata}</span>
               <p className="psc-hint">
                 {socio.daUnire
-                  ? "In cassa usa la tessera fatta in negozio: alla prossima visita uniamo le due tessere."
-                  : <>La stiamo registrando nelle casse dei negozi, di solito in pochi minuti. Se la cassa non la riconosce, riprova tra un po&apos;.</>}
+                  ? t.usaQuellaNegozio
+                  : t.registrando}
               </p>
             </>
           ) : (
             <>
               <div className="psc-barcode-box">
-                <Barcode value={socio.numeroTessera} label={`Codice a barre della tessera ${numero}`} />
+                <Barcode value={socio.numeroTessera} label={forma(t.barcode, { numero })} />
               </div>
-              <span className="psc-code">{numero}</span>
-              <p className="psc-hint">Mostra questo codice in cassa per accumulare punti e avere i prezzi soci.</p>
+              <span className="psc-code" dir="ltr">{numero}</span>
+              <p className="psc-hint">{t.mostra}</p>
             </>
           )}
         </div>

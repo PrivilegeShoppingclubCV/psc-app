@@ -5,7 +5,7 @@ import { BarraInstalla } from "@/components/InstallaApp";
 import { param } from "@/components/AuthPage";
 import { getSessione } from "@/lib/dati";
 import { SceltaLingua } from "@/components/SceltaLingua";
-import { direzione, getLingua, getTesti, ricco } from "@/lib/i18n";
+import { direzione, getLingua, getTesti, ricco, testiClient } from "@/lib/i18n";
 import { TestiProvider } from "@/lib/i18n/client";
 
 // La pagina di benvenuto è tutta verde: anche la barra in alto del telefono
@@ -35,7 +35,7 @@ export default async function Benvenuto({ searchParams }: { searchParams: Promis
 
   return (
     <main className="welcome" lang={lingua} dir={direzione(lingua)}>
-      <TestiProvider testi={t.client}>
+      <TestiProvider testi={testiClient(lingua)}>
       <BarraInstalla />
       <div className="welcome__brand">
         <span className="logo logo--lockup" role="img" aria-label="Privilege Shopping Club" />

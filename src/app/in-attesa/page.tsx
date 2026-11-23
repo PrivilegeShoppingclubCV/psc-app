@@ -1,10 +1,13 @@
-import type { Metadata } from "next";
 import { redirect } from "next/navigation";
 import { EsciButton } from "@/components/EsciButton";
 import { LinkGenitore } from "@/components/LinkGenitore";
 import { getSessione } from "@/lib/dati";
+import { direzione, getLingua, getTestiClub, testiClient } from "@/lib/i18n";
+import { TestiProvider } from "@/lib/i18n/client";
 
-export const metadata: Metadata = { title: "Manca l'ok di un genitore" };
+export async function generateMetadata() {
+  return { title: (await getTestiClub()).inAttesa.titoloPagina };
+}
 
 // Iscritti in app con meno di 14 anni: la tessera si attiva quando un genitore approva.
 export default async function InAttesa() {
@@ -12,19 +15,20 @@ export default async function InAttesa() {
   if (configurato && !email) redirect("/accedi");
   if (!socio) redirect("/collega-tessera");
   if (socio.attesaGenitore !== "iscrizione") redirect("/home");
+  const lingua = await getLingua();
+  const t = (await getTestiClub()).inAttesa;
 
   return (
-    <main className="auth">
+    <main className="auth" lang={lingua} dir={direzione(lingua)}>
+      <TestiProvider testi={testiClient(lingua)}>
       <div className="page-head">
-        <p className="t-eyebrow">Quasi fatto</p>
-        <h1 className="t-display-l">Manca l&apos;ok di un genitore</h1>
-        <p className="t-body-l">
-          Hai meno di 14 anni: per attivare la tessera serve il consenso di un genitore. Mandagli il link qui sotto: quando lo
-          approva, riapri l&apos;app e trovi la tua tessera.
-        </p>
+        <p className="t-eyebrow">{t.eyebrow}</p>
+        <h1 className="t-display-l">{t.titolo}</h1>
+        <p className="t-body-l">{t.testo}</p>
       </div>
       <LinkGenitore nome={socio.nome} />
       <EsciButton />
+      </TestiProvider>
     </main>
   );
 }

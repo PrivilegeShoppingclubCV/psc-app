@@ -2,6 +2,7 @@
 
 import { useCallback, useEffect, useRef, useState } from "react";
 import { IconChiudi } from "./Icons";
+import { forma, useTesti } from "@/lib/i18n/client";
 
 type Punto = { x: number; y: number };
 const MAX_ZOOM = 4;
@@ -18,6 +19,7 @@ export function FotoOfferta({ src, nome }: { src: string; nome: string }) {
   const inCronologia = useRef(false);
   const [aperta, setAperta] = useState(false);
   const [errore, setErrore] = useState(false);
+  const t = useTesti().foto;
 
   // Stato dello zoom: tenuto in ref per non ridisegnare a ogni movimento del dito.
   const zoom = useRef({ scala: 1, x: 0, y: 0 });
@@ -160,7 +162,7 @@ export function FotoOfferta({ src, nome }: { src: string; nome: string }) {
 
   return (
     <>
-      <button type="button" className="foto-offerta" onClick={apri} aria-label={`Ingrandisci la foto: ${nome}`}>
+      <button type="button" className="foto-offerta" onClick={apri} aria-label={forma(t.ingrandisci, { nome })}>
         <img src={src} alt="" loading="lazy" onError={() => setErrore(true)} />
       </button>
 
@@ -175,7 +177,7 @@ export function FotoOfferta({ src, nome }: { src: string; nome: string }) {
       >
         <div className="foto-overlay__bar">
           <p className="foto-overlay__nome">{nome}</p>
-          <button type="button" className="icon-btn foto-overlay__chiudi" aria-label="Chiudi" onClick={chiudi}>
+          <button type="button" className="icon-btn foto-overlay__chiudi" aria-label={t.chiudi} onClick={chiudi}>
             <IconChiudi />
           </button>
         </div>
@@ -194,7 +196,7 @@ export function FotoOfferta({ src, nome }: { src: string; nome: string }) {
             />
           )}
         </div>
-        <p className="foto-overlay__hint">Allarga con due dita o tocca due volte per ingrandire</p>
+        <p className="foto-overlay__hint">{t.suggerimento}</p>
       </dialog>
     </>
   );
