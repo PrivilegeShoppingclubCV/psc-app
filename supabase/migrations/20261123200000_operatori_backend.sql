@@ -12,6 +12,13 @@
 -- non vede movimenti, consensi, inviti, import né impostazioni. Livello, stato,
 -- punti ed email di chi usa l'app restano dell'amministrazione.
 
+-- Già creata in 20261123160000 (buoni premio): ripetuta qui perché il file
+-- funzioni anche da solo. Admin o operatore, chiunque sia nella tabella staff.
+create or replace function public.is_personale()
+returns boolean language sql stable security definer set search_path = '' as $$
+  select exists (select 1 from public.staff where user_id = auth.uid());
+$$;
+
 -- Le funzioni delle tessere (staff_nuovo_socio_fisica, staff_assegna_tessera_fisica,
 -- staff_blocca_tessera, staff_collega_account) tornano aperte a tutto il personale.
 -- Magazzino e unione dei doppioni usano interno.richiedi_admin e restano agli admin.
