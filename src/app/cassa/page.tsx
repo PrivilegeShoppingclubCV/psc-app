@@ -1,5 +1,4 @@
 import type { Metadata } from "next";
-import Link from "next/link";
 import { redirect } from "next/navigation";
 import { esci } from "@/app/accesso/azioni";
 import { param } from "@/components/AuthPage";
@@ -8,6 +7,7 @@ import { formatEuro } from "@/lib/format";
 import { codiceBuono } from "@/lib/tipi";
 import { usaBuono } from "./azioni";
 import { getAccessoCassa } from "./sessione";
+import { TestaCassa } from "./Testa";
 import "../admin/admin.css";
 
 export const metadata: Metadata = { title: "Cassa: verifica buono", robots: { index: false, follow: false } };
@@ -72,14 +72,7 @@ export default async function Cassa({ searchParams }: { searchParams: Promise<Re
 
   return (
     <main className="cassa">
-      <header className="cassa__testa">
-        <span className="logo logo--wordmark" />
-        <div className="cassa__utente">
-          <span className="t-caption">{accesso.nome ?? accesso.email}</span>
-          {accesso.admin && <Link href="/admin" className="psc-btn psc-btn--ghost">Pannello admin</Link>}
-          <form action={esci}><button type="submit" className="psc-btn psc-btn--ghost">Esci</button></form>
-        </div>
-      </header>
+      <TestaCassa nome={accesso.nome ?? accesso.email} admin={accesso.admin} attiva="buoni" />
 
       <div className="page-head">
         <p className="t-eyebrow">Cassa</p>
