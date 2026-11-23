@@ -13,12 +13,15 @@ import { redirect } from "next/navigation";
 import type { getSupabase } from "@/lib/dati";
 import { forma, getLingua, getTesti } from "@/lib/i18n";
 import type { Testi } from "@/lib/i18n/testi";
+import { cancellaRecupero, controllaTessera, salvaRecupero } from "./recupero";
 
 export type Supabase = NonNullable<Awaited<ReturnType<typeof getSupabase>>>;
 
 /** Cosa fare dopo l'accesso. Solo valori noti: mai un indirizzo arbitrario. */
-export type Dopo = "home" | "collega" | "iscriviti" | "admin";
-export const leggiDopo = (v: unknown): Dopo => (v === "collega" || v === "iscriviti" || v === "admin" ? v : "home");
+// "negozio": dopo l'accesso si va al codice da mostrare alla cassa (tessera senza email).
+export type Dopo = "home" | "collega" | "iscriviti" | "admin" | "negozio";
+export const leggiDopo = (v: unknown): Dopo =>
+  (v === "collega" || v === "iscriviti" || v === "admin" || v === "negozio" ? v : "home");
 
 export const COOKIE_ATTESA = "psc_attesa";
 
@@ -138,10 +141,25 @@ async function registraFallito(supabase: Supabase, tipo: "collegamento" | "iscri
   if (error) console.error("registro tentativi", error.code ?? error.message);
 }
 
+/** Pagina "Ho già la tessera" con il riquadro "l'email non è quella della tessera". */
+export const conAvviso = (avviso: "email_diversa" | "senza_email", tessera: string, email = "") =>
+  `/collega-tessera?${new URLSearchParams({ avviso, tessera, ...(email ? { email } : {}) })}`;
+
 export async function eseguiCollega(supabase: Supabase, numero: string): Promise<string> {
+  const user = await utenteCorrente(supabase);
+  // Tessera già collegata a questo account (es. accesso con l'email della tessera): fatto.
+  const { data: gia } = await supabase.from("soci").select("id").eq("user_id", user?.id ?? "").maybeSingle();
+  if (gia) return "/home";
   const { error } = await supabase.rpc("collega_tessera", { p_numero_tessera: numero });
-  if (error) await registraFallito(supabase, "collegamento", { numero, messaggio: error.message });
-  return error ? conErrore("/collega-tessera", error.message, { tessera: numero }) : "/home";
+  if (!error) return "/home";
+  await registraFallito(supabase, "collegamento", { numero, messaggio: error.message });
+  // Accesso fatto con un'email diversa da quella della tessera: si propone quella giusta.
+  const esito = user?.email ? await controllaTessera(numero, user.email.toLowerCase(), "controllo") : null;
+  if (esito?.esito === "email_diversa") {
+    await salvaRecupero({ numero, email: esito.email });
+    return conAvviso("email_diversa", numero);
+  }
+  return conErrore("/collega-tessera", error.message, { tessera: numero });
 }
 
 export async function eseguiIscrizione(supabase: Supabase, a: Extract<Attesa, { tipo: "iscriviti" }>): Promise<string> {
@@ -187,6 +205,7 @@ export async function salvaLinguaUtente(supabase: Supabase) {
 
 export async function completaAccesso(supabase: Supabase, dopo: Dopo): Promise<string> {
   await salvaLinguaUtente(supabase);
+  await cancellaRecupero();
   const attesa = await prendiAttesa();
   // Il modulo in attesa vale anche se "dopo" si è perso per strada (link dell'email
   // che torna alla Site URL o modello con {{ .TokenHash }}, che non lo porta).
@@ -198,6 +217,7 @@ export async function completaAccesso(supabase: Supabase, dopo: Dopo): Promise<s
   const user = await utenteCorrente(supabase);
   const { data } = await supabase.from("soci").select("id").eq("user_id", user?.id ?? "").maybeSingle();
   if (data) return "/home";
+  if (dopo === "negozio") return "/collega-tessera/negozio";
   // Lo staff senza tessera va al pannello (che spiega se l'account non è admin).
   const { data: staff } = await supabase.from("staff").select("ruolo").eq("user_id", user?.id ?? "").maybeSingle();
   return staff ? "/admin" : "/collega-tessera";

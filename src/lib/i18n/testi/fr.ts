@@ -62,6 +62,17 @@ export const fr: Testi = {
     altraEmail: "Je n'ai pas laissé cet e-mail en magasin",
     nonHaiTessera: "Pas de carte ? Inscrivez-vous",
   },
+  /** Email sbagliata nel collegamento della tessera: si propone quella salvata in negozio. */
+  recupero: {
+    titoloDiversa: "Ce n'est pas l'e-mail de votre carte",
+    testoDiversa: "En magasin, la carte a été enregistrée avec une autre adresse e-mail : {email}. Nous pouvons y envoyer le code de connexion.",
+    invia: "Envoyer le code à {email}",
+    nonUsoPiu: "Vous n'utilisez plus cette adresse ? Connectez-vous avec l'e-mail saisi et associez la carte à la caisse.",
+    continua: "Continuer avec {email}",
+    titoloSenza: "Cette carte n'a pas d'e-mail",
+    testoSenza: "Aucune adresse e-mail n'a été enregistrée en magasin pour cette carte. Connectez-vous avec votre e-mail : l'app vous donnera un code à montrer à la caisse pour associer la carte.",
+    codiceNegozio: "Montrer le code en magasin",
+  },
   negozio: {
     titoloPagina: "Associer la carte en magasin",
     titolo: "Montrez ce code en magasin",
@@ -88,6 +99,9 @@ export const fr: Testi = {
     troppeEmail: "Trop d'e-mails de connexion ont été demandés : réessayez dans quelques minutes.",
     codiceSbagliato: "Code erroné ou expiré : vérifiez les chiffres ou demandez un nouveau code et utilisez le dernier reçu.",
     controllaEmail: "Vérifiez l'adresse e-mail.",
+    tesseraNonTrovata: "Nous ne trouvons aucune carte active avec ce numéro : vérifiez les chiffres ou renseignez-vous en magasin.",
+    troppiTentativi: "Trop de tentatives avec cette carte : réessayez dans une heure ou renseignez-vous en magasin.",
+    recuperoScaduto: "Le délai pour saisir le code a expiré : saisissez de nouveau le numéro de la carte.",
     generico: "Une erreur s'est produite. Réessayez dans un instant.",
   },
   client: {

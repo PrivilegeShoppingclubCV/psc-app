@@ -63,6 +63,17 @@ export const zh: Testi = {
     altraEmail: "我在门店登记的不是这个邮箱",
     nonHaiTessera: "没有会员卡？立即注册",
   },
+  /** Email sbagliata nel collegamento della tessera: si propone quella salvata in negozio. */
+  recupero: {
+    titoloDiversa: "这不是您会员卡登记的邮箱",
+    testoDiversa: "您的会员卡在店内登记的是另一个邮箱：{email}。我们可以把登录验证码发送到该邮箱。",
+    invia: "将验证码发送到 {email}",
+    nonUsoPiu: "已不再使用该邮箱？请用您输入的邮箱登录，然后在收银台绑定会员卡。",
+    continua: "使用 {email} 继续",
+    titoloSenza: "此会员卡没有登记邮箱",
+    testoSenza: "店内没有为此会员卡保存邮箱。请用您的邮箱登录：应用会给您一个验证码，在收银台出示即可绑定会员卡。",
+    codiceNegozio: "在店内出示验证码",
+  },
   negozio: {
     titoloPagina: "在门店绑定会员卡",
     titolo: "在门店出示此代码",
@@ -89,6 +100,9 @@ export const zh: Testi = {
     troppeEmail: "登录邮件请求过多，请几分钟后再试。",
     codiceSbagliato: "验证码错误或已过期：请检查数字，或重新获取验证码并使用最新收到的那个。",
     controllaEmail: "请检查电子邮箱地址。",
+    tesseraNonTrovata: "找不到此号码的有效会员卡：请检查数字或到店咨询。",
+    troppiTentativi: "此会员卡尝试次数过多：请一小时后再试或到店咨询。",
+    recuperoScaduto: "输入验证码的时间已过：请重新输入会员卡号。",
     generico: "出了点问题，请稍后再试。",
   },
   client: {

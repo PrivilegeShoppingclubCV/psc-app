@@ -77,6 +77,8 @@ button { font: inherit; }
 /* Codice da mostrare in negozio per collegare la tessera fisica all'app. */
 .codice-negozio { margin: 0; padding: var(--space-6) var(--space-4); border: 1px dashed var(--line); border-radius: var(--radius-md); text-align: center; font-family: var(--font-text); font-size: 36px; line-height: 44px; font-weight: 500; letter-spacing: .24em; font-variant-numeric: tabular-nums; color: var(--ink); }
 .notice--errore { background: var(--danger-surface); color: var(--danger); font-size: 15px; line-height: 22px; }
+.riquadro-recupero { display: grid; gap: var(--space-3); }
+.riquadro-recupero p { margin: 0; }
 
 /* ---------- Benvenuto ---------- */
 /* Dietro la pagina di benvenuto (sotto la barra del telefono e quando si

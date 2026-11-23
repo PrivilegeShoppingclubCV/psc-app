@@ -65,6 +65,17 @@ export const it = {
     altraEmail: "In negozio non ho lasciato questa email",
     nonHaiTessera: "Non hai la tessera? Iscriviti",
   },
+  /** Email sbagliata nel collegamento della tessera: si propone quella salvata in negozio. */
+  recupero: {
+    titoloDiversa: "Questa non è l'email della tua tessera",
+    testoDiversa: "In negozio la tessera è stata registrata con un'altra email: {email}. Possiamo mandare lì il codice di accesso.",
+    invia: "Manda il codice a {email}",
+    nonUsoPiu: "Non usi più quell'indirizzo? Entra con l'email che hai scritto e collega la tessera alla cassa.",
+    continua: "Continua con {email}",
+    titoloSenza: "Questa tessera non ha un'email",
+    testoSenza: "In negozio non è stata salvata un'email per questa tessera. Entra con la tua email: l'app ti darà un codice da mostrare alla cassa per collegare la tessera.",
+    codiceNegozio: "Mostra il codice in negozio",
+  },
   negozio: {
     titoloPagina: "Collega la tessera in negozio",
     titolo: "Mostra questo codice in negozio",
@@ -91,6 +102,9 @@ export const it = {
     troppeEmail: "Sono state chieste troppe email di accesso: riprova tra qualche minuto.",
     codiceSbagliato: "Codice sbagliato o scaduto: controlla le cifre oppure chiedi un nuovo codice e usa l'ultimo che ricevi.",
     controllaEmail: "Controlla l'indirizzo email.",
+    tesseraNonTrovata: "Non troviamo una tessera attiva con questo numero: controlla le cifre o chiedi in negozio.",
+    troppiTentativi: "Troppi tentativi con questa tessera: riprova tra un'ora oppure chiedi in negozio.",
+    recuperoScaduto: "Il tempo per inserire il codice è scaduto: scrivi di nuovo il numero della tessera.",
     generico: "Qualcosa non ha funzionato. Riprova tra poco.",
   },
   /** Testi usati dai componenti che girano nel browser. */

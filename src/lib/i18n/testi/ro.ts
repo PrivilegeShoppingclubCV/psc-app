@@ -62,6 +62,17 @@ export const ro: Testi = {
     altraEmail: "Nu am lăsat acest e-mail în magazin",
     nonHaiTessera: "Nu ai card? Înregistrează-te",
   },
+  /** Email sbagliata nel collegamento della tessera: si propone quella salvata in negozio. */
+  recupero: {
+    titoloDiversa: "Acesta nu este emailul cardului tău",
+    testoDiversa: "În magazin cardul a fost înregistrat cu alt email: {email}. Putem trimite acolo codul de acces.",
+    invia: "Trimite codul la {email}",
+    nonUsoPiu: "Nu mai folosești adresa aceea? Intră cu emailul scris și asociază cardul la casă.",
+    continua: "Continuă cu {email}",
+    titoloSenza: "Acest card nu are email",
+    testoSenza: "În magazin nu a fost salvat niciun email pentru acest card. Intră cu emailul tău: aplicația îți va da un cod de arătat la casă pentru a asocia cardul.",
+    codiceNegozio: "Arată codul în magazin",
+  },
   negozio: {
     titoloPagina: "Asociază cardul în magazin",
     titolo: "Arată acest cod în magazin",
@@ -88,6 +99,9 @@ export const ro: Testi = {
     troppeEmail: "Au fost cerute prea multe e-mailuri de autentificare: încearcă din nou peste câteva minute.",
     codiceSbagliato: "Cod greșit sau expirat: verifică cifrele sau cere un cod nou și folosește-l pe ultimul primit.",
     controllaEmail: "Verifică adresa de e-mail.",
+    tesseraNonTrovata: "Nu găsim niciun card activ cu acest număr: verifică cifrele sau întreabă în magazin.",
+    troppiTentativi: "Prea multe încercări cu acest card: încearcă din nou peste o oră sau întreabă în magazin.",
+    recuperoScaduto: "Timpul pentru introducerea codului a expirat: scrie din nou numărul cardului.",
     generico: "Ceva nu a funcționat. Încearcă din nou în curând.",
   },
   client: {

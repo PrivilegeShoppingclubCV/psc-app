@@ -62,6 +62,17 @@ export const de: Testi = {
     altraEmail: "Diese E-Mail habe ich im Geschäft nicht angegeben",
     nonHaiTessera: "Keine Karte? Registrieren",
   },
+  /** Email sbagliata nel collegamento della tessera: si propone quella salvata in negozio. */
+  recupero: {
+    titoloDiversa: "Das ist nicht die E-Mail deiner Karte",
+    testoDiversa: "Im Geschäft wurde die Karte mit einer anderen E-Mail registriert: {email}. Wir können den Anmeldecode dorthin senden.",
+    invia: "Code an {email} senden",
+    nonUsoPiu: "Du nutzt diese Adresse nicht mehr? Melde dich mit der eingegebenen E-Mail an und verknüpfe die Karte an der Kasse.",
+    continua: "Weiter mit {email}",
+    titoloSenza: "Diese Karte hat keine E-Mail",
+    testoSenza: "Im Geschäft wurde für diese Karte keine E-Mail gespeichert. Melde dich mit deiner E-Mail an: Die App gibt dir einen Code, den du an der Kasse zeigst, um die Karte zu verknüpfen.",
+    codiceNegozio: "Code im Geschäft zeigen",
+  },
   negozio: {
     titoloPagina: "Karte im Geschäft verbinden",
     titolo: "Zeige diesen Code im Geschäft",
@@ -88,6 +99,9 @@ export const de: Testi = {
     troppeEmail: "Es wurden zu viele Anmelde-E-Mails angefordert: Versuche es in ein paar Minuten erneut.",
     codiceSbagliato: "Falscher oder abgelaufener Code: Prüfe die Ziffern oder fordere einen neuen Code an und verwende den zuletzt erhaltenen.",
     controllaEmail: "Prüfe die E-Mail-Adresse.",
+    tesseraNonTrovata: "Wir finden keine aktive Karte mit dieser Nummer: Prüfe die Ziffern oder frag im Geschäft nach.",
+    troppiTentativi: "Zu viele Versuche mit dieser Karte: Versuche es in einer Stunde erneut oder frag im Geschäft nach.",
+    recuperoScaduto: "Die Zeit für die Eingabe des Codes ist abgelaufen: Gib die Kartennummer erneut ein.",
     generico: "Etwas hat nicht funktioniert. Versuche es gleich noch einmal.",
   },
   client: {
