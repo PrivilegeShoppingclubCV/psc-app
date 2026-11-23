@@ -137,15 +137,23 @@ export async function getScontrini(socioId: string): Promise<Scontrino[]> {
   const dal = new Date(Date.now() - 31 * 24 * 60 * 60 * 1000).toISOString();
   const { data, error } = await supabase
     .from("scontrini")
-    .select("id, numero_documento, data_scontrino, totale, punti, righe, cassa, negozi(nome)")
+    .select(COLONNE_SCONTRINO)
     .eq("socio_id", socioId)
     .gte("data_scontrino", dal)
     .order("data_scontrino", { ascending: false })
     .order("numero_documento", { ascending: false })
     .limit(200);
   if (error) throw error;
+  return conRighe(supabase, data);
+}
 
-  // Prodotti dal CSV righe di ReadyPro, agganciati per numero di documento.
+type RigaDb = { id: string; numero_documento: string; data_scontrino: string; totale: number | string; punti: number; righe: unknown; cassa: string | null; negozi: unknown };
+
+/** Colonne di scontrini che servono a conRighe. */
+export const COLONNE_SCONTRINO = "id, numero_documento, data_scontrino, totale, punti, righe, cassa, negozi(nome)";
+
+/** Scontrini letti dal database con i prodotti del CSV righe di ReadyPro, agganciati per numero di documento. */
+export async function conRighe(supabase: NonNullable<Awaited<ReturnType<typeof getSupabase>>>, data: RigaDb[]): Promise<Scontrino[]> {
   const numeri = data.map((s) => numeroDocumento(s.numero_documento));
   const perNumero = new Map<string, RigaScontrino[]>();
   if (numeri.length) {
@@ -166,7 +174,7 @@ export async function getScontrini(socioId: string): Promise<Scontrino[]> {
     numero: s.numero_documento,
     data: s.data_scontrino,
     totale: Number(s.totale),
-    negozio: (s.negozi as unknown as { nome: string } | null)?.nome ?? s.cassa ?? undefined,
+    negozio: (s.negozi as { nome: string } | null)?.nome ?? s.cassa ?? undefined,
     punti: s.punti,
     righe: perNumero.get(numeroDocumento(s.numero_documento)) ?? (Array.isArray(s.righe) ? (s.righe as RigaScontrino[]) : []),
   }));
