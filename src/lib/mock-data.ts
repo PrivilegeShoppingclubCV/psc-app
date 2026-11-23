@@ -1,7 +1,7 @@
 // Dati finti: li usa src/lib/dati.ts finché Supabase non è configurato
 // (anteprime senza chiavi, sviluppo in locale).
 
-import type { MovimentoPunti, Negozio, Offerta, Premio, Recapiti, Socio } from "./tipi";
+import type { MovimentoPunti, Negozio, Offerta, Premio, Recapiti, Scontrino, Socio } from "./tipi";
 
 export const socio: Socio = {
   nome: "Giulia",
@@ -26,6 +26,11 @@ export const movimenti: MovimentoPunti[] = [
   { id: "m3", data: "2026-09-28", descrizione: "Buono da 10 € riscattato", punti: -1000 },
   { id: "m4", data: "2026-09-14", descrizione: "Acquisto", negozio: "Negozio Centro", punti: 212 },
   { id: "m5", data: "2026-01-01", descrizione: "Saldo importato dal gestionale", punti: 1788 },
+];
+
+export const scontrini: Scontrino[] = [
+  { id: "s1", numero: "48213", data: "2026-10-21T16:42:00Z", totale: 43.9, negozio: "Negozio Centro", punti: 8, righe: [] },
+  { id: "s2", numero: "47880", data: "2026-10-09T00:00:00Z", totale: 77.5, negozio: "Negozio Stazione", punti: 15, righe: [] },
 ];
 
 export const saldoPunti = movimenti.reduce((tot, m) => tot + m.punti, 0);

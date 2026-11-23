@@ -245,3 +245,21 @@ html:has(.welcome) body::before { display: none; }
 /* Intestazioni ordinabili delle tabelle admin */
 .admin-ordina { color: inherit; text-decoration: none; white-space: nowrap; }
 .admin-ordina:hover { text-decoration: underline; }
+
+/* Scontrini virtuali (Punti → I tuoi scontrini) */
+.scontrini { list-style: none; margin: 0; padding: 0; border-top: 1px solid var(--line); }
+.scontrini > li { border-bottom: 1px solid var(--line); }
+.scontrino summary { display: flex; justify-content: space-between; align-items: center; gap: var(--space-3); padding: var(--space-3) 0; cursor: pointer; list-style: none; }
+.scontrino summary::-webkit-details-marker { display: none; }
+.scontrino summary .list__main { display: flex; flex-direction: column; }
+.scontrino summary .list__value { font-variant-numeric: tabular-nums; font-weight: 500; white-space: nowrap; }
+.scontrino summary .list__value::after { content: "›"; display: inline-block; margin-left: var(--space-2); transition: transform 0.2s; color: var(--line-strong); }
+.scontrino[open] summary .list__value::after { transform: rotate(90deg); }
+.scontrino__carta { display: flex; flex-direction: column; gap: var(--space-3); margin: 0 0 var(--space-4); padding: var(--space-4); background: var(--bianco); color: #1a1a1a; border-radius: var(--radius-sm); border: 1px dashed var(--line); font-variant-numeric: tabular-nums; }
+.scontrino__carta p { margin: 0; }
+.scontrino__testa { display: flex; flex-direction: column; align-items: center; text-align: center; gap: 2px; font-size: 13px; line-height: 18px; }
+.scontrino__righe { list-style: none; margin: 0; padding: var(--space-3) 0 0; border-top: 1px dashed #c8c8c8; font-size: 14px; }
+.scontrino__righe li { display: flex; justify-content: space-between; gap: var(--space-3); padding: 2px 0; }
+.scontrino__totale { display: flex; justify-content: space-between; padding-top: var(--space-3); border-top: 1px dashed #c8c8c8; font-weight: 600; font-size: 17px; }
+.scontrino__punti { text-align: center; font-weight: 500; color: #1e6b45; }
+.scontrino__carta .t-caption { text-align: center; color: #6b6b6b; }

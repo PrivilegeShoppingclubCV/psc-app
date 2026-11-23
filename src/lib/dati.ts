@@ -5,7 +5,7 @@
 import { cache } from "react";
 import * as mock from "./mock-data";
 import { createClient } from "./supabase/server";
-import { tesseraDaMostrare, type MovimentoPunti, type Negozio, type Offerta, type Premio, type Recapiti, type Socio, type TesseraSocio } from "./tipi";
+import { tesseraDaMostrare, type MovimentoPunti, type Negozio, type Offerta, type Premio, type Recapiti, type RigaScontrino, type Scontrino, type Socio, type TesseraSocio } from "./tipi";
 
 export interface Sessione {
   /** false = Supabase non configurato, l'app usa i dati finti. */
@@ -118,6 +118,31 @@ export async function getMovimenti(socioId: string): Promise<MovimentoPunti[]> {
     descrizione: m.descrizione ?? DESCRIZIONI[m.tipo] ?? m.tipo,
     negozio: (m.negozi as unknown as { nome: string } | null)?.nome,
     punti: m.punti,
+  }));
+}
+
+/** Scontrini degli ultimi 30 giorni (i più vecchi il database li cancella ogni notte). */
+export async function getScontrini(socioId: string): Promise<Scontrino[]> {
+  const supabase = await getSupabase();
+  if (!supabase) return mock.scontrini;
+  const dal = new Date(Date.now() - 31 * 24 * 60 * 60 * 1000).toISOString();
+  const { data, error } = await supabase
+    .from("scontrini")
+    .select("id, numero_documento, data_scontrino, totale, punti, righe, cassa, negozi(nome)")
+    .eq("socio_id", socioId)
+    .gte("data_scontrino", dal)
+    .order("data_scontrino", { ascending: false })
+    .order("numero_documento", { ascending: false })
+    .limit(200);
+  if (error) throw error;
+  return data.map((s) => ({
+    id: s.id,
+    numero: s.numero_documento,
+    data: s.data_scontrino,
+    totale: Number(s.totale),
+    negozio: (s.negozi as unknown as { nome: string } | null)?.nome ?? s.cassa ?? undefined,
+    punti: s.punti,
+    righe: Array.isArray(s.righe) ? (s.righe as RigaScontrino[]) : [],
   }));
 }
 

@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import Link from "next/link";
 import { PageHead } from "@/components/PageHead";
 import { SaldoPunti } from "@/components/SaldoPunti";
 import { getMovimenti, getPremi, getSaldo } from "@/lib/dati";
@@ -35,6 +36,10 @@ export default async function Punti() {
           </ul>
         </section>
       )}
+
+      <section className="section">
+        <Link href="/punti/scontrini" className="psc-btn psc-btn--secondary psc-btn--block">I tuoi scontrini degli ultimi 30 giorni</Link>
+      </section>
 
       <section className="section" aria-labelledby="movimenti">
         <h2 id="movimenti" className="t-title">Movimenti</h2>
