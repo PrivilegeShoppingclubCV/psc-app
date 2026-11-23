@@ -208,3 +208,11 @@ $$;
 revoke execute on all functions in schema interno from public;
 revoke execute on function public.gestionale_ricevi_righe(text, text, text, jsonb) from public;
 grant execute on function public.gestionale_ricevi_righe(text, text, text, jsonb) to anon, authenticated;
+
+-- Il filtro Vendite di ReadyPro ora esporta anche l'ora dello scontrino (colonna
+-- "Ora"): la si aggiunge alla mappatura vendite, se non c'è già, insieme al tipo
+-- documento. Le colonne non mappate (es. "Operatore") si ignorano.
+update public.impostazioni
+set valore = jsonb_build_object('ora', 'Ora', 'tipo_documento', 'Tipo documento') || valore
+where chiave = 'gestionale_mappatura_vendite'
+  and valore ? 'numero_tessera';
