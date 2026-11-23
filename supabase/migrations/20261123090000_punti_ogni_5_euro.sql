@@ -9,6 +9,12 @@
 -- saltano, così un reinvio del CSV (ReadyPro manda gli ultimi 7 giorni) non
 -- rimette punti di prima del lancio. Vuota = nessun limite.
 --
+-- Saldi già accumulati: si convertono alla nuova regola, saldo / 5 per
+-- difetto (37 punti → 7). Si fa con un movimento di rettifica per socio, così
+-- il registro resta com'era e il saldo torna dalla somma. Va fatto nella
+-- stessa migrazione del cambio regola: le vendite importate dopo sono già a
+-- 1 punto ogni 5 euro e non vanno divise di nuovo.
+--
 -- euro_per_punto() è leggibile da tutti: la pagina Punti del socio la usa per
 -- scrivere la regola (impostazioni la leggono solo gli staff).
 
@@ -35,6 +41,15 @@ $$;
 
 revoke execute on function public.euro_per_punto() from public;
 grant execute on function public.euro_per_punto() to anon, authenticated;
+
+insert into public.movimenti_punti (socio_id, punti, tipo, descrizione, fonte)
+select socio_id,
+       (sign(saldo) * floor(abs(saldo) / 5.0))::integer - saldo,
+       'rettifica',
+       'Conversione a 1 punto ogni 5 € (saldo ' || saldo || ' → ' || (sign(saldo) * floor(abs(saldo) / 5.0))::integer || ')',
+       'admin'
+from public.saldi_punti
+where (sign(saldo) * floor(abs(saldo) / 5.0))::integer <> saldo;
 
 create or replace function public.importa_movimenti_punti(p_batch_id uuid)
 returns jsonb
