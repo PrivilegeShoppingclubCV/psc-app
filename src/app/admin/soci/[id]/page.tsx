@@ -43,7 +43,7 @@ export default async function SchedaSocio({ params, searchParams }: {
   if (!s) notFound();
   // Scontrini degli ultimi 30 giorni, con chi li ha battuti (solo per l'amministrazione).
   const { data: scontrini } = await supabase.from("scontrini")
-    .select("numero_documento, data_scontrino, totale, punti, cassa, negozi(nome)")
+    .select("id, numero_documento, data_scontrino, totale, punti, cassa, negozi(nome)")
     .eq("socio_id", id).order("data_scontrino", { ascending: false }).limit(100);
   const { data: operatori } = scontrini?.length
     ? await supabase.from("scontrini_operatori").select("numero_documento, operatore").in("numero_documento", scontrini.map((x) => x.numero_documento))
@@ -307,7 +307,7 @@ export default async function SchedaSocio({ params, searchParams }: {
                 {scontrini.map((x) => (
                   <tr key={x.numero_documento}>
                     <td className="min">{dataMovimento(x.data_scontrino)}</td>
-                    <td className="min">{x.numero_documento}</td>
+                    <td className="min"><Link href={`/admin/scontrini/${x.id}`}>{x.numero_documento}</Link></td>
                     <td className="min">{(x.negozi as unknown as { nome: string } | null)?.nome ?? x.cassa ?? "—"}</td>
                     <td className="min">{operatoreDi.get(x.numero_documento) ?? "—"}</td>
                     <td className="num">{formatEuro(Number(x.totale))}</td>
