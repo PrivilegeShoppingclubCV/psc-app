@@ -20,10 +20,10 @@ export default async function ClubLayout({ children }: { children: React.ReactNo
           </Link>
           <div className="app-header__azioni">
             {ruoloStaff === "admin" && (
-              <Link href="/admin" className="tasto-staff" aria-label={t.staff.apriAdmin}>{t.staff.admin}</Link>
+              <Link href="/admin" className="tasto-staff" lang="it" aria-label="Apri il pannello admin">Admin</Link>
             )}
             {ruoloStaff === "operatore" && (
-              <Link href="/cassa" className="tasto-staff" aria-label={t.staff.apriCassa}>{t.staff.cassa}</Link>
+              <Link href="/cassa" className="tasto-staff" lang="it" aria-label="Apri la cassa">Cassa</Link>
             )}
             <TastoInstalla />
             <span className="psc-badge psc-badge--gold">{socio.livello}</span>

@@ -3,7 +3,6 @@ import type { TestiClub } from "./it";
 // 简体中文
 export const club: TestiClub = {
   vaiHome: "Privilege Shopping Club，返回首页",
-  staff: { admin: "管理", apriAdmin: "打开管理面板", cassa: "收银", apriCassa: "打开收银台" },
   home: {
     titoloPagina: "首页",
     socioDal: "{anno} 年起成为会员",
