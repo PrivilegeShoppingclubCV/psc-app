@@ -110,7 +110,7 @@ export default async function SocioCassa({ params, searchParams }: {
         );
       })}
 
-      <ModuloScheda azione={salvaSocioCassa} socio={s} haApp={s.ha_app} livelli={livelli ?? []} negozi={negozi ?? []} />
+      <ModuloScheda azione={salvaSocioCassa} socio={s} haApp={s.ha_app} emailSoloAdmin livelli={livelli ?? []} negozi={negozi ?? []} />
 
       <section className="admin-card">
         <h2 className="t-title">Tessere</h2>
