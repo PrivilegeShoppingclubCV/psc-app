@@ -53,10 +53,12 @@ Da lì in poi il pannello `/admin` è aperto a quell'account, e gli altri admin 
 
 - **Chiunque, anche senza accesso**: negozi attivi, premi attivi, offerte pubblicate non riservate ai tesserati.
 - **Socio**: la propria scheda, i propri movimenti e saldo, i propri consensi e inviti, tutte le offerte in corso per il suo livello. Modifica solo i recapiti, con `aggiorna_profilo()`.
-- **Operatore**: legge tutti i soci e i movimenti; registra acquisti, riscatti e bonus solo nel proprio negozio.
+- **Operatore**: nessuna lettura diretta delle tabelle. Dall'area /cassa, solo con le funzioni `personale_*` e `staff_*`: verifica e usa i buoni, cerca e corregge i soci, unisce schede, gestisce tessere. Non dà punti e non cambia l'email di accesso di chi usa l'app (solo admin).
 - **Admin**: tutto, compresi import e caricamento immagini.
 
 Nessuno, admin compresi, può modificare o cancellare un movimento punti o un consenso: si aggiunge una riga nuova.
+
+`registro_personale` (solo admin, sezione "Registro modifiche" nella scheda socio) tiene chi ha cambiato email, account collegato, livello o stato di un socio e chi ha unito o cancellato schede. Gli import da ReadyPro non vengono registrati.
 
 ## Funzioni per l'app
 

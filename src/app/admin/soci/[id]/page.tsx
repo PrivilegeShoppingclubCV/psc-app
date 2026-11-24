@@ -19,6 +19,24 @@ const TIPI: Record<string, string> = {
 const CONSENSI: Record<string, string> = { privacy: "Privacy", regolamento: "Regolamento", marketing: "Marketing", profilazione: "Profilazione" };
 const ORIGINI: Record<string, string> = { import: "Gestionale", app: "App", negozio: "Negozio" };
 
+function descriviRegistro(azione: string, d: Record<string, unknown>): string {
+  const cambio = (etichetta: string, v: unknown) => {
+    const [prima, dopo] = (v as [unknown, unknown]) ?? [];
+    return `${etichetta}: ${prima ?? "—"} → ${dopo ?? "—"}`;
+  };
+  if (azione === "unione_schede") {
+    const tessere = Array.isArray(d.tessere_tolte) ? d.tessere_tolte.join(", ") : "nessuna tessera";
+    return `Unita la scheda di ${d.nome_tolto || "senza nome"} (${tessere}), ${d.punti_spostati ?? 0} punti spostati qui`;
+  }
+  if (azione === "scheda_cancellata") return `Scheda cancellata: ${d.nome || "senza nome"}`;
+  const parti: string[] = [];
+  if (d.email) parti.push(cambio("Email", d.email));
+  if (d.account) parti.push(Array.isArray(d.account) && d.account[1] ? "Account dell'app collegato" : "Account dell'app scollegato");
+  if (d.livello) parti.push(cambio("Livello", d.livello));
+  if (d.stato) parti.push(cambio("Stato", d.stato));
+  return parti.join(" · ") || azione;
+}
+
 export default async function SchedaSocio({ params, searchParams }: {
   params: Promise<{ id: string }>;
   searchParams: Promise<Record<string, string | string[] | undefined>>;
@@ -45,14 +63,19 @@ export default async function SchedaSocio({ params, searchParams }: {
   ]);
   const s = socio.data;
   if (!s) notFound();
-  const [{ data: operatori }, { data: daUnire }] = await Promise.all([
+  const [{ data: operatori }, { data: daUnire }, { data: registro }, { data: personale }] = await Promise.all([
     scontrini?.length
       ? supabase.from("scontrini_operatori").select("numero_documento, operatore").in("numero_documento", scontrini.map((x) => x.numero_documento))
       : { data: [] },
     // Iscritti dall'app con il cellulare di una scheda senza email: da unire in negozio.
     supabase.from("soci").select("id, nome, cognome, email, da_unire_con")
       .or(`id.eq.${s.da_unire_con ?? "00000000-0000-0000-0000-000000000000"},da_unire_con.eq.${s.id}`),
+    // Chi ha cambiato email, account, livello o stato, o unito schede (solo admin).
+    supabase.from("registro_personale").select("id, creato_il, user_id, ruolo, azione, dettagli")
+      .eq("socio_id", id).order("creato_il", { ascending: false }).limit(50),
+    supabase.from("staff").select("user_id, nome"),
   ]);
+  const nomePersonale = new Map((personale ?? []).map((p) => [p.user_id, p.nome]));
   const operatoreDi = new Map((operatori ?? []).map((o) => [o.numero_documento, o.operatore]));
 
   const nome = [s.nome, s.cognome].filter(Boolean).join(" ") || "Senza nome";
@@ -320,6 +343,27 @@ export default async function SchedaSocio({ params, searchParams }: {
             </table>
           </div>
         ) : <p className="admin-vuoto">Nessuno scontrino negli ultimi 30 giorni.</p>}
+      </section>
+
+      <section className="admin-card">
+        <h2 className="t-title">Registro modifiche</h2>
+        <p className="t-caption">Chi ha cambiato email, account collegato, livello o stato di questa scheda, o le ha unito un&apos;altra scheda. Gli import da ReadyPro non compaiono.</p>
+        {registro?.length ? (
+          <div className="admin-table-wrap">
+            <table className="admin-table">
+              <thead><tr><th>Data</th><th>Chi</th><th>Cosa</th></tr></thead>
+              <tbody>
+                {registro.map((r) => (
+                  <tr key={r.id}>
+                    <td className="min">{dataMovimento(r.creato_il)}</td>
+                    <td className="min">{r.ruolo ? `${nomePersonale.get(r.user_id) || "Senza nome"} (${r.ruolo})` : "Il socio dall'app"}</td>
+                    <td>{descriviRegistro(r.azione, r.dettagli as Record<string, unknown>)}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        ) : <p className="admin-vuoto">Nessuna modifica registrata.</p>}
       </section>
     </>
   );

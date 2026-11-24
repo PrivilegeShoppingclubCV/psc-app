@@ -11,10 +11,12 @@ type Socio = {
  * Dati del socio: lo stesso modulo nel pannello admin e nella scheda degli
  * operatori (/cassa). Salva con staff_aggiorna_socio, che manda le modifiche a ReadyPro.
  */
-export function ModuloScheda({ azione, socio: s, haApp, livelli, negozi }: {
+export function ModuloScheda({ azione, socio: s, haApp, livelli, negozi, emailSoloAdmin = false }: {
   azione: (form: FormData) => Promise<void>;
   socio: Socio;
   haApp: boolean;
+  /** Operatori: l'email di accesso di chi usa l'app la cambia solo l'amministrazione. */
+  emailSoloAdmin?: boolean;
   livelli: { codice: string; nome: string }[];
   negozi: { id: string; nome: string }[];
 }) {
@@ -25,9 +27,14 @@ export function ModuloScheda({ azione, socio: s, haApp, livelli, negozi }: {
       <div className="admin-grid">
         <Campo id="nome" label="Nome" defaultValue={s.nome ?? ""} />
         <Campo id="cognome" label="Cognome" defaultValue={s.cognome ?? ""} />
-        <Campo id="email" label="Email" type="email" defaultValue={s.email ?? ""} help={haApp
-          ? "Il socio accede all'app con questa email: se la correggi, da subito entra con quella nuova (nessuna conferma da fare)."
-          : "Con questa email il socio collega da solo la tessera all'app."} />
+        {haApp && emailSoloAdmin ? (
+          <Campo id="email" label="Email" type="email" defaultValue={s.email ?? ""} readOnly
+            help="Il socio entra nell'app con questa email: per cambiarla chiedi all'amministrazione." />
+        ) : (
+          <Campo id="email" label="Email" type="email" defaultValue={s.email ?? ""} help={haApp
+            ? "Il socio accede all'app con questa email: se la correggi, da subito entra con quella nuova (nessuna conferma da fare)."
+            : "Con questa email il socio collega da solo la tessera all'app."} />
+        )}
         <Campo id="telefono" label="Telefono" type="tel" defaultValue={s.telefono ?? ""} />
         <CampoData id="data_nascita" label="Data di nascita" defaultValue={s.data_nascita ?? ""} />
         <Campo id="indirizzo" label="Indirizzo" defaultValue={s.indirizzo ?? ""} />
