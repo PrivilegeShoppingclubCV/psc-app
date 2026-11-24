@@ -7,6 +7,8 @@ import { getSessione } from "@/lib/dati";
 import { SceltaLingua } from "@/components/SceltaLingua";
 import { direzione, getLingua, getTesti, ricco, testiClient } from "@/lib/i18n";
 import { TestiProvider } from "@/lib/i18n/client";
+import { TornaAlCodice } from "@/components/RiprendiIscrizione";
+import { paginaCodiceInAttesa } from "./accesso/flusso";
 
 // La pagina di benvenuto è tutta verde: anche la barra in alto del telefono
 // (ora, batteria) prende il verde invece del bianco del resto dell'app.
@@ -32,10 +34,13 @@ export default async function Benvenuto({ searchParams }: { searchParams: Promis
   const lingua = await getLingua();
   const t = await getTesti();
   const b = t.benvenuto;
+  // App riaperta mentre si leggeva il codice nell'email: si torna alla pagina del codice.
+  const codice = await paginaCodiceInAttesa();
 
   return (
     <main className="welcome" lang={lingua} dir={direzione(lingua)}>
       <TestiProvider testi={testiClient(lingua)}>
+      {codice && <TornaAlCodice href={codice} />}
       <BarraInstalla />
       <div className="welcome__brand">
         <span className="logo logo--lockup" role="img" aria-label="Privilege Shopping Club" />

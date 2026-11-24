@@ -5,21 +5,25 @@ import { TESTI, testiClient } from "@/lib/i18n/testi";
 import { TestiProvider } from "@/lib/i18n/client";
 import { IconIndietro } from "./Icons";
 import { SceltaLingua } from "./SceltaLingua";
+import { paginaCodiceInAttesa } from "@/app/accesso/flusso";
 
 /**
  * Guscio comune delle pagine di accesso: torna al benvenuto, scelta della lingua,
  * titolo, eventuale errore, contenuto. Lingua e direzione (arabo da destra a
  * sinistra) valgono per tutta la pagina.
  */
-export async function AuthPage({ eyebrow, titolo, intro, errore, indietro = "/", children }: {
+export async function AuthPage({ eyebrow, titolo, intro, errore, indietro = "/", avvisoCodice = false, children }: {
   eyebrow: string;
   titolo: string;
   intro: React.ReactNode;
   errore?: string;
   indietro?: string;
+  /** Se c'è un codice già mandato e non ancora scritto, un avviso porta alla sua pagina. */
+  avvisoCodice?: boolean;
   children: React.ReactNode;
 }) {
   const lingua = await getLingua();
+  const codice = avvisoCodice ? await paginaCodiceInAttesa() : null;
   const t = TESTI[lingua];
   return (
     <main className="auth" lang={lingua} dir={direzione(lingua)}>
@@ -33,6 +37,12 @@ export async function AuthPage({ eyebrow, titolo, intro, errore, indietro = "/",
           <h1 className="t-display-l">{titolo}</h1>
           <p className="t-body-l">{intro}</p>
         </div>
+        {codice && !errore && (
+          <div className="notice riquadro-recupero avviso-codice" role="status">
+            <p>{t.comune.codiceGiaInviato}</p>
+            <Link href={codice} className="psc-btn psc-btn--primary psc-btn--block">{t.comune.scriviCodice}</Link>
+          </div>
+        )}
         {errore && <p className="notice notice--errore" role="alert">{errore}</p>}
         {children}
         {!isSupabaseConfigured && <p className="notice">{t.comune.anteprima}</p>}

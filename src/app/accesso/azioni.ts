@@ -18,6 +18,7 @@ import {
   mandaLink,
   messaggioAuth,
   salvaAttesa,
+  salvaCodiceInviato,
   salvaLinguaUtente,
   testo,
   utenteCorrente,
@@ -126,6 +127,7 @@ async function mandaCodiceTessera(supabase: NonNullable<Awaited<ReturnType<typeo
   if (error) redirect(conErrore("/collega-tessera", messaggioAuth(error, t), { tessera: numero }));
   await salvaRecupero({ numero, email: esito.email });
   await salvaAttesa({ tipo: "collega", numero });
+  await salvaCodiceInviato({ recupero: true, dopo: "collega" });
   redirect(`/verifica?${new URLSearchParams({ recupero: "1", dopo: "collega" })}`);
 }
 

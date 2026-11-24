@@ -4,6 +4,7 @@ import { getSessione } from "@/lib/dati";
 import { iscriviti } from "../accesso/azioni";
 import { CampoData } from "@/components/CampoData";
 import { getTesti } from "@/lib/i18n";
+import { MemoriaIscrizione } from "@/components/RiprendiIscrizione";
 
 export async function generateMetadata() {
   return { title: (await getTesti()).iscriviti.titoloPagina };
@@ -18,8 +19,9 @@ export default async function Iscriviti({ searchParams }: { searchParams: Promis
   const i = t.iscriviti;
 
   return (
-    <AuthPage eyebrow={i.eyebrow} titolo={i.titolo} intro={i.intro} errore={param(q.errore)}>
+    <AuthPage eyebrow={i.eyebrow} titolo={i.titolo} intro={i.intro} errore={param(q.errore)} avvisoCodice>
       <form action={iscriviti}>
+        <MemoriaIscrizione />
         <Campo id="nome" label={i.nome} autoComplete="given-name" required={configurato} defaultValue={param(q.nome)} />
         <Campo id="cognome" label={i.cognome} autoComplete="family-name" required={configurato} defaultValue={param(q.cognome)} />
         {!conAccesso && <Campo id="email" label={t.comune.email} type="email" dir="ltr" autoComplete="email" required={configurato} defaultValue={param(q.email)} />}

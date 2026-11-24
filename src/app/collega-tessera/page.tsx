@@ -55,6 +55,7 @@ export default async function CollegaTessera({ searchParams }: { searchParams: P
         ? ricco(c.introConAccesso, { email: <strong dir="ltr">{email}</strong> })
         : soloNumero ? c.introSoloNumero : c.intro}
       errore={param(q.errore)}
+      avvisoCodice
     >
       {emailDiversa && (
         <div className="notice notice--errore riquadro-recupero" role="alert">

@@ -7,6 +7,8 @@ export const ro: Testi = {
     email: "E-mail",
     lingua: "Limbă",
     anteprima: "Previzualizare: baza de date nu este conectată. Cu „Continuă” intri ca membru de test.",
+    codiceGiaInviato: "Ți-am trimis deja un cod de 6 cifre pe email: dacă l-ai primit, scrie-l și continuă de unde ai rămas.",
+    scriviCodice: "Scrie codul",
   },
   benvenuto: {
     slogan: "Cardul tău, punctele și ofertele rezervate membrilor, mereu în buzunar.",

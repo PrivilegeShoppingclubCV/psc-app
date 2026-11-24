@@ -79,6 +79,7 @@ button { font: inherit; }
 .notice--errore { background: var(--danger-surface); color: var(--danger); font-size: 15px; line-height: 22px; }
 .riquadro-recupero { display: grid; gap: var(--space-3); }
 .riquadro-recupero p { margin: 0; }
+.avviso-codice { font-size: 15px; line-height: 22px; }
 
 /* ---------- Benvenuto ---------- */
 /* Dietro la pagina di benvenuto (sotto la barra del telefono e quando si
