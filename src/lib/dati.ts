@@ -48,6 +48,23 @@ function attesaGenitore(s: { stato: string; data_nascita: string | null; punti_a
   return approvato ? null : "punti_offerte";
 }
 
+/**
+ * Se chi è entrato fa parte dello staff: serve solo a mostrare nell'app il tasto
+ * per il pannello admin o per la cassa. I permessi veri restano quelli di /admin,
+ * /cassa e delle regole del database: il tasto da solo non apre nulla.
+ */
+export const getRuoloStaff = cache(async (): Promise<"admin" | "operatore" | null> => {
+  const supabase = await getSupabase();
+  if (!supabase) return null;
+  const { data: claims } = await supabase.auth.getClaims();
+  const userId = claims?.claims.sub;
+  if (!userId) return null;
+  const { data } = await supabase.from("staff").select("ruolo").eq("user_id", userId).maybeSingle();
+  if (data?.ruolo === "admin") return "admin";
+  if (data?.ruolo === "operatore") return "operatore";
+  return null;
+});
+
 export const getSessione = cache(async (): Promise<Sessione> => {
   const supabase = await getSupabase();
   if (!supabase) return { configurato: false, email: mock.socio.email, socio: { ...mock.socio, id: "mock" } };

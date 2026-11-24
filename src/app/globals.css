@@ -313,3 +313,12 @@ html:has(.welcome) body::before { display: none; }
 .cassa__dati { display: grid; grid-template-columns: auto 1fr; gap: var(--space-2) var(--space-4); margin: 0; }
 .cassa__dati dt { color: var(--line-strong); }
 .cassa__dati dd { margin: 0; }
+
+/* Tasto per lo staff nell'intestazione dell'app (solo admin e operatori lo vedono). */
+.tasto-staff {
+  display: inline-flex; align-items: center; min-height: 36px; padding: 0 var(--space-3);
+  border-radius: var(--radius-pill); background: var(--surface-brand); color: var(--ink-on-brand);
+  font-family: var(--font-label); font-size: 10px; line-height: 16px; font-weight: 600; letter-spacing: 0.14em; text-transform: uppercase; white-space: nowrap;
+  text-decoration: none;
+}
+.tasto-staff:focus-visible { outline: 2px solid var(--focus); outline-offset: 2px; }
