@@ -4,6 +4,7 @@
 
 export const club = {
   vaiHome: "Privilege Shopping Club, vai alla Home",
+  staff: { admin: "Admin", apriAdmin: "Apri il pannello admin", cassa: "Cassa", apriCassa: "Apri la cassa" },
   home: {
     titoloPagina: "Home",
     socioDal: "Socio dal {anno}",

@@ -2,6 +2,7 @@ import type { TestiClub } from "./it";
 
 export const club: TestiClub = {
   vaiHome: "Privilege Shopping Club, ir para o início",
+  staff: { admin: "Admin", apriAdmin: "Abrir o painel de administração", cassa: "Caixa", apriCassa: "Abrir a caixa" },
   home: {
     titoloPagina: "Início",
     socioDal: "Sócio desde {anno}",
