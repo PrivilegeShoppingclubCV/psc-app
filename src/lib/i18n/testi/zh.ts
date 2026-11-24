@@ -8,6 +8,8 @@ export const zh: Testi = {
     email: "电子邮箱",
     lingua: "语言",
     anteprima: "预览：数据库未连接。点击“继续”将以测试会员身份进入。",
+    codiceGiaInviato: "我们已通过电子邮件向你发送了 6 位数验证码：如果已收到，请输入验证码，从上次中断的地方继续。",
+    scriviCodice: "输入验证码",
   },
   benvenuto: {
     slogan: "会员卡、积分和会员专享优惠，随时随身。",

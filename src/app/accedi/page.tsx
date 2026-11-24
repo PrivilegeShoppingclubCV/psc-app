@@ -24,6 +24,7 @@ export default async function Accedi({ searchParams }: { searchParams: Promise<R
       titolo={admin ? a.titoloAdmin : a.titolo}
       intro={a.intro}
       errore={param(q.errore)}
+      avvisoCodice={!admin}
     >
       <form action={accedi}>
         <input type="hidden" name="dopo" value={admin ? "admin" : "home"} />

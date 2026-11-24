@@ -7,6 +7,8 @@ export const pl: Testi = {
     email: "E-mail",
     lingua: "Język",
     anteprima: "Podgląd: baza danych nie jest podłączona. Po kliknięciu „Dalej” wejdziesz jako testowy członek.",
+    codiceGiaInviato: "Wysłaliśmy Ci już 6-cyfrowy kod e-mailem: jeśli go otrzymałeś, wpisz go i kontynuuj od miejsca, w którym przerwałeś.",
+    scriviCodice: "Wpisz kod",
   },
   benvenuto: {
     slogan: "Twoja karta, punkty i oferty tylko dla członków, zawsze w kieszeni.",

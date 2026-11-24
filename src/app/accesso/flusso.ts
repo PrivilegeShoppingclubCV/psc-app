@@ -81,6 +81,39 @@ export async function salvaAttesa(attesa: Attesa) {
   });
 }
 
+/**
+ * Codice di 6 cifre appena mandato: per riportare il socio alla pagina del codice
+ * se l'app si riapre da capo mentre legge l'email (succede spesso con l'app
+ * installata su iPhone e Android). Dura quanto il modulo in attesa.
+ */
+export const COOKIE_CODICE = "psc_codice";
+type CodiceInviato = { email: string; dopo: Dopo } | { recupero: true; dopo: Dopo };
+
+export async function salvaCodiceInviato(c: CodiceInviato) {
+  (await cookies()).set(COOKIE_CODICE, JSON.stringify(c), {
+    httpOnly: true,
+    secure: process.env.NODE_ENV === "production",
+    sameSite: "lax",
+    path: "/",
+    maxAge: 30 * 60,
+  });
+}
+
+/** Indirizzo della pagina del codice ancora da scrivere, o null. */
+export async function paginaCodiceInAttesa(): Promise<string | null> {
+  const valore = (await cookies()).get(COOKIE_CODICE)?.value;
+  if (!valore) return null;
+  try {
+    const c = JSON.parse(valore) as Partial<{ email: string; recupero: boolean; dopo: string }>;
+    const dopo = leggiDopo(c.dopo);
+    if (c.recupero) return `/verifica?${new URLSearchParams({ recupero: "1", dopo })}`;
+    if (typeof c.email === "string" && c.email) return `/verifica?${new URLSearchParams({ email: c.email, dopo })}`;
+  } catch {
+    /* cookie rovinato: si ignora */
+  }
+  return null;
+}
+
 async function prendiAttesa(): Promise<Attesa | null> {
   const store = await cookies();
   const valore = store.get(COOKIE_ATTESA)?.value;
@@ -122,6 +155,7 @@ export async function mandaLink(supabase: Supabase, email: string, dopo: Dopo, p
     redirect(`/?${new URLSearchParams({ registrati: "1", email })}`);
   }
   if (error) redirect(conErrore(pagina, messaggioAuth(error, t), { email }));
+  await salvaCodiceInviato({ email, dopo });
   redirect(`/verifica?${new URLSearchParams({ email, dopo })}`);
 }
 
@@ -206,6 +240,7 @@ export async function salvaLinguaUtente(supabase: Supabase) {
 export async function completaAccesso(supabase: Supabase, dopo: Dopo): Promise<string> {
   await salvaLinguaUtente(supabase);
   await cancellaRecupero();
+  (await cookies()).delete(COOKIE_CODICE);
   const attesa = await prendiAttesa();
   // Il modulo in attesa vale anche se "dopo" si è perso per strada (link dell'email
   // che torna alla Site URL o modello con {{ .TokenHash }}, che non lo porta).

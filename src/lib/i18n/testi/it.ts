@@ -9,6 +9,8 @@ export const it = {
     email: "Email",
     lingua: "Lingua",
     anteprima: "Anteprima: il database non è collegato. Con «Continua» entri con un socio di prova.",
+    codiceGiaInviato: "Ti abbiamo già mandato un codice di 6 cifre via email: se l'hai ricevuto, scrivilo e continua da dove eri rimasto.",
+    scriviCodice: "Scrivi il codice",
   },
   benvenuto: {
     slogan: "La tua tessera, i punti e le offerte riservate ai soci, sempre in tasca.",
