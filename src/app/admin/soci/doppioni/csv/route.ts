@@ -1,7 +1,8 @@
+import { cellaExcel } from "@/lib/admin/csv-excel";
 import { richiediAdmin } from "@/lib/admin/sessione";
 
 // CSV per Excel italiano: punto e virgola, BOM per gli accenti.
-const cella = (v: string | number | null | undefined) => `"${String(v ?? "").replace(/"/g, '""')}"`;
+const cella = cellaExcel;
 const data = (v: string | null) => (v ? v.slice(0, 10).split("-").reverse().join("/") : "");
 const ORIGINI: Record<string, string> = { import: "Gestionale", app: "App", negozio: "Negozio" };
 // Le schede si leggono a blocchi: l'elenco degli id va nell'indirizzo della richiesta.

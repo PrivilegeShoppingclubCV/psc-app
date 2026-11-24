@@ -1,9 +1,10 @@
 import type { NextRequest } from "next/server";
 import { clientiDaCompletare, dataInizio } from "@/lib/admin/clienti-da-completare";
+import { cellaExcel } from "@/lib/admin/csv-excel";
 import { richiediAdmin } from "@/lib/admin/sessione";
 
 // CSV per Excel italiano: punto e virgola, BOM per gli accenti.
-const cella = (v: string | null) => `"${(v ?? "").replace(/"/g, '""')}"`;
+const cella = cellaExcel;
 
 export async function GET(request: NextRequest) {
   const { supabase } = await richiediAdmin();
