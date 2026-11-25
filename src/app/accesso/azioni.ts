@@ -116,8 +116,8 @@ async function mandaCodiceTessera(supabase: NonNullable<Awaited<ReturnType<typeo
   if (esito?.esito === "senza_email") redirect(conErrore("/collega-tessera", t.tesseraProblema, { tessera: numero }));
   if (esito?.esito !== "email_diversa") redirect(conErrore("/collega-tessera", t.generico, { tessera: numero }));
 
-  // Chi era entrato con un'altra email esce: si rientra con quella della tessera.
-  if (await utenteCorrente(supabase)) await supabase.auth.signOut();
+  // Chi era entrato con un'altra email esce (solo da questo telefono): si rientra con quella della tessera.
+  if (await utenteCorrente(supabase)) await supabase.auth.signOut({ scope: "local" });
   const h = await headers();
   const origine = h.get("origin") ?? `https://${h.get("host")}`;
   const { error } = await supabase.auth.signInWithOtp({
@@ -181,7 +181,10 @@ export async function iscriviti(form: FormData) {
 
 export async function esci() {
   const supabase = await getSupabase();
-  await supabase?.auth.signOut();
+  // Solo questo dispositivo. Senza "local" Supabase chiude le sessioni dell'account su
+  // tutti i dispositivi (scope "global"): chi usa lo stesso account sul telefono, sul PC
+  // o alla cassa si ritrovava fuori senza aver premuto Esci.
+  await supabase?.auth.signOut({ scope: "local" });
   redirect("/");
 }
 
