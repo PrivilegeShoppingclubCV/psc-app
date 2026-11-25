@@ -129,3 +129,8 @@ a.admin-stat:hover { border-color: var(--ink); }
 .admin-caricamento__riga--corta { width: 60%; }
 @keyframes admin-caricamento { 50% { opacity: 0.16; } }
 @media (prefers-reduced-motion: reduce) { .admin-caricamento__titolo, .admin-caricamento__riga { animation: none; } }
+
+/* Prodotti: esporta per newsletter */
+.admin-newsletter { display: flex; flex-wrap: wrap; align-items: center; gap: var(--space-2); padding: var(--space-3); margin-bottom: var(--space-2); border: 1px solid var(--line); border-radius: var(--radius-md); background: var(--surface-alt); position: sticky; top: 0; z-index: 2; }
+.admin-newsletter .t-caption { flex: 1 1 200px; }
+.admin-newsletter__testo { width: 100%; font-family: ui-monospace, monospace; font-size: 12px; white-space: pre; margin-bottom: var(--space-3); }

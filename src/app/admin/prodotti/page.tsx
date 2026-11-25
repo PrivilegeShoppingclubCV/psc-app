@@ -8,6 +8,7 @@ import { formatEuro } from "@/lib/format";
 import { rigeneraVetrina } from "./azioni";
 import { urlImmagine } from "@/lib/foto-sito";
 import { PrendiFotoSito } from "./PrendiFotoSito";
+import { TabellaProdotti, type RigaProdotto } from "./TabellaProdotti";
 
 export const metadata: Metadata = { title: "Prodotti" };
 
@@ -15,6 +16,7 @@ const PER_PAGINA = 50;
 const FILTRI = [
   { value: "", label: "Disponibili" },
   { value: "offerta", label: "Possono andare in offerta" },
+  { value: "con_foto", label: "Con foto" },
   { value: "senza_foto", label: "Senza foto" },
   { value: "nascosti", label: "Nascosti" },
   { value: "esauriti", label: "Esauriti" },
@@ -29,7 +31,7 @@ export default async function Prodotti({ searchParams }: { searchParams: Promise
 
   let query = supabase
     .from(filtro === "offerta" ? "prodotti_in_offerta" : "prodotti")
-    .select("id, ean, marca, descrizione, colore, taglia, disponibilita, prezzo_soci, valore_fermo, immagine_path, categoria", { count: "exact" })
+    .select("id, ean, sku, marca, descrizione, colore, taglia, disponibilita, prezzo_listino, prezzo_soci, valore_fermo, immagine_path, categoria", { count: "exact" })
     .order(filtro === "offerta" ? "punteggio" : "valore_fermo", { ascending: false })
     .order("ean")
     .range((pagina - 1) * PER_PAGINA, pagina * PER_PAGINA - 1);
@@ -37,6 +39,7 @@ export default async function Prodotti({ searchParams }: { searchParams: Promise
     query = query.or(["ean", "marca", "descrizione", "categoria"].map((c) => `${c}.ilike.%${parola}%`).join(","));
   }
   if (filtro === "" ) query = query.gt("disponibilita", 0);
+  if (filtro === "con_foto") query = query.gt("disponibilita", 0).not("immagine_path", "is", null);
   if (filtro === "senza_foto") query = query.gt("disponibilita", 0).is("immagine_path", null);
   if (filtro === "nascosti") query = query.eq("nascosto", true);
   if (filtro === "esauriti") query = query.lte("disponibilita", 0);
@@ -120,28 +123,7 @@ export default async function Prodotti({ searchParams }: { searchParams: Promise
       </p>
 
       {prodotti?.length ? (
-        <div className="admin-table-wrap">
-          <table className="admin-table">
-            <thead>
-              <tr><th></th><th>Prodotto</th><th>EAN</th><th className="num">Pezzi</th><th className="num">Tesserati</th><th className="num">Valore fermo</th></tr>
-            </thead>
-            <tbody>
-              {prodotti.map((p) => (
-                <tr key={p.id}>
-                  <td>{p.immagine_path ? <img className="thumb" src={urlImmagine(foto, p.immagine_path)} alt="" /> : <span className="thumb" style={{ display: "block" }} />}</td>
-                  <td>
-                    <Link href={`/admin/prodotti/${p.id}`}>{p.descrizione}</Link>
-                    <div className="t-caption">{[p.marca, p.colore, p.taglia].filter(Boolean).join(" · ")}</div>
-                  </td>
-                  <td className="min">{p.ean}</td>
-                  <td className="num">{p.disponibilita}</td>
-                  <td className="num">{p.prezzo_soci !== null ? formatEuro(p.prezzo_soci) : "—"}</td>
-                  <td className="num">{formatEuro(p.valore_fermo)}</td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
+        <TabellaProdotti prodotti={prodotti as RigaProdotto[]} fotoBucket={foto} />
       ) : (
         <p className="admin-vuoto">Nessun prodotto. <Link href="/admin/prodotti/importa">Importa il magazzino</Link>.</p>
       )}
