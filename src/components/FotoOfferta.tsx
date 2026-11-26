@@ -13,7 +13,7 @@ const MAX_ZOOM = 4;
  * Nella vista grande si può ingrandire con due dita o con un doppio tocco.
  * Le foto possono arrivare anche da link esterni (sito del negozio): si usano così come sono.
  */
-export function FotoOfferta({ src, nome }: { src: string; nome: string }) {
+export function FotoOfferta({ src, nome, contenuta = false }: { src: string; nome: string; contenuta?: boolean }) {
   const dialog = useRef<HTMLDialogElement>(null);
   const foto = useRef<HTMLImageElement>(null);
   const inCronologia = useRef(false);
@@ -77,7 +77,7 @@ export function FotoOfferta({ src, nome }: { src: string; nome: string }) {
 
   useEffect(() => {
     const indietro = () => {
-      if (!inCronologia.current) return;
+      if (!inCronologia.current || window.history.state?.pscFoto) return;
       inCronologia.current = false;
       dialog.current?.close();
     };
@@ -162,7 +162,7 @@ export function FotoOfferta({ src, nome }: { src: string; nome: string }) {
 
   return (
     <>
-      <button type="button" className="foto-offerta" onClick={apri} aria-label={forma(t.ingrandisci, { nome })}>
+      <button type="button" className={contenuta ? "foto-offerta foto-offerta--contenuta" : "foto-offerta"} onClick={apri} aria-label={forma(t.ingrandisci, { nome })}>
         <img src={src} alt="" loading="lazy" onError={() => setErrore(true)} />
       </button>
 

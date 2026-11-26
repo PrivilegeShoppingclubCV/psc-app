@@ -299,7 +299,7 @@ export async function getOfferte(): Promise<Offerta[]> {
   // perché admin e operatori, che vedono tutto, nell'app vedano solo le offerte in corso.
   const { data, error } = await supabase
     .from("offerte")
-    .select("id, titolo, marca, prezzo_soci, prezzo_listino, etichetta, valida_al, solo_tesserati, immagine_path")
+    .select("id, titolo, marca, descrizione, prezzo_soci, prezzo_listino, etichetta, valida_al, solo_tesserati, immagine_path, punti_extra, nota_extra")
     .eq("pubblicata", true)
     .lte("valida_dal", adesso)
     .or(`valida_al.is.null,valida_al.gt.${adesso}`)
@@ -318,6 +318,9 @@ export async function getOfferte(): Promise<Offerta[]> {
     scadenza: o.valida_al,
     soloTesserati: o.solo_tesserati,
     immagineUrl: o.immagine_path ? supabase.storage.from("offerte").getPublicUrl(o.immagine_path).data.publicUrl : undefined,
+    descrizione: o.descrizione ?? undefined,
+    puntiExtra: o.punti_extra ?? undefined,
+    notaExtra: o.nota_extra ?? undefined,
   }));
 }
 
@@ -352,6 +355,26 @@ function daProdotto(supabase: NonNullable<Awaited<ReturnType<typeof getSupabase>
 }
 
 /**
+ * Extra della scheda (punti in più, altra offerta) dei prodotti mostrati.
+ * Non sono nella vista prodotti_in_offerta: si leggono dalla tabella, solo per
+ * i prodotti che ne hanno. Se la lettura non riesce, le card restano senza extra.
+ */
+async function conExtra(supabase: NonNullable<Awaited<ReturnType<typeof getSupabase>>>, prodotti: Offerta[]): Promise<Offerta[]> {
+  if (!prodotti.length) return prodotti;
+  const { data, error } = await supabase
+    .from("prodotti")
+    .select("id, punti_extra, nota_extra")
+    .in("id", prodotti.map((p) => p.id))
+    .or("punti_extra.gt.0,nota_extra.not.is.null");
+  if (error || !data?.length) return prodotti;
+  const extra = new Map(data.map((e) => [e.id as string, e]));
+  return prodotti.map((p) => {
+    const e = extra.get(p.id);
+    return e ? { ...p, puntiExtra: e.punti_extra ?? undefined, notaExtra: e.nota_extra ?? undefined } : p;
+  });
+}
+
+/**
  * Pagina Offerte: prima tutte le offerte dello staff in corso, poi i prodotti
  * della vetrina di oggi fino a vetrina_totale (scelti dal database, vedi la
  * migrazione prodotti_vetrina).
@@ -366,7 +389,7 @@ export async function getVetrina(): Promise<Offerta[]> {
   ]);
   if (prodotti.error) throw prodotti.error;
   const posti = Math.max(0, Number(totale.data ?? 10) - staff.length);
-  return [...staff, ...(prodotti.data as ProdottoDb[]).slice(0, posti).map((p) => daProdotto(supabase, p))];
+  return [...staff, ...(await conExtra(supabase, (prodotti.data as ProdottoDb[]).slice(0, posti).map((p) => daProdotto(supabase, p))))];
 }
 
 export const PRODOTTI_PER_PAGINA = 40;
@@ -386,5 +409,5 @@ export async function getCatalogo(pagina: number, cerca: string): Promise<{ prod
   }
   const { data, count, error } = await query;
   if (error) throw error;
-  return { prodotti: (data as ProdottoDb[]).map((p) => daProdotto(supabase, p)), totale: count ?? 0 };
+  return { prodotti: await conExtra(supabase, (data as ProdottoDb[]).map((p) => daProdotto(supabase, p))), totale: count ?? 0 };
 }

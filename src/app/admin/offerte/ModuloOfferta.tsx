@@ -21,6 +21,8 @@ export interface OffertaDb {
   pubblicata: boolean;
   in_evidenza: boolean;
   ordine: number;
+  punti_extra: number | null;
+  nota_extra: string | null;
 }
 
 const prezzo = (n: number | null) => (n === null ? "" : n.toFixed(2).replace(".", ","));
@@ -53,6 +55,15 @@ export function ModuloOfferta({ offerta, negozi, negoziScelti, livelli }: {
             <Campo id="prezzo_soci" label="Prezzo soci (€)" inputMode="decimal" defaultValue={prezzo(o?.prezzo_soci ?? null)} placeholder="59,90" />
             <Campo id="prezzo_listino" label="Prezzo di listino (€)" inputMode="decimal" defaultValue={prezzo(o?.prezzo_listino ?? null)} help="Si mostra barrato." />
             <Campo id="etichetta" label="Etichetta" defaultValue={o?.etichetta ?? ""} placeholder="-30%, 2x1, Omaggio" help="Per le offerte senza prezzo, oppure in aggiunta." />
+          </div>
+        </section>
+
+        <section className="admin-card">
+          <h2 className="t-title">Extra nella scheda</h2>
+          <p className="t-caption">Facoltativi. Il socio li vede quando tocca l&apos;offerta nell&apos;app.</p>
+          <div className="admin-grid">
+            <Campo id="punti_extra" label="Punti extra" inputMode="numeric" defaultValue={o?.punti_extra ? String(o.punti_extra) : ""} placeholder="50" help="Solo un annuncio: i punti non si accreditano da soli, vanno dati dalla scheda del socio." />
+            <Campo id="nota_extra" label="Altra offerta" defaultValue={o?.nota_extra ?? ""} placeholder="2° pezzo a metà prezzo" />
           </div>
         </section>
 
