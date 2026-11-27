@@ -63,7 +63,7 @@ export const negozi: Negozio[] = [
 ];
 
 export const offerte: Offerta[] = [
-  { id: "o1", tipo: "staff", marca: "Esempio", nome: "Maglione girocollo in lana merino", prezzoSoci: 59.9, prezzoListino: 89.9, scadenza: "2026-11-09", soloTesserati: true },
+  { id: "o1", tipo: "staff", marca: "Esempio", nome: "Maglione girocollo in lana merino", prezzoSoci: 59.9, prezzoListino: 89.9, scadenza: "2026-11-09", soloTesserati: true, puntiExtra: 50, notaExtra: "2° pezzo a metà prezzo", descrizione: "Lana merino extrafine, vestibilità regolare." },
   { id: "o2", tipo: "staff", marca: "Esempio", nome: "Sciarpa in cashmere", prezzoSoci: 39.9, prezzoListino: 55, scadenza: "2026-11-16", soloTesserati: true },
   { id: "o3", tipo: "staff", marca: "Esempio", nome: "Borsa a mano in pelle", prezzoSoci: 119, prezzoListino: 160, scadenza: "2026-11-30", soloTesserati: false },
 ];

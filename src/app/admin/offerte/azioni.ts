@@ -18,6 +18,8 @@ export async function salvaOfferta(form: FormData) {
   const ordine = intero(form, "ordine");
   if (Number.isNaN(prezzoSoci) || Number.isNaN(prezzoListino)) errore("Scrivi i prezzi come numeri, es. 59,90.");
   if (Number.isNaN(ordine)) errore("L'ordine deve essere un numero intero.");
+  const puntiExtra = intero(form, "punti_extra");
+  if (Number.isNaN(puntiExtra) || (puntiExtra !== null && puntiExtra < 0)) errore("I punti extra devono essere un numero intero, es. 50.");
   const etichetta = testoONull(form, "etichetta");
   if (prezzoSoci === null && !etichetta) errore("Indica il prezzo soci oppure un'etichetta (es. -30%).");
 
@@ -40,6 +42,8 @@ export async function salvaOfferta(form: FormData) {
     pubblicata: spunta(form, "pubblicata"),
     in_evidenza: spunta(form, "in_evidenza"),
     ordine: ordine ?? 0,
+    punti_extra: puntiExtra || null,
+    nota_extra: testoONull(form, "nota_extra"),
   };
 
   const { data, error } = id

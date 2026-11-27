@@ -114,6 +114,12 @@ export interface Offerta {
   immagineUrl?: string;
   /** Colore e taglia dei prodotti del magazzino. */
   dettaglio?: string;
+  /** Testo lungo dell'offerta, scritto nel pannello. */
+  descrizione?: string;
+  /** Punti in più annunciati nella scheda del prodotto. */
+  puntiExtra?: number;
+  /** Altra offerta sul prodotto, es. "2° pezzo a metà prezzo". */
+  notaExtra?: string;
 }
 
 /** Il primo premio non ancora raggiunto, o l'ultimo se li ha superati tutti. */

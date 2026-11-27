@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
-import { Interruttore } from "@/components/admin/Campi";
+import { Campo, Interruttore } from "@/components/admin/Campi";
 import { Esito } from "@/components/admin/Esito";
 import { ImmagineInput } from "@/components/admin/ImmagineInput";
 import { dataBreve, dataOra, urlBucket } from "@/lib/admin/form";
@@ -76,9 +76,15 @@ export default async function SchedaProdotto({ params, searchParams }: {
       <form action={salvaProdotto} className="admin-form">
         <input type="hidden" name="id" value={p.id} />
         <section className="admin-card">
-          <h2 className="t-title">Foto e visibilità</h2>
+          <h2 className="t-title">Foto, visibilità ed extra</h2>
           <ImmagineInput bucket="prodotti" valore={p.immagine_path} urlBase={urlBucket("prodotti")} cartella={p.ean} />
           <Interruttore id="nascosto" label="Non mostrarlo nelle offerte" help="Resta nel catalogo e la foto si conserva." defaultChecked={p.nascosto} />
+          <h3 className="t-title">Extra nella scheda</h3>
+          <p className="t-caption">Facoltativi. Il socio li vede quando tocca il prodotto nell&apos;app. L&apos;import dal gestionale non li cambia.</p>
+          <div className="admin-grid">
+            <Campo id="punti_extra" label="Punti extra" inputMode="numeric" defaultValue={p.punti_extra ? String(p.punti_extra) : ""} placeholder="50" help="Solo un annuncio: i punti non si accreditano da soli, vanno dati dalla scheda del socio." />
+            <Campo id="nota_extra" label="Altra offerta" defaultValue={p.nota_extra ?? ""} placeholder="2° pezzo a metà prezzo" />
+          </div>
           <div className="admin-azioni"><button type="submit" className="psc-btn psc-btn--primary">Salva</button></div>
         </section>
       </form>

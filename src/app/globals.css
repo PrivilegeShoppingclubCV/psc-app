@@ -322,3 +322,43 @@ html:has(.welcome) body::before { display: none; }
   text-decoration: none;
 }
 .tasto-staff:focus-visible { outline: 2px solid var(--focus); outline-offset: 2px; }
+
+/* Scheda prodotto delle offerte: tutta la card si tocca e apre la scheda. */
+.psc-product--apribile { position: relative; }
+.psc-product__apri { position: absolute; inset: 0; width: 100%; height: 100%; padding: 0; border: 0; background: none; cursor: pointer; border-radius: var(--radius-sm); }
+.psc-product__apri:focus-visible { outline: 2px solid var(--focus); outline-offset: 4px; }
+.scheda-card-extra { display: inline-flex; align-items: center; gap: var(--space-1); align-self: flex-start; font-size: 12px; line-height: 16px; font-weight: 600; color: var(--accent); }
+.scheda-card-extra svg { width: 14px; height: 14px; }
+.scheda-offerta {
+  width: min(100%, 520px); max-width: 100%; max-height: calc(100dvh - var(--safe-top) - var(--space-6));
+  margin: auto auto 0; padding: 0; border: 0; border-radius: var(--radius-md) var(--radius-md) 0 0;
+  background: var(--surface); color: var(--ink); overflow-y: auto; overscroll-behavior: contain;
+}
+.scheda-offerta::backdrop { background: rgba(9, 29, 16, 0.55); }
+.scheda-offerta[open] { animation: sheet-up .22s ease-out; }
+@media (min-width: 560px) { .scheda-offerta { margin: auto; border-radius: var(--radius-md); } }
+@media (prefers-reduced-motion: reduce) { .scheda-offerta[open] { animation: none; } }
+.scheda-offerta__corpo {
+  position: relative; display: flex; flex-direction: column; gap: var(--space-4);
+  padding: var(--space-4) var(--space-4) calc(var(--safe-bottom) + var(--space-6));
+}
+.scheda-offerta__chiudi { position: absolute; top: var(--space-6); inset-inline-end: var(--space-6); z-index: 1; background: var(--surface); box-shadow: var(--shadow-sheet); }
+.scheda-offerta__media { position: relative; flex: none; height: min(44dvh, 440px); border-radius: var(--radius-sm); overflow: hidden; background: var(--surface-alt); }
+.scheda-offerta__media .media-placeholder { width: 100%; height: 100%; }
+.foto-offerta--contenuta img { width: 100%; height: 100%; object-fit: contain; display: block; }
+.scheda-offerta__testi { display: flex; flex-direction: column; gap: var(--space-1); }
+.scheda-offerta__nome { margin: 0; }
+.scheda-prezzi { margin: 0; display: flex; flex-direction: column; border-top: 1px solid var(--line); }
+.scheda-prezzi__riga { display: flex; justify-content: space-between; align-items: baseline; gap: var(--space-4); padding: var(--space-3) 0; border-bottom: 1px solid var(--line); }
+.scheda-prezzi__riga dt { font-size: 14px; line-height: 20px; color: var(--ink-muted); }
+.scheda-prezzi__riga dd { margin: 0; text-align: end; }
+.scheda-prezzi__riga--soci dt { color: var(--ink); font-weight: 600; }
+.scheda-prezzi__riga--soci .psc-price__member { font-size: 26px; line-height: 30px; }
+.scheda-prezzi .psc-price__list { font-size: 15px; line-height: 20px; }
+.scheda-extra { display: flex; flex-direction: column; gap: var(--space-2); padding: var(--space-4); border-radius: var(--radius-sm); background: var(--accent-surface); color: var(--ink); }
+.scheda-extra p { margin: 0; }
+.scheda-extra__titolo { display: flex; align-items: center; gap: var(--space-2); margin: 0; font-family: var(--font-label); font-size: 11px; line-height: 16px; font-weight: 600; letter-spacing: .14em; text-transform: uppercase; color: var(--accent); }
+.scheda-extra__titolo svg { width: 16px; height: 16px; }
+.scheda-extra__punti { font-weight: 700; font-size: 16px; line-height: 22px; }
+.scheda-offerta__descrizione { margin: 0; white-space: pre-line; }
+.scheda-offerta__cassa { margin: 0; }
